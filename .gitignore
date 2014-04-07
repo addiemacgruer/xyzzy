@@ -1,0 +1,6 @@
+bin/
+libs/
+assets/
+assets.bak/
+*.z*
+.git.bak/
