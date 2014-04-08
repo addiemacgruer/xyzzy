@@ -39,6 +39,10 @@ import android.util.Log;
         if (i < staticMemory && changed[i]) {
             return changes.get(i) & 0xff;
         }
+        if (i >= zmp.length) {
+            Log.w("Xyzzy", "Array index out-of-bounds");
+            return 0;
+        }
         return zmp[i] & 0xff;
     }
 

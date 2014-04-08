@@ -35,8 +35,8 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
-            final short value = (short) (a + b);
-            readDestinationAndStore(value);
+            final short result = (short) (a + b);
+            readDestinationAndStoreResult(result);
         }
     },
     AND(2, 0x9) {
@@ -44,7 +44,7 @@ import android.util.Log;
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             final short result = (short) (a & b);
-            readDestinationAndStore(result);
+            readDestinationAndStoreResult(result);
         }
     },
     AREAD(3, 0x4) {
@@ -77,7 +77,7 @@ import android.util.Log;
                 Memory.CURRENT.buff().put(text + 2 + i, (byte) inputString.codePointAt(i));
             }
             ZText.tokeniseInputToBuffers(text, parse, inputString);
-            readDestinationAndStore((short) 10);
+            readDestinationAndStoreResult((short) 10);
         }
     },
     ART_SHIFT(4, 0x3) {
@@ -92,12 +92,11 @@ import android.util.Log;
             } else {
                 result = number;
             }
-            readDestinationAndStore(result);
+            readDestinationAndStoreResult(result);
         }
     },
     BUFFER_MODE(3, 0x12) {
         @Override public void invoke(ZStack<Short> arguments) {
-            // TODO screen logic
             final short flag = arguments.get(0);
             Memory.currentScreen().setBuffered(flag == 1);
             if (Debug.screen) {
@@ -108,7 +107,7 @@ import android.util.Log;
     CALL_1N(1, 0xf) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short routine = arguments.get(0);
-            CallStack.call(routine & 0xffff, arguments, new StackThrowAway());
+            CallStack.call(routine & 0xffff, arguments, new StackDiscard());
         }
     },
     CALL_1S(1, 0x8) {
@@ -121,7 +120,7 @@ import android.util.Log;
     CALL_2N(2, 0x1a) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short routine = arguments.get(0);
-            CallStack.call(routine & 0xffff, arguments, new StackThrowAway());
+            CallStack.call(routine & 0xffff, arguments, new StackDiscard());
         }
     },
     CALL_2S(2, 0x19) {
@@ -134,13 +133,13 @@ import android.util.Log;
     CALL_VN(3, 0x19) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short routine = arguments.get(0);
-            CallStack.call(routine & 0xffff, arguments, new StackThrowAway());
+            CallStack.call(routine & 0xffff, arguments, new StackDiscard());
         }
     },
     CALL_VN2(3, 0x1a) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short routine = arguments.get(0);
-            CallStack.call(routine & 0xffff, arguments, new StackThrowAway());
+            CallStack.call(routine & 0xffff, arguments, new StackDiscard());
         }
     },
     CALL_VS(3, 0x0) {
@@ -159,13 +158,10 @@ import android.util.Log;
     },
     CATCH(0, 0x9) {
         @Override public void invoke(ZStack<Short> arguments) {
-            //TODO
+            //TODO catch
             final int destination = Memory.CURRENT.callStack.peek().getProgramByte();
             Log.w("Xyzzy", "Catch:" + arguments + " destination:" + destination);
-            for (CallStack cs : Memory.CURRENT.callStack) {
-                Log.d("Xyzzy", cs.toString());
-                //            throw new UnsupportedOperationException();
-            }
+            logCallStack();
         }
     },
     CHECK_ARG_COUNT(3, 0x1f) {
@@ -177,9 +173,13 @@ import android.util.Log;
     },
     CHECK_UNICODE(4, 0xc) {
         @Override public void invoke(ZStack<Short> arguments) {
-            // TODO Auto-generated method stub
             final short charNumber = arguments.get(0);
-            throw new UnsupportedOperationException();
+            int result;
+            switch (charNumber) {
+            default:
+                result = 3; //we can print and receive any unicode char
+            }
+            readDestinationAndStoreResult(result);
         }
     },
     CLEAR_ATTR(2, 0xc) {
@@ -234,12 +234,11 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
-            //TODO halt on divzero
             if (b == 0) {
                 Error.ERR_DIV_ZERO.invoke();
             }
             final short value = (short) (a / b);
-            readDestinationAndStore(value);
+            readDestinationAndStoreResult(value);
         }
     },
     DRAW_PICTURE(4, 0x5) {
@@ -247,7 +246,7 @@ import android.util.Log;
             final short pictureNumber = arguments.get(0);
             final short y = arguments.get(1);
             final short x = arguments.get(2);
-            // TODO Auto-generated method stub
+            // TODO draw_picture
             throw new UnsupportedOperationException();
         }
     },
@@ -257,14 +256,14 @@ import android.util.Log;
             final short length = arguments.get(1);
             final short from = arguments.get(2);
             final short codedText = arguments.get(0);
-            // TODO Auto-generated method stub
+            // TODO encode_text
             throw new UnsupportedOperationException();
         }
     },
     ERASE_LINE(3, 0xe) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short value = arguments.get(0);
-            // TODO Auto-generated method stub
+            // TODO erase_line
             throw new UnsupportedOperationException();
         }
     },
@@ -273,7 +272,7 @@ import android.util.Log;
             final short pictureNumber = arguments.get(0);
             final short y = arguments.get(1);
             final short x = arguments.get(2);
-            // TODO Auto-generated method stub
+            // TODO erase_picture
             throw new UnsupportedOperationException();
         }
     },
@@ -313,14 +312,14 @@ import android.util.Log;
             } else {
                 value = ZObject.count(object).child();
             }
-            readDestinationAndStore((short) value);
+            readDestinationAndStoreResult((short) value);
             branchOnTest(value != 0);
         }
     },
     GET_CURSOR(3, 0x10) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short array = arguments.get(0);
-            // TODO Auto-generated method stub
+            // TODO get cursor
             throw new UnsupportedOperationException();
         }
     },
@@ -331,7 +330,7 @@ import android.util.Log;
             final ZObject zo = ZObject.count(object);
             final ZProperty zp = new ZProperty(zo);
             final int value = zp.getNextProperty(property);
-            readDestinationAndStore((short) value);
+            readDestinationAndStoreResult((short) value);
         }
     },
     GET_PARENT(1, 0x3) {
@@ -339,11 +338,11 @@ import android.util.Log;
             final Short object = arguments.get(0);
             if (object == 0) {
                 Error.ERR_GET_PARENT_0.invoke();
-                readDestinationAndStore(0);
+                readDestinationAndStoreResult(0);
                 return;
             }
             final short zo = (short) ZObject.count(object).parent();
-            readDestinationAndStore(zo);
+            readDestinationAndStoreResult(zo);
         }
     },
     GET_PROP(2, 0x11) {
@@ -352,13 +351,13 @@ import android.util.Log;
             final short property = arguments.get(1);
             if (object == 0) {
                 Error.ERR_GET_PROP_0.invoke();
-                readDestinationAndStore(0);
+                readDestinationAndStoreResult(0);
                 return;
             }
             final ZObject zo = ZObject.count(object);
             final ZProperty zp = new ZProperty(zo);
             final int value = zp.getProperty(property);
-            readDestinationAndStore(value);
+            readDestinationAndStoreResult(value);
         }
     },
     GET_PROP_ADDR(2, 0x12) {
@@ -367,7 +366,7 @@ import android.util.Log;
             final short property = arguments.get(1);
             if (object == 0) {
                 Error.ERR_GET_PROP_ADDR_0.invoke();
-                readDestinationAndStore(0);
+                readDestinationAndStoreResult(0);
                 return;
             }
             final ZProperty zp = new ZProperty(ZObject.count(object));
@@ -379,25 +378,25 @@ import android.util.Log;
                     addr++;
                 }
             }
-            readDestinationAndStore(addr);
+            readDestinationAndStoreResult(addr);
         }
     },
     GET_PROP_LEN(1, 0x4) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short propertyAddress = (short) (arguments.get(0) - 1);
             if (propertyAddress == -1) {
-                readDestinationAndStore(0);
+                readDestinationAndStoreResult(0);
                 return;
             }
             final short value = (short) ZProperty.calcProplenSize(propertyAddress & 0xffff);
-            readDestinationAndStore(value);
+            readDestinationAndStoreResult(value);
         }
     },
     GET_SIBLING(1, 0x1) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final int value = ZObject.count(object).sibling();
-            readDestinationAndStore((short) value);
+            readDestinationAndStoreResult((short) value);
             branchOnTest(value != 0);
         }
     },
@@ -405,7 +404,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short window = arguments.get(0);
             final short propertyNumber = arguments.get(0);
-            // TODO Auto-generated method stub.
+            // TODO get_wind_prop.
             throw new UnsupportedOperationException();
         }
     },
@@ -428,7 +427,7 @@ import android.util.Log;
     INPUT_STREAM(3, 0x14) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short number = arguments.get(0);
-            // TODO Auto-generated method stub
+            // TODO input stream
             throw new UnsupportedOperationException();
         }
     },
@@ -522,15 +521,15 @@ import android.util.Log;
             } else {
                 value = (short) readValue(variable);
             }
-            readDestinationAndStore(value);
+            readDestinationAndStoreResult(value);
         }
     },
     LOADB(2, 0x10) {
         @Override public void invoke(ZStack<Short> arguments) {
             final int array = arguments.get(0) & 0xffff;
             final int byteIndex = arguments.get(1) & 0xffff;
-            final int value = Memory.CURRENT.buff().get(array + byteIndex) & 0xff;
-            readDestinationAndStore((short) value);
+            final int value = Memory.CURRENT.buff().get(array + byteIndex);
+            readDestinationAndStoreResult((short) value);
         }
     },
     LOADW(2, 0xf) {
@@ -539,7 +538,7 @@ import android.util.Log;
             final int wordIndex = arguments.get(1);// & 0xffff;
             final int address = array + 2 * wordIndex;
             final int value = Memory.CURRENT.buff().getShort(address) & 0xffff;
-            readDestinationAndStore(value);
+            readDestinationAndStoreResult(value);
         }
     },
     LOG_SHIFT(4, 0x2) {
@@ -552,19 +551,18 @@ import android.util.Log;
             } else if (places < 0) {
                 result >>= -places;
             }
-            readDestinationAndStore(result);
+            readDestinationAndStoreResult(result);
         }
     },
     MOD(2, 0x18) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
-            //TODO halt on divzero
             if (b == 0) {
                 Error.ERR_DIV_ZERO.invoke();
             }
             final short value = (short) (a % b);
-            readDestinationAndStore(value);
+            readDestinationAndStoreResult(value);
         }
     },
     MUL(2, 0x16) {
@@ -572,7 +570,7 @@ import android.util.Log;
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             final short value = (short) (a * b);
-            readDestinationAndStore(value);
+            readDestinationAndStoreResult(value);
         }
     },
     NEW_LINE(0, 0xb) {
@@ -592,7 +590,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short value = arguments.get(0);
             final short result = (short) ~value;
-            readDestinationAndStore(result);
+            readDestinationAndStoreResult(result);
         }
     },
     OR(2, 0x8) {
@@ -600,12 +598,12 @@ import android.util.Log;
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             final short value = (short) (a | b);
-            readDestinationAndStore(value);
+            readDestinationAndStoreResult(value);
         }
     },
     OUTPUT_STREAM(3, 0x13) {
         @Override public void invoke(ZStack<Short> arguments) {
-            //TODO implement
+            //TODO output_stream
             if (Debug.screen) {
                 Log.i("Xyzzy", "OUTPUT STREAM: " + arguments);
             }
@@ -615,7 +613,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short pictureNumber = arguments.get(0);
             final short array = arguments.get(1);
-            // TODO Auto-generated method stub
+            // TODO picture_data
             throw new UnsupportedOperationException();
         }
     },
@@ -679,14 +677,14 @@ import android.util.Log;
             final short width = arguments.get(1);
             final short height = arguments.get(2);
             final short skip = arguments.get(3);
-            // TODO Auto-generated method stub
+            // TODO print_table
             throw new UnsupportedOperationException();
         }
     },
     PRINT_UNICODE(4, 0xb) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short charNumber = arguments.get(0);
-            // TODO Auto-generated method stub
+            // TODO print_unicode
             throw new UnsupportedOperationException();
         }
     },
@@ -735,7 +733,7 @@ import android.util.Log;
             } else {
                 value = Memory.CURRENT.random.random(range);
             }
-            readDestinationAndStore(value);
+            readDestinationAndStoreResult(value);
         }
     },
     READ_CHAR(3, 0x16) {
@@ -745,7 +743,6 @@ import android.util.Log;
             final short one = arguments.get(0);
             //            final short time = Process.zargs.get(1);
             //            final short routine = Process.zargs.get(2);
-            // TODO actually read a char
             value = MainActivity.activity.waitOnKey();
             Log.i("Xyzzy", "Got keyboard value:" + value);
             switch (value) {
@@ -755,7 +752,7 @@ import android.util.Log;
             default:
                 break;
             }
-            readDestinationAndStore(value);
+            readDestinationAndStoreResult(value);
         }
     },
     REMOVE_OBJ(1, 0x9) {
@@ -787,7 +784,7 @@ import android.util.Log;
                 loaded = (Memory) ois.readObject();
                 ois.close();
             } catch (final FileNotFoundException e) {
-                readDestinationAndStore(0);
+                readDestinationAndStoreResult(0);
                 return;
             } catch (final IOException e) {
                 throw new RuntimeException(e);
@@ -796,10 +793,10 @@ import android.util.Log;
             }
             if (!loaded.storyPath.equals(Memory.CURRENT.storyPath)) {
                 Log.i("Xyzzy", "Not a save from this story. " + loaded.storyPath + " v " + Memory.CURRENT.storyPath);
-                readDestinationAndStore(0);
+                readDestinationAndStoreResult(0);
             } else {
                 Memory.CURRENT = loaded;
-                readDestinationAndStore(2);
+                readDestinationAndStoreResult(2);
             }
         }
     },
@@ -818,10 +815,10 @@ import android.util.Log;
             }
             if (!loaded.storyPath.equals(Memory.CURRENT.storyPath)) {
                 Log.i("Xyzzy", "Not a save from this story. " + loaded.storyPath + " v " + Memory.CURRENT.storyPath);
-                readDestinationAndStore(0);
+                readDestinationAndStoreResult(0);
             } else {
                 Memory.CURRENT = loaded;
-                readDestinationAndStore(2);
+                readDestinationAndStoreResult(2);
             }
         }
     },
@@ -860,7 +857,7 @@ import android.util.Log;
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
-            readDestinationAndStore(1);
+            readDestinationAndStoreResult(1);
         }
     },
     SAVE_UNDO(4, 0x9) {
@@ -877,7 +874,7 @@ import android.util.Log;
             Memory.UNDO = baos.toByteArray();
             Log.i("Xyzzy", "Made undo file:" + Memory.UNDO.length + " bytes, " + (System.currentTimeMillis() - time)
                     + " ms");
-            readDestinationAndStore(1);
+            readDestinationAndStoreResult(1);
         }
     },
     SCAN_TABLE(3, 0x17) {
@@ -886,7 +883,7 @@ import android.util.Log;
             final short table = arguments.get(1);
             final short len = arguments.get(2);
             final short form = arguments.get(3);
-            // TODO Auto-generated method stub
+            // TODO scan_table
             throw new UnsupportedOperationException();
         }
     },
@@ -923,7 +920,7 @@ import android.util.Log;
     SET_FONT(4, 0x4) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short font = arguments.get(0);
-            // TODO Auto-generated method stub
+            // TODO set_font
             throw new UnsupportedOperationException();
         }
     },
@@ -932,7 +929,7 @@ import android.util.Log;
             final short left = arguments.get(0);
             final short right = arguments.get(0);
             final short window = arguments.get(0);
-            // TODO Auto-generated method stub
+            // TODO set_margins
             throw new UnsupportedOperationException();
         }
     },
@@ -998,7 +995,7 @@ import android.util.Log;
             final short effect = arguments.get(1);
             final short volume = arguments.get(2);
             final short routine = arguments.get(3);
-            // TODO Auto-generated method stub
+            // TODO sound_effect
             throw new UnsupportedOperationException();
         }
     },
@@ -1047,7 +1044,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
-            readDestinationAndStore(a - b);
+            readDestinationAndStoreResult(a - b);
         }
     },
     TEST(2, 0x7) {
@@ -1071,9 +1068,7 @@ import android.util.Log;
             final short value = arguments.get(0);
             final short stackFrame = arguments.get(1);
             Log.w("Xyzzy", "Throw:" + value + " stackFrame:" + stackFrame);
-            for (CallStack cs : Memory.CURRENT.callStack) {
-                Log.d("Xyzzy", cs.toString());
-            }
+            logCallStack();
             throw new UnsupportedOperationException();
         }
     },
@@ -1095,7 +1090,7 @@ import android.util.Log;
     },
     VERIFY(0, 0xd) {
         @Override public void invoke(ZStack<Short> arguments) {
-            //TODO implement
+            //TODO verify
             branchOnTest(true);
         }
     };
@@ -1137,7 +1132,7 @@ import android.util.Log;
         return (Header.GLOBALS.value() & 0xffff) + 2 * (ldestination - 16);
     }
 
-    public static void readDestinationAndStore(final int value) {
+    public static void readDestinationAndStoreResult(final int value) {
         final int destination = Memory.CURRENT.callStack.peek().getProgramByte();
         storeValue(destination, (short) value);
     }
@@ -1195,6 +1190,12 @@ import android.util.Log;
     }
 
     abstract public void invoke(ZStack<Short> arguments);
+
+    void logCallStack() {
+        for (CallStack cs : Memory.CURRENT.callStack) {
+            Log.d("Xyzzy", cs.toString());
+        }
+    }
 
     @Override public String toString() {
         return "(" + operands + "," + Integer.toHexString(hex) + ") " + super.toString().toLowerCase(Locale.UK);
