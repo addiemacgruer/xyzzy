@@ -68,7 +68,7 @@ public class Memory implements Serializable {
 
     public static ZWindow currentScreen() {
         return CURRENT.zwin.get(CURRENT.currentScreen);
-    };
+    }
 
     public static void loadDataFromFile() {
         CURRENT.buffer = new FileBuffer(Memory.CURRENT.storyPath);
@@ -154,8 +154,6 @@ public class Memory implements Serializable {
         }
     }
 
-    {
-    }
     public int                   currentScreen = 0;
     public Map<Integer, ZWindow> zwin          = new HashMap<Integer, ZWindow>();
     public ZStack<CallStack>     callStack     = new ZStack<CallStack>();

@@ -3,9 +3,10 @@ package uk.addie.xyzzy.zmachine;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-public class ZStack<T> implements Serializable {
+public class ZStack<T> implements Serializable, Iterable<T> {
     private static final long serialVersionUID = 1L;
     private final List<T>     list             = new ArrayList<T>();
     private T                 last             = null;
@@ -25,6 +26,10 @@ public class ZStack<T> implements Serializable {
 
     public T get(int i) {
         return list.get(i);
+    }
+
+    @Override public Iterator<T> iterator() {
+        return list.iterator();
     }
 
     public T peek() {

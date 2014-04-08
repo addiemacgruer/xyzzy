@@ -8,6 +8,7 @@ import android.content.Intent;
 public enum MenuButtons implements Invokeable {
     ABOUT {
         @Override public void invoke() {
+            // TODO
         }
 
         @Override public String toString() {
@@ -16,6 +17,7 @@ public enum MenuButtons implements Invokeable {
     },
     HELP {
         @Override public void invoke() {
+            // TODO
         }
 
         @Override public String toString() {
@@ -33,6 +35,7 @@ public enum MenuButtons implements Invokeable {
     },
     SETTINGS {
         @Override public void invoke() {
+            // TODO
         }
 
         @Override public String toString() {

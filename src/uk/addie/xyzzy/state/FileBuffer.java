@@ -12,11 +12,10 @@ import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.header.Header;
-import uk.addie.xyzzy.util.Bit;
-import uk.addie.xyzzy.zobjects.ZWindow;
+import android.annotation.SuppressLint;
 import android.util.Log;
 
-public class FileBuffer implements Serializable {
+@SuppressLint("UseSparseArrays") public class FileBuffer implements Serializable {
     private static final long           serialVersionUID = 1L;
     public transient byte[]             zmp;
     public transient boolean[]          changed;
@@ -24,7 +23,6 @@ public class FileBuffer implements Serializable {
     public final int                    staticMemory;
     public final int                    highMemory;
     public transient Map<Integer, Byte> changes          = new HashMap<Integer, Byte>();
-    private boolean                     fixedWidthFont   = false;
 
     public FileBuffer(final String storyPath) {
         this.storyPath = storyPath;
@@ -35,21 +33,6 @@ public class FileBuffer implements Serializable {
 
     public int capacity() {
         return zmp.length;
-    }
-
-    private void fontBitInHeader(int s) {
-        { // game sets fixed width font in header
-            Log.w("Xyzzy", "Game sets fixed width font in header");
-            fixedWidthFont = Bit.bit1(s);
-            final Map<Integer, ZWindow> zwin = Memory.CURRENT.zwin;
-            for (int i : zwin.keySet()) {
-                if (fixedWidthFont) {
-                    zwin.get(i).addStyle(ZWindow.TextStyle.FIXED_PITCH);
-                } else {
-                    zwin.get(i).clearStyles();
-                }
-            }
-        }
     }
 
     public int get(int i) {

@@ -43,7 +43,7 @@ public enum Header {
     HX_MOUSE_X(1, 1), //
     HX_MOUSE_Y(2, 1), //
     HX_UNICODE_TABLE(3, 1);
-    public static void printHeader(final FileBuffer bb) {
+    public static void printHeader() {
         Log.i("Xyzzy", "Header information:");
         for (final Header h : values()) {
             Log.i("Xyzzy", h + ":" + h.value());

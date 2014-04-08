@@ -6,7 +6,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
@@ -23,6 +22,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.TypefaceSpan;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
@@ -54,15 +54,15 @@ public class ZWindow implements Serializable {
         abstract CharacterStyle characterStyle();
     }
 
-    private static int                         background;
-    private final static Map<Integer, Integer> colours          = new HashMap<Integer, Integer>();
-    private static int                         foreground;
-    final static View.OnKeyListener            okl;
-    private static final long                  serialVersionUID = 1L;
-    public final static Object                 syncObject       = new Object();
-    public final static int                    textSize         = 16;
-    private static int[]                       windowMap        = { R.id.screen0, R.id.screen1 };
-    private static long                        latency          = 0;
+    private static int                  background;
+    private final static SparseIntArray colours          = new SparseIntArray();
+    private static int                  foreground;
+    final static View.OnKeyListener     okl;
+    private static final long           serialVersionUID = 1L;
+    public final static Object          syncObject       = new Object();
+    public final static int             textSize         = 16;
+    private static int[]                windowMap        = { R.id.screen0, R.id.screen1 };
+    private static long                 latency          = 0;
     static {
         colours.put(-1, 0x00000000); // transparent
         colours.put(0, 0xff000000); // interpreter def foreground
@@ -104,6 +104,21 @@ public class ZWindow implements Serializable {
             //            System.out.println("WINDOW: " + i);
             Memory.CURRENT.zwin.get(i).flush();
         }
+    }
+
+    public static void setColour(final int fore, final int back) {
+        foreground = colours.get(fore);
+        background = colours.get(back);
+        MainActivity.activity.setBackgroundColour(background);
+    }
+
+    private static TextView textView() {
+        final TextView ett = new TextView(MainActivity.activity.getApplicationContext());
+        ett.setTextColor(foreground);
+        ett.setBackgroundColor(background);
+        ett.setTextSize(textSize);
+        ett.setPadding(0, 0, 0, 0);
+        return ett;
     }
 
     private transient SpannableStringBuilder buffer           = new SpannableStringBuilder();
@@ -168,7 +183,7 @@ public class ZWindow implements Serializable {
 
     public synchronized String promptForInput() {
         final EditText et = new EditText(MainActivity.activity.getApplicationContext());
-        et.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.FILL_PARENT,
+        et.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
         et.setTextColor(background);
         et.setTextSize(textSize);
@@ -186,6 +201,7 @@ public class ZWindow implements Serializable {
                         + (latency != 0 ? "(" + (System.currentTimeMillis() - latency) + " ms since last)" : ""));
                 syncObject.wait();
             } catch (final InterruptedException e) {
+                // don't care if interrupted.
             }
         }
         final String command = et.getText().toString() + "\n";
@@ -210,26 +226,11 @@ public class ZWindow implements Serializable {
         this.buffered = buffered;
     }
 
-    public void setColour(final int fore, final int back) {
-        foreground = colours.get(fore);
-        background = colours.get(back);
-        MainActivity.activity.setBackgroundColour(background);
-    }
-
-    private TextView textView() {
-        final TextView ett = new TextView(MainActivity.activity.getApplicationContext());
-        ett.setTextColor(foreground);
-        ett.setBackgroundColor(background);
-        ett.setTextSize(textSize);
-        ett.setPadding(0, 0, 0, 0);
-        return ett;
-    }
-
     @Override public String toString() {
         return "ZWindow:" + windowCount;
     }
 
-    private void writeObject(final ObjectOutputStream out) throws IOException {
+    @SuppressWarnings("static-method") private void writeObject(final ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         out.writeInt(foreground);
         out.writeInt(background);

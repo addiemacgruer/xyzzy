@@ -1,7 +1,6 @@
 
 package uk.addie.xyzzy;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,7 +17,7 @@ import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,18 +29,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class SelectionActivity extends Activity implements ListAdapter {
-    public static String getPath(Context context, Uri uri) throws URISyntaxException {
+    public static String getPath(Context context, Uri uri) {
         if ("content".equalsIgnoreCase(uri.getScheme())) {
-            String[] projection = { MediaStore.Images.Media.DATA };
+            String[] projection = { MediaColumns.DATA };
             Cursor cursor = null;
             try {
                 cursor = context.getContentResolver().query(uri, projection, null, null, null);
-                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                int column_index = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
                 if (cursor.moveToFirst()) {
-                    return cursor.getString(column_index);
+                    String rval = cursor.getString(column_index);
+                    cursor.close();
+                    return rval;
                 }
+                cursor.close();
             } catch (Exception e) {
-                // Eat it
+                if (cursor != null) {
+                    cursor.close();
+                }
             }
         } else if ("file".equalsIgnoreCase(uri.getScheme())) {
             return uri.getPath();
@@ -49,13 +53,17 @@ public class SelectionActivity extends Activity implements ListAdapter {
         return null;
     }
 
-    List<String>                        games            = new ArrayList<String>();
-    Map<String, String>                 all              = new HashMap<String, String>();    ;
-    private int                         textSize;
-    private final List<DataSetObserver> observer         = new ArrayList<DataSetObserver>();
-    public final static String          EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
-    private static final int            FILE_SELECT_CODE = 0;
-    private String                      rval;
+    List<String>                games            = new ArrayList<String>();
+    Map<String, String>         all              = new HashMap<String, String>();
+    private int                 textSize;
+    final List<DataSetObserver> observer         = new ArrayList<DataSetObserver>();
+    public final static String  EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
+    private static final int    FILE_SELECT_CODE = 0;
+
+    private void addPathToGamesList(String path) {
+        Log.d("Xyzzy", "Adding path:" + path);
+        getGameNameDialogue(path);
+    }
 
     @Override public boolean areAllItemsEnabled() {
         return true;
@@ -65,17 +73,22 @@ public class SelectionActivity extends Activity implements ListAdapter {
         return games.size();
     }
 
-    private String getDialogueName() {
+    private void getGameNameDialogue(final String pathToGame) {
         final EditText input = new EditText(getApplicationContext());
         input.setText("New game");
         input.setTextColor(0xff000000);
         new AlertDialog.Builder(this).setTitle("Please name this file").setView(input)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override public void onClick(DialogInterface dialog, int whichButton) {
-                        rval = input.getText().toString();
+                        SharedPreferences.Editor sp = getSharedPreferences("XyzzyGames", 0).edit();
+                        sp.putString(input.getText().toString(), pathToGame);
+                        sp.commit();
+                        regenerateData();
+                        for (DataSetObserver dso : observer) {
+                            dso.onChanged();
+                        }
                     }
                 }).show();
-        return rval;
     }
 
     @Override public Object getItem(int position) {
@@ -130,29 +143,20 @@ public class SelectionActivity extends Activity implements ListAdapter {
     }
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("Xyzzy", "onActivityResult requestCode:" + requestCode + " resultCode:" + resultCode + " data:" + data);
         switch (requestCode) {
         case FILE_SELECT_CODE:
+        default:
             if (resultCode == RESULT_OK) {
                 // Get the Uri of the selected file 
                 Uri uri = data.getData();
                 Log.d("Xyzzy", "File Uri: " + uri.toString());
                 // Get the path
                 String path;
-                try {
-                    path = getPath(this, uri);
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
+                path = getPath(this, uri);
                 Log.d("Xyzzy", "File Path: " + path);
                 if (path != null) {
-                    String name = getDialogueName();
-                    SharedPreferences.Editor sp = getSharedPreferences("XyzzyGames", 0).edit();
-                    sp.putString(name, path);
-                    sp.commit();
-                    regenerateData();
-                    for (DataSetObserver dso : observer) {
-                        dso.onChanged();
-                    }
+                    addPathToGamesList(path);
                 }
             }
             break;
@@ -169,7 +173,8 @@ public class SelectionActivity extends Activity implements ListAdapter {
         lv.setAdapter(this);
     }
 
-    private void regenerateData() {
+    void regenerateData() {
+        Log.d("Xyzzy", "Regenerating data");
         all.clear();
         games.clear();
         SharedPreferences sp = getSharedPreferences("XyzzyGames", 0);
@@ -187,8 +192,9 @@ public class SelectionActivity extends Activity implements ListAdapter {
         games.add("+ Add another...");
     }
 
-    @Override public void registerDataSetObserver(DataSetObserver observer) {
-        this.observer.add(observer);
+    @Override public void registerDataSetObserver(DataSetObserver dso) {
+        Log.d("Xyzzy", "Registering observer:" + dso);
+        this.observer.add(dso);
     }
 
     private void setupGames() {
@@ -197,14 +203,13 @@ public class SelectionActivity extends Activity implements ListAdapter {
         regenerateData();
     }
 
-    private void showFileChooser() {
+    void showFileChooser() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {
             startActivityForResult(Intent.createChooser(intent, "Select a File to Upload"), FILE_SELECT_CODE);
         } catch (android.content.ActivityNotFoundException ex) {
-            // Potentially direct the user to the Market with a Dialog
             Toast.makeText(this, "Please install a File Manager.", Toast.LENGTH_SHORT).show();
         }
     }
@@ -215,7 +220,7 @@ public class SelectionActivity extends Activity implements ListAdapter {
         startActivity(intent);
     }
 
-    @Override public void unregisterDataSetObserver(DataSetObserver observer) {
-        this.observer.remove(observer);
+    @Override public void unregisterDataSetObserver(DataSetObserver dso) {
+        this.observer.remove(dso);
     }
 }

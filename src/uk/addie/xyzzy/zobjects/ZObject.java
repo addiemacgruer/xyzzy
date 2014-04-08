@@ -1,9 +1,7 @@
 
 package uk.addie.xyzzy.zobjects;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import uk.addie.xyzzy.error.Error;
@@ -11,6 +9,7 @@ import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
 import android.util.Log;
+import android.util.SparseArray;
 
 public class ZObject {
     public static ZObject count(final int oCount) {
@@ -43,8 +42,8 @@ public class ZObject {
         final ZObject zo = count(object);
         // detach from the existing tree
         final int oldSibling = zo.sibling();
-        Set<Integer> expectedSiblings = new HashSet(getReverse(reverseSiblings, object));
-        Set<Integer> expectedChildren = new HashSet(getReverse(reverseChildren, object));
+        Set<Integer> expectedSiblings = new HashSet<Integer>(getReverse(reverseSiblings, object));
+        Set<Integer> expectedChildren = new HashSet<Integer>(getReverse(reverseChildren, object));
         for (int i : expectedSiblings) {
             count(i).setSibling(oldSibling);
         }
@@ -75,27 +74,25 @@ public class ZObject {
         Memory.CURRENT.objectCount = objectCount;
     }
 
-    private int                                     count;
-    private int                                     offset;
-    private final static Map<Integer, Set<Integer>> reverseChildren = new HashMap<Integer, Set<Integer>>();
-    private final static Map<Integer, Set<Integer>> reverseSiblings = new HashMap<Integer, Set<Integer>>();
-    private final static Map<Integer, Set<Integer>> reverseParents  = new HashMap<Integer, Set<Integer>>();
+    private int                                    count;
+    private int                                    offset;
+    private final static SparseArray<Set<Integer>> reverseChildren = new SparseArray<Set<Integer>>();
+    private final static SparseArray<Set<Integer>> reverseSiblings = new SparseArray<Set<Integer>>();
+    private final static SparseArray<Set<Integer>> reverseParents  = new SparseArray<Set<Integer>>();
 
-    private static void addToReverseMap(Map<Integer, Set<Integer>> map, int object, int linked) {
+    private static void addToReverseMap(SparseArray<Set<Integer>> map, int object, int linked) {
         Set<Integer> target = getReverse(map, linked);
         target.add(object);
     }
 
-    private static void clearFromReverseMap(Map<Integer, Set<Integer>> map, int object, int linked) {
+    private static void clearFromReverseMap(SparseArray<Set<Integer>> map, int object, int linked) {
         Set<Integer> target = getReverse(map, linked);
         target.remove(object);
     }
 
-    private static Set<Integer> getReverse(Map<Integer, Set<Integer>> map, int linked) {
-        Set<Integer> target;
-        if (map.containsKey(linked)) {
-            target = map.get(linked);
-        } else {
+    private static Set<Integer> getReverse(SparseArray<Set<Integer>> map, int linked) {
+        Set<Integer> target = map.get(linked);
+        if (target == null) {
             target = new HashSet<Integer>();
             map.put(linked, target);
         }

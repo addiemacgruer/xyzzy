@@ -26,13 +26,21 @@ import android.widget.RelativeLayout;
 
 public class MainActivity extends Activity {
     public static MainActivity      activity;
-    private static final List<View> textBoxes     = new ArrayList<View>();
-    private static Thread           background    = null;
-    private final int               currentScroll = 0;
-    public static int               lastKey       = 0;
-    public Object                   keyWaiter     = new Object();
-    public static int               width, height;
-    private MenuItem[]              mis;
+    private static final List<View> textBoxes   = new ArrayList<View>();
+    private static Thread           logicThread = null;
+    public static int               lastKey     = 0;
+
+    static void focusTextView(final View tv) {
+        //        if (tv instanceof EditText) {
+        //            showKeyboard();
+        //        }
+        tv.setFocusableInTouchMode(true);
+        tv.requestFocus();
+    }
+
+    public Object      keyWaiter = new Object();
+    public static int  width, height;
+    private MenuItem[] mis;
 
     public void addView(final View tv, final int viewId) {
         //        snooze();
@@ -52,7 +60,7 @@ public class MainActivity extends Activity {
         activity = null;
         textBoxes.clear();
         Decoder.terminate();
-        background = null;
+        logicThread = null;
         synchronized (keyWaiter) {
             keyWaiter.notifyAll();
         }
@@ -74,14 +82,6 @@ public class MainActivity extends Activity {
         });
     }
 
-    void focusTextView(final View tv) {
-        //        if (tv instanceof EditText) {
-        //            showKeyboard();
-        //        }
-        tv.setFocusableInTouchMode(true);
-        tv.requestFocus();
-    }
-
     @SuppressWarnings("deprecation") private void getScreenSize() {
         Display display = getWindowManager().getDefaultDisplay();
         width = display.getWidth();
@@ -100,10 +100,10 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         boolean layout = true;
         synchronized (this) {
-            if (background == null) {
+            if (logicThread == null) {
                 Log.i("Xyzzy", "Starting new thread");
-                background = new Thread(new Xyzzy(), "XyzzyInterpreter");
-                background.start();
+                logicThread = new Thread(new Xyzzy(), "XyzzyInterpreter");
+                logicThread.start();
                 layout = false;
             }
         }
@@ -196,14 +196,6 @@ public class MainActivity extends Activity {
                         InputMethodManager.SHOW_FORCED, 0);
             }
         });
-    }
-
-    private void snooze() {
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public int waitOnKey() {

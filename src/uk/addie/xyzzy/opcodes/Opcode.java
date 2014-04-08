@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.EmptyStackException;
+import java.util.Locale;
 
 import uk.addie.xyzzy.Invokeable;
 import uk.addie.xyzzy.MainActivity;
@@ -29,7 +30,7 @@ import uk.addie.xyzzy.zobjects.ZWindow;
 import android.content.Context;
 import android.util.Log;
 
-public enum Opcode {
+@SuppressWarnings("unused") public enum Opcode {
     ADD(2, 0x14) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short a = arguments.get(0);
@@ -69,7 +70,7 @@ public enum Opcode {
                 Log.i("Xyzzy", "Read routine should be timed...");
             }
             final int maxCharacters = Memory.CURRENT.buff().get(text);
-            String inputString = Memory.currentScreen().promptForInput().toLowerCase();
+            String inputString = Memory.currentScreen().promptForInput().toLowerCase(Locale.UK);
             inputString = inputString.substring(0, Math.min(maxCharacters, inputString.length()));
             Memory.CURRENT.buff().put(text + 1, (byte) inputString.length());
             for (int i = 0, j = inputString.length(); i < j; i++) {
@@ -159,7 +160,12 @@ public enum Opcode {
     CATCH(0, 0x9) {
         @Override public void invoke(ZStack<Short> arguments) {
             //TODO
-            throw new UnsupportedOperationException();
+            final int destination = Memory.CURRENT.callStack.peek().getProgramByte();
+            Log.w("Xyzzy", "Catch:" + arguments + " destination:" + destination);
+            for (CallStack cs : Memory.CURRENT.callStack) {
+                Log.d("Xyzzy", cs.toString());
+                //            throw new UnsupportedOperationException();
+            }
         }
     },
     CHECK_ARG_COUNT(3, 0x1f) {
@@ -746,6 +752,8 @@ public enum Opcode {
             case '#':
                 value = 130;
                 break;
+            default:
+                break;
             }
             readDestinationAndStore(value);
         }
@@ -894,7 +902,7 @@ public enum Opcode {
         @Override public void invoke(ZStack<Short> arguments) {
             final short foreground = arguments.get(0);
             final short background = arguments.get(1);
-            Memory.currentScreen().setColour(foreground, background);
+            ZWindow.setColour(foreground, background);
             if (Debug.screen) {
                 Log.w("Xyzzy", "set_colour " + foreground + " " + background);
             }
@@ -1062,6 +1070,10 @@ public enum Opcode {
         @Override public void invoke(ZStack<Short> arguments) {
             final short value = arguments.get(0);
             final short stackFrame = arguments.get(1);
+            Log.w("Xyzzy", "Throw:" + value + " stackFrame:" + stackFrame);
+            for (CallStack cs : Memory.CURRENT.callStack) {
+                Log.d("Xyzzy", cs.toString());
+            }
             throw new UnsupportedOperationException();
         }
     },
@@ -1077,7 +1089,7 @@ public enum Opcode {
             for (int i = 0; i < length; i++) {
                 sb.append((char) Memory.CURRENT.buff().get(text + i + 2));
             }
-            final String inputString = sb.toString().toLowerCase();
+            final String inputString = sb.toString().toLowerCase(Locale.UK);
             ZText.tokeniseInputToBuffers(text, parse, inputString);
         }
     },
@@ -1094,6 +1106,15 @@ public enum Opcode {
             RTRUE.invoke(null);
         } else {
             Memory.CURRENT.callStack.peek().adjustProgramCounter(offset - 2);
+        }
+    }
+
+    protected static void branchOnTest(boolean test) {
+        final int lobit = Memory.CURRENT.callStack.peek().getProgramByte();
+        final boolean branchCondition = Bit.bit7(lobit);
+        final int offset = calculateOffset(lobit);
+        if (!branchCondition ^ test) {
+            branch(offset);
         }
     }
 
@@ -1139,6 +1160,16 @@ public enum Opcode {
         }
     }
 
+    public static void returnValue(final int value) {
+        final Invokeable i = Memory.CURRENT.callStack.peek().returnFunction();
+        Memory.CURRENT.callStack.pop();
+        Memory.CURRENT.callStack.peek().push(value);
+        i.invoke();
+        if (Debug.callstack) {
+            Log.i("Xyzzy", "<--");
+        }
+    }
+
     public static void storeValue(final int destination, final int value) {
         final int ldestination = destination & 0xff;
         if (Debug.stores) {
@@ -1163,28 +1194,9 @@ public enum Opcode {
         OpMap.map(this);
     }
 
-    protected void branchOnTest(boolean test) {
-        final int lobit = Memory.CURRENT.callStack.peek().getProgramByte();
-        final boolean branchCondition = Bit.bit7(lobit);
-        final int offset = calculateOffset(lobit);
-        if (!branchCondition ^ test) {
-            branch(offset);
-        }
-    }
-
     abstract public void invoke(ZStack<Short> arguments);
 
-    public void returnValue(final int value) {
-        final Invokeable i = Memory.CURRENT.callStack.peek().returnFunction();
-        Memory.CURRENT.callStack.pop();
-        Memory.CURRENT.callStack.peek().push(value);
-        i.invoke();
-        if (Debug.callstack) {
-            Log.i("Xyzzy", "<--");
-        }
-    }
-
     @Override public String toString() {
-        return "(" + operands + "," + Integer.toHexString(hex) + ") " + super.toString().toLowerCase();
+        return "(" + operands + "," + Integer.toHexString(hex) + ") " + super.toString().toLowerCase(Locale.UK);
     }
 }
