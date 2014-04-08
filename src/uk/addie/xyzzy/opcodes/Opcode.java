@@ -235,7 +235,7 @@ import android.util.Log;
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             if (b == 0) {
-                Error.ERR_DIV_ZERO.invoke();
+                Error.DIV_ZERO.invoke();
             }
             final short value = (short) (a / b);
             readDestinationAndStoreResult(value);
@@ -307,7 +307,7 @@ import android.util.Log;
             final int object = arguments.get(0);
             final int value;
             if (object == 0) {
-                Error.ERR_GET_CHILD_0.invoke();
+                Error.GET_CHILD_0.invoke();
                 value = 0;
             } else {
                 value = ZObject.count(object).child();
@@ -337,7 +337,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final Short object = arguments.get(0);
             if (object == 0) {
-                Error.ERR_GET_PARENT_0.invoke();
+                Error.GET_PARENT_0.invoke();
                 readDestinationAndStoreResult(0);
                 return;
             }
@@ -350,7 +350,7 @@ import android.util.Log;
             final short object = arguments.get(0);
             final short property = arguments.get(1);
             if (object == 0) {
-                Error.ERR_GET_PROP_0.invoke();
+                Error.GET_PROP_0.invoke();
                 readDestinationAndStoreResult(0);
                 return;
             }
@@ -365,7 +365,7 @@ import android.util.Log;
             final short object = arguments.get(0);
             final short property = arguments.get(1);
             if (object == 0) {
-                Error.ERR_GET_PROP_ADDR_0.invoke();
+                Error.GET_PROP_ADDR_0.invoke();
                 readDestinationAndStoreResult(0);
                 return;
             }
@@ -485,7 +485,7 @@ import android.util.Log;
             final short obj1 = arguments.get(0);
             final short obj2 = arguments.get(1);
             if (obj2 == 0) {
-                Error.ERR_JIN_0.invoke();
+                Error.JIN_0.invoke();
                 branchOnTest(false);
                 return;
             }
@@ -559,7 +559,7 @@ import android.util.Log;
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             if (b == 0) {
-                Error.ERR_DIV_ZERO.invoke();
+                Error.DIV_ZERO.invoke();
             }
             final short value = (short) (a % b);
             readDestinationAndStoreResult(value);
@@ -1142,7 +1142,7 @@ import android.util.Log;
             try {
                 return Memory.CURRENT.callStack.peek().pop();
             } catch (final EmptyStackException ese) {
-                Error.ERR_STK_UNDF.invoke(); // fatal
+                Error.STK_UNDF.invoke(); // fatal
                 return 0;
             }
         } else if (destination < 16) {

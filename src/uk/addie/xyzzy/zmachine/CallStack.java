@@ -18,7 +18,7 @@ public class CallStack implements Serializable {
     private static int calculateProgramCounter(final int rpos) {
         final int pc = Memory.unpackAddress(rpos);
         if (pc >= Memory.story_size()) {
-            Error.ERR_ILL_JUMP_ADDR.invoke();
+            Error.ILL_JUMP_ADDR.invoke();
         }
         return pc;
     }
@@ -73,7 +73,7 @@ public class CallStack implements Serializable {
             Log.i("Xyzzy", "--> 0x" + Integer.toHexString(rpos) + ", " + count + " locals.");
         }
         if (count > 15) {
-            Error.ERR_CALL_NON_RTN.invoke();
+            Error.CALL_NON_RTN.invoke();
         }
         return count;
     }

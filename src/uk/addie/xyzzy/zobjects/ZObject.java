@@ -16,11 +16,11 @@ public class ZObject {
         int count = oCount;
         if (count == 0) {
             Log.e("Xyzzy", "Object zero");
-            Error.ERR_ILL_OBJ.invoke();
+            Error.ILL_OBJ.invoke();
             return ZObject.count(1); // TODO bad
         } else if (count < 0) {
             Log.e("Xyzzy", "Negative object count");
-            Error.ERR_ILL_OBJ.invoke();
+            Error.ILL_OBJ.invoke();
         } else if (count > Memory.CURRENT.objectCount) {
             Log.e("Xyzzy", "Object count " + oCount + " > " + Memory.CURRENT.objectCount);
             //            Error.ERR_ILL_OBJ.invoke();
@@ -154,7 +154,7 @@ public class ZObject {
 
     public void setChild(final int object) {
         if (count == object) {
-            Error.ERR_MAKING_OBJECT_OWN_CHILD.invoke();
+            Error.MAKING_OBJECT_OWN_CHILD.invoke();
         }
         clearFromReverseMap(reverseChildren, count, child());
         addToReverseMap(reverseChildren, count, object);
@@ -170,7 +170,7 @@ public class ZObject {
 
     public void setParent(final int object) {
         if (count == object) {
-            Error.ERR_MAKING_OBJECT_OWN_PARENT.invoke();
+            Error.MAKING_OBJECT_OWN_PARENT.invoke();
         }
         clearFromReverseMap(reverseParents, count, parent());
         addToReverseMap(reverseParents, count, object);
@@ -186,7 +186,7 @@ public class ZObject {
 
     public void setSibling(final int object) {
         if (count == object) {
-            Error.ERR_MAKING_OBJECT_OWN_SIBLING.invoke();
+            Error.MAKING_OBJECT_OWN_SIBLING.invoke();
         }
         clearFromReverseMap(reverseSiblings, count, sibling());
         addToReverseMap(reverseSiblings, count, object);

@@ -19,7 +19,7 @@ public class OpMap {
     public static void invoke(final int operands, final int hex, ZStack<Short> arguments) {
         final Opcode z = opmap[operands][hex];
         if (z == null) {
-            Error.ERR_ILL_OPCODE.invoke();
+            Error.ILL_OPCODE.invoke();
             return;
         }
         if (Debug.opcodes) {
