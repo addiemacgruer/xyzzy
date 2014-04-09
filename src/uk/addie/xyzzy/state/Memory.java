@@ -15,6 +15,7 @@ import uk.addie.xyzzy.os.OS;
 import uk.addie.xyzzy.util.Bit;
 import uk.addie.xyzzy.zmachine.CallStack;
 import uk.addie.xyzzy.zmachine.ZStack;
+import uk.addie.xyzzy.zmachine.ZStream;
 import uk.addie.xyzzy.zobjects.Dictionary;
 import uk.addie.xyzzy.zobjects.ZObject;
 import uk.addie.xyzzy.zobjects.ZWindow;
@@ -65,9 +66,11 @@ public class Memory implements Serializable {
     private static final long serialVersionUID = 1L;
     public static Memory      CURRENT          = new Memory();
     public static byte[]      UNDO             = new byte[0];
+    public static ZStream     streams          = new ZStream();
 
-    public static ZWindow currentScreen() {
-        return CURRENT.zwin.get(CURRENT.currentScreen);
+    public static ZStream currentScreen() {
+        //        return CURRENT.zwin.get(CURRENT.currentScreen);
+        return streams;
     }
 
     public static void loadDataFromFile() {

@@ -61,7 +61,7 @@ public class OpMap {
 
     public static void map(final Opcode z) {
         if (opmap[z.operands][z.hex] != null) {
-            Log.w("Xyzzy", "Duplicate zcode:" + z);
+            Log.w("Xyzzy", "Duplicate zcode:" + z + " (was " + opmap[z.operands][z.hex] + ")");
         }
         opmap[z.operands][z.hex] = z;
     }

@@ -606,10 +606,20 @@ import android.util.Log;
     },
     OUTPUT_STREAM(3, 0x13) {
         @Override public void invoke(ZStack<Short> arguments) {
-            //TODO output_stream
-            if (Debug.screen) {
-                Log.i("Xyzzy", "OUTPUT STREAM: " + arguments);
+            Log.w("Xyzzy", "OUTPUT STREAM: " + arguments);
+            int width = 0, table = 0, number = 0;
+            switch (arguments.size()) {
+            case 3: // V6
+                width = arguments.get(2) & 0xffff;
+                //$FALL-THROUGH$
+            case 2:
+                table = arguments.get(1) & 0xffff;
+                //$FALL-THROUGH$
+            case 1:
+            default:
+                number = arguments.get(0); // signed
             }
+            Memory.currentScreen().setOutputStream(number, table, width);
         }
     },
     PICTURE_DATA(4, 0x6) {
@@ -640,13 +650,13 @@ import android.util.Log;
     PRINT_CHAR(3, 0x5) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short outputCharacterCode = arguments.get(0);
-            Memory.currentScreen().append(Character.valueOf((char) outputCharacterCode));
+            Memory.currentScreen().append(Character.toString((char) outputCharacterCode));
         }
     },
     PRINT_NUM(3, 0x6) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short value = arguments.get(0);
-            Memory.currentScreen().append(value);
+            Memory.currentScreen().append(Short.toString(value));
         }
     },
     PRINT_OBJ(1, 0xa) {
@@ -685,7 +695,7 @@ import android.util.Log;
             // TODO get cursor position
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    Memory.currentScreen().append(text.charAt(charcount++));
+                    Memory.currentScreen().append(Character.toString(text.charAt(charcount++)));
                 }
                 charcount += skip;
                 // TODO should reset to cursor x position
@@ -1015,7 +1025,7 @@ import android.util.Log;
             }
         }
     },
-    SHOW_STATUS(3, 0xc) {
+    SHOW_STATUS(0, 0xc) {
         @Override public void invoke(ZStack<Short> arguments) {
             if (Header.VERSION.value() != 3) {
                 NOP.invoke(arguments);

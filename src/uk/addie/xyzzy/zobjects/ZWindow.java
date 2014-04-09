@@ -134,14 +134,6 @@ public class ZWindow implements Serializable {
         currentTextStyle.put(ts, buffer.length());
     }
 
-    public void append(final char c) {
-        buffer.append(c);
-    }
-
-    public void append(final int value) {
-        buffer.append(Integer.toString(value));
-    }
-
     public void append(final String s) {
         buffer.append(s);
     }
