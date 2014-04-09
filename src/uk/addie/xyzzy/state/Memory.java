@@ -156,7 +156,7 @@ public class Memory implements Serializable {
 
     public int                   currentScreen = 0;
     public Map<Integer, ZWindow> zwin          = new HashMap<Integer, ZWindow>();
-    public ZStack<CallStack>     callStack     = new ZStack<CallStack>();
+    public ZStack<CallStack>     callStack     = new ZStack<CallStack>(null);
     public Random                random        = new Random();
     public int                   objectCount;
     public String                storyPath;

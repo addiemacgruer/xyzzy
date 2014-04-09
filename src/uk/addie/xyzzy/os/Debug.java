@@ -9,6 +9,6 @@ public class Debug {
     public static boolean  callstack = all;
     public static boolean  jumps     = all;
     public static boolean  screen    = all;
-    public static boolean  moves     = false;
+    public static boolean  moves     = all;
     public static boolean  copcodes  = false;
 }

@@ -1,17 +1,21 @@
 
 package uk.addie.xyzzy.zmachine;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+
 import uk.addie.xyzzy.error.XyzzyException;
 import uk.addie.xyzzy.opcodes.OpMap;
 import uk.addie.xyzzy.opcodes.Opcode;
 import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
 import uk.addie.xyzzy.util.Bit;
+import uk.addie.xyzzy.zobjects.ZWindow;
 import android.util.Log;
 
 public class Decoder {
     private static boolean             finished  = false;
-    private static final ZStack<Short> arguments = new ZStack<Short>();
+    private static final ZStack<Short> arguments = new ZStack<Short>((short) 0);
     private static int                 opcount   = 1;
 
     public static ZStack<Short> arguments() {
@@ -37,15 +41,32 @@ public class Decoder {
             try {
                 interpretOpcode(opcode);
             } catch (XyzzyException xe) { //oops
+                Memory.currentScreen().append("\n\nFatal error in story file\n");
                 Log.e("Xyzzy", "Interpreter:" + xe.toString());
                 xe.printStackTrace();
+                flushTraceToScreen0(xe);
                 finished = true;
             } catch (Exception e) { // double oops
+                Memory.currentScreen().append("\n\nFatal error in interpreter\n");
                 Log.e("Xyzzy", "Runtime:" + e.toString());
                 e.printStackTrace();
+                flushTraceToScreen0(e);
                 finished = true;
             }
         } while (!finished);
+    }
+
+    static void flushTraceToScreen0(Exception xe) {
+        if (!finished) {
+            Memory.currentScreen().append(xe.toString() + "\n\n");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintWriter pw = new PrintWriter(baos);
+            xe.printStackTrace(pw);
+            pw.flush();
+            String printLog = new String(baos.toByteArray());
+            Memory.currentScreen().append(printLog);
+            ZWindow.printAllScreens();
+        }
     }
 
     private static void intepretShortOpcode(final int opcode) {

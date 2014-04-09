@@ -77,7 +77,9 @@ import android.util.Log;
                 Memory.CURRENT.buff().put(text + 2 + i, (byte) inputString.codePointAt(i));
             }
             ZText.tokeniseInputToBuffers(text, parse, inputString);
-            readDestinationAndStoreResult((short) 10);
+            if (Header.VERSION.value() >= 5) {
+                readDestinationAndStoreResult((short) 10);
+            }
         }
     },
     ART_SHIFT(4, 0x3) {
@@ -247,7 +249,7 @@ import android.util.Log;
             final short y = arguments.get(1);
             final short x = arguments.get(2);
             // TODO draw_picture
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@draw_picture");
         }
     },
     ENCODE_TEXT(3, 0x1c) {
@@ -257,14 +259,14 @@ import android.util.Log;
             final short from = arguments.get(2);
             final short codedText = arguments.get(0);
             // TODO encode_text
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@encode_text");
         }
     },
     ERASE_LINE(3, 0xe) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short value = arguments.get(0);
             // TODO erase_line
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@erase_line");
         }
     },
     ERASE_PICTURE(4, 0x7) {
@@ -273,7 +275,7 @@ import android.util.Log;
             final short y = arguments.get(1);
             final short x = arguments.get(2);
             // TODO erase_picture
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@erase_picture");
         }
     },
     ERASE_WINDOW(3, 0xd) {
@@ -320,7 +322,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short array = arguments.get(0);
             // TODO get cursor
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@get_cursor");
         }
     },
     GET_NEXT_PROP(2, 0x13) {
@@ -405,7 +407,7 @@ import android.util.Log;
             final short window = arguments.get(0);
             final short propertyNumber = arguments.get(0);
             // TODO get_wind_prop.
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@get_wind_prop");
         }
     },
     INC(1, 0x5) {
@@ -428,7 +430,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short number = arguments.get(0);
             // TODO input stream
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@input_stream");
         }
     },
     INSERT_OBJ(2, 0xe) {
@@ -614,7 +616,7 @@ import android.util.Log;
             final short pictureNumber = arguments.get(0);
             final short array = arguments.get(1);
             // TODO picture_data
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@picture_data");
         }
     },
     PIRACY(0, 0xf) {
@@ -678,14 +680,14 @@ import android.util.Log;
             final short height = arguments.get(2);
             final short skip = arguments.get(3);
             // TODO print_table
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@print_table");
         }
     },
     PRINT_UNICODE(4, 0xb) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short charNumber = arguments.get(0);
             // TODO print_unicode
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@print_unicode");
         }
     },
     PULL(3, 0x9) {
@@ -771,7 +773,7 @@ import android.util.Log;
                 final int pc = Header.START_PC.value();
                 Memory.CURRENT.callStack.peek().setProgramCounter(pc);
             } else {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("@restart (v6)");
             }
         }
     },
@@ -879,12 +881,23 @@ import android.util.Log;
     },
     SCAN_TABLE(3, 0x17) {
         @Override public void invoke(ZStack<Short> arguments) {
-            final short x = arguments.get(0);
-            final short table = arguments.get(1);
-            final short len = arguments.get(2);
-            final short form = arguments.get(3);
-            // TODO scan_table
-            throw new UnsupportedOperationException();
+            final int x = arguments.get(0) & 0xffff;
+            final int table = arguments.get(1) & 0xffff;
+            final int len = arguments.get(2) & 0xffff;
+            int form = 0;
+            if (arguments.size() == 4) { // and implicitly, version 5
+                form = arguments.get(3);
+            }
+            for (int i = 0; i < len; i++) {
+                int wordAtI = Memory.CURRENT.buffer.getShort(table + i * 2) & 0xffff;
+                if (x == wordAtI) {
+                    readDestinationAndStoreResult(table + i * 2);
+                    branchOnTest(true);
+                    return;
+                }
+            }
+            readDestinationAndStoreResult(0);
+            branchOnTest(false); // eat the branch address
         }
     },
     SET_ATTR(2, 0xb) {
@@ -921,7 +934,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short font = arguments.get(0);
             // TODO set_font
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@set_font");
         }
     },
     SET_MARGINS(4, 0x8) {
@@ -930,7 +943,7 @@ import android.util.Log;
             final short right = arguments.get(0);
             final short window = arguments.get(0);
             // TODO set_margins
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@set_margins");
         }
     },
     SET_TEXT_STYLE(3, 0x11) {
@@ -996,7 +1009,7 @@ import android.util.Log;
             final short volume = arguments.get(2);
             final short routine = arguments.get(3);
             // TODO sound_effect
-            throw new UnsupportedOperationException();
+            //            throw new UnsupportedOperationException("@sound_effect");
         }
     },
     SPLIT_WINDOW(3, 0xa) {
@@ -1069,7 +1082,7 @@ import android.util.Log;
             final short stackFrame = arguments.get(1);
             Log.w("Xyzzy", "Throw:" + value + " stackFrame:" + stackFrame);
             logCallStack();
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("@throw");
         }
     },
     TOKENISE(3, 0x1b) {
@@ -1077,7 +1090,7 @@ import android.util.Log;
             final int text = arguments.get(0) & 0xffff;
             final int parse = arguments.get(1) & 0xffff;
             if (arguments.size() != 2) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("@tokenise (long arguments)");
             }
             final int length = Memory.CURRENT.buff().get(text + 1) & 0xff;
             final StringBuilder sb = new StringBuilder();
@@ -1092,6 +1105,11 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             //TODO verify
             branchOnTest(true);
+        }
+    },
+    POP {
+        @Override public void invoke(ZStack<Short> arguments) {
+            Memory.CURRENT.callStack.peek().pop();
         }
     };
     protected static void branch(final int offset) {
@@ -1151,7 +1169,7 @@ import android.util.Log;
             final int addr = globalVariableAddress(destination);
             return Memory.CURRENT.buff().getShort(addr);
         } else {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("Read value from invalid store:" + destination);
         }
     }
 
@@ -1182,6 +1200,11 @@ import android.util.Log;
 
     public final int hex;
     public final int operands;
+
+    private Opcode() { // constructor for pre-V5 opcodes
+        this.operands = 0;
+        this.hex = 0x0;
+    }
 
     private Opcode(final int operands, final int hex) {
         this.operands = operands;

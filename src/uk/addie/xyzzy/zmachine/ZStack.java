@@ -6,11 +6,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.util.Log;
+
 public class ZStack<T> implements Serializable, Iterable<T> {
+    private final T           nullValue;
     private static final long serialVersionUID = 1L;
     private final List<T>     list             = new ArrayList<T>();
     private T                 last             = null;
     private int               size             = 0;
+
+    public ZStack(T nullValue) {
+        this.nullValue = nullValue;
+    }
 
     public void add(T value) {
         list.add(value);
@@ -25,6 +32,10 @@ public class ZStack<T> implements Serializable, Iterable<T> {
     }
 
     public T get(int i) {
+        if (i < 0 || i >= list.size()) {
+            Log.w("Xyzzy", "Stack index out of range.");
+            return nullValue;
+        }
         return list.get(i);
     }
 

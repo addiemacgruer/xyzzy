@@ -34,7 +34,8 @@ public class CallStack implements Serializable {
         Memory.CURRENT.callStack.add(f);
         if (Header.VERSION.value() <= 4) {
             for (int i = 1; i <= f.localsCount; i++) {
-                final int value = Memory.CURRENT.callStack.peek().getProgramByte();
+                int value = Memory.CURRENT.callStack.peek().getProgramByte() << 8;
+                value += Memory.CURRENT.callStack.peek().getProgramByte();
                 f.register.put((short) i, (short) value);
             }
         }
@@ -48,7 +49,7 @@ public class CallStack implements Serializable {
     private int                     programCounter;
     private final Map<Short, Short> register = new HashMap<Short, Short>();
     private final Invokeable        returnFunction;
-    private final ZStack<Short>     stack    = new ZStack<Short>();
+    private final ZStack<Short>     stack    = new ZStack<Short>((short) 0);
 
     public CallStack() {
         this.calledWithCount = 0;
