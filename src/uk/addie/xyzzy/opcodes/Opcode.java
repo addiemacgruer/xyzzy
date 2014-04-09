@@ -3,6 +3,7 @@ package uk.addie.xyzzy.opcodes;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -807,7 +808,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             Memory loaded = null;
             try {
-                final FileInputStream save = MainActivity.activity.openFileInput(Memory.CURRENT.storyPath + ".save");
+                final FileInputStream save = MainActivity.activity.openFileInput(saveGameName());
                 final ObjectInputStream ois = new ObjectInputStream(save);
                 loaded = (Memory) ois.readObject();
                 ois.close();
@@ -875,17 +876,19 @@ import android.util.Log;
     SAVE(4, 0x0) {
         @Override public void invoke(ZStack<Short> arguments) {
             try {
-                //                MainActivity.activity.getFilesDir().
-                //                final FileOutputStream save = new FileOutputStream("/home/addie/Inform/JFrotz.save");
-                final FileOutputStream save = MainActivity.activity.openFileOutput(Memory.CURRENT.storyPath + ".save",
-                        Context.MODE_PRIVATE);
+                final FileOutputStream save = MainActivity.activity
+                        .openFileOutput(saveGameName(), Context.MODE_PRIVATE);
                 final ObjectOutputStream oos = new ObjectOutputStream(save);
                 oos.writeObject(Memory.CURRENT);
                 oos.close();
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
-            readDestinationAndStoreResult(1);
+            if (Header.VERSION.value() < 5) { //branch
+                branchOnTest(true);
+            } else { // store
+                readDestinationAndStoreResult(1);
+            }
         }
     },
     SAVE_UNDO(4, 0x9) {
@@ -1267,6 +1270,12 @@ import android.util.Log;
         for (CallStack cs : Memory.CURRENT.callStack) {
             Log.d("Xyzzy", cs.toString());
         }
+    }
+
+    String saveGameName() {
+        File story = new File(Memory.CURRENT.storyPath);
+        String namepart = story.getName();
+        return namepart + ".save";
     }
 
     @Override public String toString() {
