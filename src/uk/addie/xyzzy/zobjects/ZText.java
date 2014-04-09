@@ -16,7 +16,7 @@ public class ZText {
             '9', '.', ',', '!', '?', '_', '#', '\'', '"', '/', '\\', '-', ':', '(', ')' };
     public static int     bytePosition;
 
-    public static String atOffset(final int offset) {
+    public static String encodedAtOffset(final int offset) {
         final List<Character> cb = new ArrayList<Character>();
         //        int alphabet = Header.H_ALPHABET.value(FastMem.CURRENT.zmp);
         int b = 0;
@@ -40,7 +40,7 @@ public class ZText {
             if (abbreviation != 0) {
                 final int ptr_addr = Header.ABBREVIATIONS.value() + 64 * (abbreviation - 1) + 2 * c;
                 final int abbrOffset = Memory.CURRENT.buff().getShort(ptr_addr) & 0xffff;
-                sb.append(ZText.atOffset(abbrOffset << 1));
+                sb.append(ZText.encodedAtOffset(abbrOffset << 1));
                 abbreviation = 0;
                 continue;
             }
@@ -115,5 +115,19 @@ public class ZText {
             }
             offset++;
         }
+    }
+
+    public static String unencodedAtOffset(final int offset) {
+        final StringBuilder sb = new StringBuilder();
+        int start = offset;
+        while (true) {
+            char c = (char) Memory.CURRENT.buffer.get(start);
+            if (c == 0) {
+                break;
+            }
+            sb.append(c);
+            start++;
+        }
+        return sb.toString();
     }
 }

@@ -124,6 +124,6 @@ public class ZProperty {
 
     @Override public String toString() {
         //        int length = (FastMem.CURRENT.zmp.get(offset) & 0xff) * 2;
-        return ZText.atOffset(offset + 1);
+        return ZText.encodedAtOffset(offset + 1);
     }
 }

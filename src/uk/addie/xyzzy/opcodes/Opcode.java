@@ -197,22 +197,23 @@ import android.util.Log;
             final short first = arguments.get(0);
             final short second = arguments.get(1);
             final short size = arguments.get(2);
+            final int length = Math.abs(size);
             if (second == 0) { // zero first
-                for (int i = 0; i < Math.abs(size); i++) {
+                for (int i = 0; i < length; i++) {
                     Memory.CURRENT.buff().put(first + i, 0);
                 }
                 return;
             }
             // decide copy direction
-            if (size < 0 || first + size < second) { // copy forwards
-                for (int i = 0; i < Math.abs(size); i++) {
-                    byte b = (byte) Memory.CURRENT.buff().get(second + i);
-                    Memory.CURRENT.buff().put(first + i, b);
+            if (size < 0 || first > second) { // copy forwards
+                for (int i = 0; i < length; i++) {
+                    byte b = (byte) Memory.CURRENT.buff().get(first + i);
+                    Memory.CURRENT.buff().put(second + i, b);
                 }
             } else { // copy backwards
-                for (int i = Math.abs(size) - 1; i >= 0; i--) {
-                    byte b = (byte) Memory.CURRENT.buff().get(second + i);
-                    Memory.CURRENT.buff().put(first + i, b);
+                for (int i = length - 1; i >= 0; i--) {
+                    byte b = (byte) Memory.CURRENT.buff().get(first + i);
+                    Memory.CURRENT.buff().put(second + i, b);
                 }
             }
         }
@@ -626,14 +627,14 @@ import android.util.Log;
     },
     PRINT(0, 0x2) {
         @Override public void invoke(ZStack<Short> arguments) {
-            Memory.currentScreen().append(ZText.atOffset(Memory.CURRENT.callStack.peek().programCounter()));
+            Memory.currentScreen().append(ZText.encodedAtOffset(Memory.CURRENT.callStack.peek().programCounter()));
             Memory.CURRENT.callStack.peek().setProgramCounter(ZText.bytePosition + 2);
         }
     },
     PRINT_ADDR(1, 0x7) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short byteAddressOfString = arguments.get(0);
-            Memory.currentScreen().append(ZText.atOffset(byteAddressOfString & 0xffff));
+            Memory.currentScreen().append(ZText.encodedAtOffset(byteAddressOfString & 0xffff));
         }
     },
     PRINT_CHAR(3, 0x5) {
@@ -663,7 +664,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final int packedAddressOfString = arguments.get(0) & 0xffff;
             final int address = Memory.unpackAddress(packedAddressOfString);
-            Memory.currentScreen().append(ZText.atOffset(address));
+            Memory.currentScreen().append(ZText.encodedAtOffset(address));
         }
     },
     PRINT_RET(0, 0x3) {
@@ -679,8 +680,17 @@ import android.util.Log;
             final short width = arguments.get(1);
             final short height = arguments.get(2);
             final short skip = arguments.get(3);
-            // TODO print_table
-            throw new UnsupportedOperationException("@print_table");
+            String text = ZText.unencodedAtOffset(zsciiText);
+            int charcount = 0;
+            // TODO get cursor position
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    Memory.currentScreen().append(text.charAt(charcount++));
+                }
+                charcount += skip;
+                // TODO should reset to cursor x position
+                Memory.currentScreen().append("\n");
+            }
         }
     },
     PRINT_UNICODE(4, 0xb) {
@@ -894,7 +904,7 @@ import android.util.Log;
                 int wordAtI = isWord ? Memory.CURRENT.buffer.getShort(table + i * skip) & 0xffff
                         : Memory.CURRENT.buffer.get(table + i * skip) & 0xff;
                 if (x == wordAtI) {
-                    readDestinationAndStoreResult(table + i * 2);
+                    readDestinationAndStoreResult(table + i * skip);
                     branchOnTest(true);
                     return;
                 }
@@ -1005,6 +1015,15 @@ import android.util.Log;
             }
         }
     },
+    SHOW_STATUS(3, 0xc) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            if (Header.VERSION.value() != 3) {
+                NOP.invoke(arguments);
+            } else {
+                throw new UnsupportedOperationException("@show-status");
+            }
+        }
+    },
     SOUND_EFFECT(3, 0x15) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short number = arguments.get(0);
@@ -1012,7 +1031,7 @@ import android.util.Log;
             final short volume = arguments.get(2);
             final short routine = arguments.get(3);
             // TODO sound_effect
-            //            throw new UnsupportedOperationException("@sound_effect");
+            Log.i("Xyzzy", "Sound effect:" + arguments);
         }
     },
     SPLIT_WINDOW(3, 0xa) {
