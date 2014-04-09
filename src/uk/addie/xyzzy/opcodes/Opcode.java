@@ -884,12 +884,15 @@ import android.util.Log;
             final int x = arguments.get(0) & 0xffff;
             final int table = arguments.get(1) & 0xffff;
             final int len = arguments.get(2) & 0xffff;
-            int form = 0;
+            int form = 0x82;
             if (arguments.size() == 4) { // and implicitly, version 5
                 form = arguments.get(3);
             }
-            for (int i = 0; i < len; i++) {
-                int wordAtI = Memory.CURRENT.buffer.getShort(table + i * 2) & 0xffff;
+            final boolean isWord = Bit.bit7(form);
+            final int skip = Bit.low(form, 7);
+            for (int i = 0; i < len; i += skip) {
+                int wordAtI = isWord ? Memory.CURRENT.buffer.getShort(table + i * skip) & 0xffff
+                        : Memory.CURRENT.buffer.get(table + i * skip) & 0xff;
                 if (x == wordAtI) {
                     readDestinationAndStoreResult(table + i * 2);
                     branchOnTest(true);
