@@ -8,7 +8,7 @@ public class Debug {
     public static boolean  stack     = all;
     public static boolean  callstack = all;
     public static boolean  jumps     = all;
-    public static boolean  screen    = true;
+    public static boolean  screen    = all;
     public static boolean  moves     = all;
     public static boolean  copcodes  = false;
 }

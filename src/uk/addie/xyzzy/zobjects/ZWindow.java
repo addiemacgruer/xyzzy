@@ -64,20 +64,20 @@ public class ZWindow implements Serializable {
     private static int[]                windowMap        = { R.id.screen0, R.id.screen1 };
     private static long                 latency          = 0;
     static {
-        colours.put(-1, 0x00000000); // transparent
-        colours.put(0, 0xff000000); // interpreter def foreground
-        colours.put(1, 0xffffffff); // interpreter def background
-        colours.put(2, 0xff000000); //black
-        colours.put(3, 0xffff0000); // red
-        colours.put(4, 0xff00ff00); //green
-        colours.put(5, 0xffffff00); // yellow
-        colours.put(6, 0xff0000ff); // blue
-        colours.put(7, 0xffff00ff); // magenta
-        colours.put(8, 0xff00ffff); // cyan
-        colours.put(9, 0xffffffff); //white
-        colours.put(10, 0xffbbbbbb); // light grey
-        colours.put(11, 0xff888888); // medium grey
-        colours.put(12, 0xff444444); // dark grey
+        colours.put(-1, 0x0); // transparent
+        colours.put(0, amigaColourToAndroid(0x0000)); // interpreter def foreground
+        colours.put(1, amigaColourToAndroid(0x7fff)); // interpreter def background
+        colours.put(2, amigaColourToAndroid(0x0000)); //black
+        colours.put(3, amigaColourToAndroid(0x001d)); // red
+        colours.put(4, amigaColourToAndroid(0x0340)); //green
+        colours.put(5, amigaColourToAndroid(0x03bd)); // yellow
+        colours.put(6, amigaColourToAndroid(0x59a0)); // blue
+        colours.put(7, amigaColourToAndroid(0x7c1f)); // magenta
+        colours.put(8, amigaColourToAndroid(0x77a0)); // cyan
+        colours.put(9, amigaColourToAndroid(0x7fff)); //white
+        colours.put(10, amigaColourToAndroid(0x5ad6)); // light grey
+        colours.put(11, amigaColourToAndroid(0x4631)); // medium grey
+        colours.put(12, amigaColourToAndroid(0x2d6b)); // dark grey
     }
     static {
         okl = new View.OnKeyListener() {
@@ -92,6 +92,14 @@ public class ZWindow implements Serializable {
                 return false;
             }
         };
+    }
+
+    public static int amigaColourToAndroid(int amiga) {
+        int red = (0x1f & amiga) * 8; // bottom five bits, scaled from 0x1f to 0x2f
+        int green = ((0x3e0 & amiga) >> 5) * 8;
+        int blue = ((0x7c00 & amiga) >> 10) * 8;
+        int androidValue = 0xff000000 | (red << 16) | (green << 8) | blue;
+        return androidValue;
     }
 
     public static void defaultColours() {
@@ -109,6 +117,22 @@ public class ZWindow implements Serializable {
     public static void setColour(final int fore, final int back) {
         foreground = colours.get(fore);
         background = colours.get(back);
+        MainActivity.activity.setBackgroundColour(background);
+    }
+
+    public static void setTrueColour(int foreground2, int background2) {
+        Log.i("Xyzzy", "Set true colour:" + Integer.toHexString(foreground2) + " :" + Integer.toHexString(background2));
+        if (foreground2 > 0) {
+            foreground = amigaColourToAndroid(foreground2);
+        } else if (foreground2 == -1) {
+            foreground = colours.get(0);
+        }
+        if (background2 > 0) {
+            background = amigaColourToAndroid(background2);
+        } else if (background2 == -1) {
+            background = colours.get(1);
+        }
+        Log.i("Xyzzy", "Set as:" + Integer.toHexString(foreground) + " :" + Integer.toHexString(background));
         MainActivity.activity.setBackgroundColour(background);
     }
 

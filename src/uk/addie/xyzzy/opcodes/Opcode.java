@@ -23,6 +23,7 @@ import uk.addie.xyzzy.util.Bit;
 import uk.addie.xyzzy.zmachine.CallStack;
 import uk.addie.xyzzy.zmachine.Decoder;
 import uk.addie.xyzzy.zmachine.ZStack;
+import uk.addie.xyzzy.zobjects.Beep;
 import uk.addie.xyzzy.zobjects.ZObject;
 import uk.addie.xyzzy.zobjects.ZProperty;
 import uk.addie.xyzzy.zobjects.ZText;
@@ -45,41 +46,6 @@ import android.util.Log;
             final short b = arguments.get(1);
             final short result = (short) (a & b);
             readDestinationAndStoreResult(result);
-        }
-    },
-    AREAD(3, 0x4) {
-        @Override public void invoke(ZStack<Short> arguments) {
-            ZWindow.printAllScreens();
-            int text = 0, parse = 0, time = 0, routine = 0;
-            switch (arguments.size()) {
-            default:
-            case 4:
-                routine = arguments.get(3) & 0xffff;
-                //$FALL-THROUGH$
-            case 3:
-                time = arguments.get(2) & 0xffff;
-                //$FALL-THROUGH$
-            case 2:
-                parse = arguments.get(1) & 0xffff;
-                //$FALL-THROUGH$
-            case 1:
-                text = arguments.get(0) & 0xffff;
-                break;
-            }
-            if (routine != 0 || time != 0) {
-                Log.i("Xyzzy", "Read routine should be timed...");
-            }
-            final int maxCharacters = Memory.CURRENT.buff().get(text);
-            String inputString = Memory.currentScreen().promptForInput().toLowerCase(Locale.UK);
-            inputString = inputString.substring(0, Math.min(maxCharacters, inputString.length()));
-            Memory.CURRENT.buff().put(text + 1, (byte) inputString.length());
-            for (int i = 0, j = inputString.length(); i < j; i++) {
-                Memory.CURRENT.buff().put(text + 2 + i, (byte) inputString.codePointAt(i));
-            }
-            ZText.tokeniseInputToBuffers(text, parse, inputString);
-            if (Header.VERSION.value() >= 5) {
-                readDestinationAndStoreResult((short) 10);
-            }
         }
     },
     ART_SHIFT(4, 0x3) {
@@ -606,7 +572,6 @@ import android.util.Log;
     },
     OUTPUT_STREAM(3, 0x13) {
         @Override public void invoke(ZStack<Short> arguments) {
-            Log.w("Xyzzy", "OUTPUT STREAM: " + arguments);
             int width = 0, table = 0, number = 0;
             switch (arguments.size()) {
             case 3: // V6
@@ -633,6 +598,11 @@ import android.util.Log;
     PIRACY(0, 0xf) {
         @Override public void invoke(ZStack<Short> arguments) {
             branchOnTest(true);
+        }
+    },
+    POP {
+        @Override public void invoke(ZStack<Short> arguments) {
+            Memory.CURRENT.callStack.peek().pop();
         }
     },
     PRINT(0, 0x2) {
@@ -758,6 +728,42 @@ import android.util.Log;
             readDestinationAndStoreResult(value);
         }
     },
+    READ(3, 0x4) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            ZWindow.printAllScreens();
+            int text = 0, parse = 0, time = 0, routine = 0;
+            switch (arguments.size()) {
+            default:
+            case 4:
+                routine = arguments.get(3) & 0xffff;
+                //$FALL-THROUGH$
+            case 3:
+                time = arguments.get(2) & 0xffff;
+                //$FALL-THROUGH$
+            case 2:
+                parse = arguments.get(1) & 0xffff;
+                //$FALL-THROUGH$
+            case 1:
+                text = arguments.get(0) & 0xffff;
+                break;
+            }
+            if (routine != 0 || time != 0) {
+                Log.i("Xyzzy", "Read routine should be timed...");
+            }
+            final int maxCharacters = Memory.CURRENT.buff().get(text);
+            String inputString = Memory.currentScreen().promptForInput().toLowerCase(Locale.UK);
+            Memory.currentScreen().userInput(inputString);
+            inputString = inputString.substring(0, Math.min(maxCharacters, inputString.length()));
+            Memory.CURRENT.buff().put(text + 1, (byte) inputString.length());
+            for (int i = 0, j = inputString.length(); i < j; i++) {
+                Memory.CURRENT.buff().put(text + 2 + i, (byte) inputString.codePointAt(i));
+            }
+            ZText.tokeniseInputToBuffers(text, parse, inputString);
+            if (Header.VERSION.value() >= 5) {
+                readDestinationAndStoreResult((short) 10);
+            }
+        }
+    },
     READ_CHAR(3, 0x16) {
         @Override public void invoke(ZStack<Short> arguments) {
             ZWindow.printAllScreens();
@@ -766,7 +772,7 @@ import android.util.Log;
             //            final short time = Process.zargs.get(1);
             //            final short routine = Process.zargs.get(2);
             value = MainActivity.activity.waitOnKey();
-            Log.i("Xyzzy", "Got keyboard value:" + value);
+            Memory.currentScreen().userInput(Character.toString((char) value));
             switch (value) {
             case '#':
                 value = 130;
@@ -941,6 +947,16 @@ import android.util.Log;
             }
         }
     },
+    SET_TRUE_COLOUR(4, 0xd) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            final short foreground = arguments.get(0);
+            final short background = arguments.get(1);
+            ZWindow.setTrueColour(foreground, background);
+            if (Debug.screen) {
+                Log.w("Xyzzy", "set_true_colour " + foreground + " " + background);
+            }
+        }
+    },
     SET_CURSOR(3, 0xf) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short line = arguments.get(0);
@@ -1041,7 +1057,13 @@ import android.util.Log;
             final short volume = arguments.get(2);
             final short routine = arguments.get(3);
             // TODO sound_effect
-            Log.i("Xyzzy", "Sound effect:" + arguments);
+            if (number == 1) {
+                Beep.beep1.playSound();
+            } else if (number == 2) {
+                Beep.beep2.playSound();
+            } else {
+                Log.i("Xyzzy", "Sound effect:" + arguments);
+            }
         }
     },
     SPLIT_WINDOW(3, 0xa) {
@@ -1137,11 +1159,6 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             //TODO verify
             branchOnTest(true);
-        }
-    },
-    POP {
-        @Override public void invoke(ZStack<Short> arguments) {
-            Memory.CURRENT.callStack.peek().pop();
         }
     };
     protected static void branch(final int offset) {

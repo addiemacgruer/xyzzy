@@ -105,6 +105,7 @@ public class Memory implements Serializable {
         Header.DEFAULT_FOREGROUND.put(0);
         Header.DEFAULT_BACKGROUND.put(1);
         Header.STANDARD_HIGH.put(1);
+        Header.STANDARD_LOW.put(0);
         Dictionary.initDefault();
         ZObject.enumerateObjects();
         //        throw new UnsupportedOperationException();
