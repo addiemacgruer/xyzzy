@@ -27,6 +27,8 @@ public enum Error {/* Error codes */
     ILL_WIN("Illegal window", true), /* Illegal window */
     ILL_WIN_PROP("Illegal window property", true), /* Illegal window property */
     ILL_PRINT_ADDR("Print at illegal address", true), /* Print at illegal address */
+    UNKNOWN_ZCODE_VERSION("Unknown Z-code version", true), //
+    BYTE_SWAPPED_STORY_FILE("Byte swapped story file", true), //
     /* Less serious errors */
     JIN_0("@jin called with object 0"), /* @jin called with object 0 */
     GET_CHILD_0("@get_child called with object 0"), /* @get_child called with object 0 */

@@ -16,22 +16,20 @@ import android.annotation.SuppressLint;
 import android.util.Log;
 
 @SuppressLint("UseSparseArrays") public class FileBuffer implements Serializable {
-    private static final long           serialVersionUID = 1L;
-    public transient byte[]             zmp;
-    public transient boolean[]          changed;
-    public String                       storyPath;
-    public final int                    staticMemory;
-    public final int                    highMemory;
-    public transient Map<Integer, Byte> changes          = new HashMap<Integer, Byte>();
+    private static final long            serialVersionUID = 1L;
+    private transient byte[]             zmp;
+    private transient boolean[]          changed;
+    private final String                 storyPath;
+    private final int                    staticMemory;
+    private transient Map<Integer, Byte> changes          = new HashMap<Integer, Byte>();
 
-    public FileBuffer(final String storyPath) {
+    FileBuffer(final String storyPath) {
         this.storyPath = storyPath;
         loadUpFile(storyPath);
         staticMemory = Header.DYNAMIC_SIZE.value(this);
-        highMemory = Header.RESIDENT_SIZE.value(this);
     }
 
-    public int capacity() {
+    int capacity() {
         return zmp.length;
     }
 

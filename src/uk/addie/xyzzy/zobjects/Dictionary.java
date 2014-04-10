@@ -41,21 +41,21 @@ public class Dictionary {
     }
 
     private int entryLength() {
-        return Memory.CURRENT.buff().get(offset + numberOfInputCodes() + 1);
+        return Memory.current().buff().get(offset + numberOfInputCodes() + 1);
     }
 
     private int numberOfEntries() {
-        return Memory.CURRENT.buff().getShort(offset + numberOfInputCodes() + 2);
+        return Memory.current().buff().getShort(offset + numberOfInputCodes() + 2);
     }
 
     private int numberOfInputCodes() {
-        return Memory.CURRENT.buff().get(offset) & 0xff;
+        return Memory.current().buff().get(offset) & 0xff;
     }
 
     public int wordSplit(final char ch) {
         final int dictStart = offset;
         for (int i = 0, codes = numberOfInputCodes(); i < codes; i++) {
-            if (Memory.CURRENT.buff().get(dictStart + i + 1) == ch) {
+            if (Memory.current().buff().get(dictStart + i + 1) == ch) {
                 return dictStart + i + 1;
             }
         }

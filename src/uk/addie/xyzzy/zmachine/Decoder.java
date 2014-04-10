@@ -25,7 +25,7 @@ public class Decoder {
     public static void beginDecoding() {
         finished = false;
         do {
-            final CallStack callStack = Memory.CURRENT.callStack.peek();
+            final CallStack callStack = Memory.current().callStack.peek();
             if (Debug.stack) {
                 Log.i("Xyzzy", callStack.toString());
             }
@@ -56,7 +56,7 @@ public class Decoder {
         } while (!finished);
     }
 
-    static void flushTraceToScreen0(Exception xe) {
+    private static void flushTraceToScreen0(Exception xe) {
         if (!finished) {
             Memory.streams().append(xe.toString() + "\n\n");
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -80,8 +80,8 @@ public class Decoder {
     }
 
     private static void interpretExtended() {
-        final int opcode = Memory.CURRENT.callStack.peek().getProgramByte();
-        loadOperands(Memory.CURRENT.callStack.peek().getProgramByte());
+        final int opcode = Memory.current().callStack.peek().getProgramByte();
+        loadOperands(Memory.current().callStack.peek().getProgramByte());
         OpMap.invoke(4, opcode, arguments);
     }
 
@@ -112,7 +112,7 @@ public class Decoder {
     }
 
     private static void interpretVarOpcode(final int opcode) {
-        final CallStack callStack = Memory.CURRENT.callStack.peek();
+        final CallStack callStack = Memory.current().callStack.peek();
         if (Bit.bit5(opcode) && ((opcode & 0x1f) == 12 || (opcode & 0x1f) == 26)) {
             final int vc1 = callStack.getProgramByte();
             final int vc2 = callStack.getProgramByte();
@@ -142,7 +142,7 @@ public class Decoder {
                 break;
             }
         }
-        final CallStack callStack = Memory.CURRENT.callStack.peek();
+        final CallStack callStack = Memory.current().callStack.peek();
         switch (type) {
         case 0: // large constant
             value = callStack.getProgramByte() << 8;
@@ -184,7 +184,7 @@ public class Decoder {
     }
 
     private static void printCOpcode(final int opcode) {
-        Log.i("Xyzzy", opcount + " @" + Integer.toHexString(Memory.CURRENT.callStack.peek().programCounter() - 1)
+        Log.i("Xyzzy", opcount + " @" + Integer.toHexString(Memory.current().callStack.peek().programCounter() - 1)
                 + ":(");
         if (Bit.bit7(opcode) && Bit.bit6(opcode)) { //var, 0b11xxxxxx
             Log.i("Xyzzy", "3," + Integer.toHexString(opcode & 0x3f) + "):");

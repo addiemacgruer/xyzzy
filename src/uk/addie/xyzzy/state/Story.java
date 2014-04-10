@@ -1,8 +1,8 @@
 
 package uk.addie.xyzzy.state;
 
-public class Story {
-    public enum Game {
+class Story {
+    enum Game {
         ARTHUR, BEYOND_ZORK, JOURNEY, LURKING_HORROR, SHERLOCK, SHOGUN, UNKNOWN, ZORK_ZERO;
     }
 

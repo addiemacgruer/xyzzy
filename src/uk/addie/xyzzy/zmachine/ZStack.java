@@ -25,7 +25,7 @@ public class ZStack<T> implements Serializable, Iterable<T> {
         size++;
     }
 
-    public void clear() {
+    void clear() {
         list.clear();
         last = null;
         size = 0;
@@ -58,7 +58,7 @@ public class ZStack<T> implements Serializable, Iterable<T> {
         return rval;
     }
 
-    public void push(T value) {
+    void push(T value) {
         last = value;
         list.add(value);
         size++;

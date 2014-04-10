@@ -27,14 +27,11 @@ public class MainActivity extends Activity {
     public static MainActivity      activity;
     private static final List<View> textBoxes       = new ArrayList<View>();
     private static Thread           logicThread     = null;
-    public static int               lastKey         = 0;
+    private static int              lastKey         = 0;
     public final static Object      inputSyncObject = new Object();
     public static int               width, height;
 
     static void focusTextView(final View tv) {
-        //        if (tv instanceof EditText) {
-        //            showKeyboard();
-        //        }
         tv.setFocusableInTouchMode(true);
         tv.requestFocus();
     }
@@ -69,7 +66,7 @@ public class MainActivity extends Activity {
         textBoxes.add(tv);
     }
 
-    public void endMe() {
+    void endMe() {
         Log.i("Xyzzy", "Shutting down...");
         activity = null;
         textBoxes.clear();
@@ -174,15 +171,6 @@ public class MainActivity extends Activity {
             @Override public void run() {
                 LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
                 ll.removeAllViews();
-            }
-        });
-    }
-
-    public void removeView(final View et, final int viewId) {
-        runOnUiThread(new Runnable() {
-            @Override public void run() {
-                LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
-                ll.removeView(et);
             }
         });
     }

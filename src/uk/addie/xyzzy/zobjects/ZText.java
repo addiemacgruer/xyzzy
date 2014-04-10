@@ -21,7 +21,7 @@ public class ZText {
         //        int alphabet = Header.H_ALPHABET.value(FastMem.CURRENT.zmp);
         int b = 0;
         for (b = offset; true; b += 2) {
-            final int word = Memory.CURRENT.buff().getShort(b) & 0xffff;
+            final int word = Memory.current().buff().getShort(b) & 0xffff;
             final int first = (word & 0x7c00) >> 10;
             final int second = (word & 0x3e0) >> 5;
             final int third = word & 0x1f;
@@ -39,7 +39,7 @@ public class ZText {
         for (final char c : cb) {
             if (abbreviation != 0) {
                 final int ptr_addr = Header.ABBREVIATIONS.value() + 64 * (abbreviation - 1) + 2 * c;
-                final int abbrOffset = Memory.CURRENT.buff().getShort(ptr_addr) & 0xffff;
+                final int abbrOffset = Memory.current().buff().getShort(ptr_addr) & 0xffff;
                 sb.append(ZText.encodedAtOffset(abbrOffset << 1));
                 abbreviation = 0;
                 continue;
@@ -94,7 +94,7 @@ public class ZText {
         final StringBuffer currentWord = new StringBuffer();
         final ParseTable pt = new ParseTable(parse, Dictionary.DEFAULT);
         for (final char ch : inputString.toCharArray()) {
-            Memory.CURRENT.buff().put(offset, (byte) ch);
+            Memory.current().buff().put(offset, (byte) ch);
             final int wordSplit = Dictionary.DEFAULT.wordSplit(ch);
             if (parse != 0 && (ch == ' ' || ch == '\n' || wordSplit != 0) && currentWord.length() != 0) {
                 final String wordFound = currentWord.toString();
@@ -121,7 +121,7 @@ public class ZText {
         final StringBuilder sb = new StringBuilder();
         int start = offset;
         while (true) {
-            char c = (char) Memory.CURRENT.buffer.get(start);
+            char c = (char) Memory.current().buffer.get(start);
             if (c == 0) {
                 break;
             }

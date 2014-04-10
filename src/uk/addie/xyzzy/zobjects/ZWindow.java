@@ -28,14 +28,14 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 public class ZWindow implements Serializable {
-    private static int                  background;
-    private final static SparseIntArray colours          = new SparseIntArray();
-    private static int                  foreground;
-    final static View.OnKeyListener     okl;
-    private static final long           serialVersionUID = 1L;
-    public final static int             textSize         = 16;
-    private static int[]                windowMap        = { R.id.screen0, R.id.screen1 };
-    private static long                 latency          = 0;
+    private static int                      background;
+    private final static SparseIntArray     colours          = new SparseIntArray();
+    private static int                      foreground;
+    private final static View.OnKeyListener okl;
+    private static final long               serialVersionUID = 1L;
+    public final static int                 textSize         = 16;
+    private static int[]                    windowMap        = { R.id.screen0, R.id.screen1 };
+    private static long                     latency          = 0;
     static {
         final int[] amigaColours = { 0x0, 0x7fff, 0x0, 0x1d, 0x340, 0x3bd, 0x59a0, 0x7c1f, 0x77a0, 0x7fff, 0x5ad6,
             0x4631, 0x2d6b };
@@ -56,7 +56,7 @@ public class ZWindow implements Serializable {
         };
     }
 
-    public static int amigaColourToAndroid(int amiga) {
+    private static int amigaColourToAndroid(int amiga) {
         int red = (0x1f & amiga) * 8; // bottom five bits, scaled from 0x1f to 0x2f
         int green = ((0x3e0 & amiga) >> 5) * 8;
         int blue = ((0x7c00 & amiga) >> 10) * 8;
@@ -69,7 +69,7 @@ public class ZWindow implements Serializable {
         background = colours.get(1);
     }
 
-    static EditText formattedEditText() {
+    private static EditText formattedEditText() {
         final EditText et = new EditText(MainActivity.activity.getApplicationContext());
         et.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -85,9 +85,9 @@ public class ZWindow implements Serializable {
     }
 
     public static void printAllScreens() {
-        int zwc = Memory.CURRENT.zwin.size();
+        int zwc = Memory.current().zwin.size();
         for (int i = 0; i < zwc; i++) {
-            Memory.CURRENT.zwin.get(Memory.CURRENT.zwin.keyAt(i)).flush();
+            Memory.current().zwin.get(Memory.current().zwin.keyAt(i)).flush();
         }
     }
 
@@ -125,8 +125,8 @@ public class ZWindow implements Serializable {
     private final List<SpannableStringBuilder> buffer           = new ArrayList<SpannableStringBuilder>();
     private boolean                            buffered         = true;
     private final Map<TextStyle, Integer>      currentTextStyle = new EnumMap<TextStyle, Integer>(TextStyle.class);
-    final int                                  windowCount;
-    int                                        row, column;
+    private final int                          windowCount;
+    private int                                row, column;
 
     public ZWindow(final int window) {
         windowCount = window;
@@ -148,10 +148,6 @@ public class ZWindow implements Serializable {
         }
         buffer.get(row).append(s);
         column += s.length();
-    }
-
-    public boolean buffered() {
-        return buffered;
     }
 
     public void clearStyles() {
@@ -221,7 +217,8 @@ public class ZWindow implements Serializable {
         return command;
     }
 
-    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
+    @SuppressWarnings("static-method") private void readObject(final ObjectInputStream in) throws IOException,
+            ClassNotFoundException {
         in.defaultReadObject();
         foreground = in.readInt();
         background = in.readInt();

@@ -10,7 +10,6 @@ public class Beep {
     // and modified by Steve Pomeroy <steve@staticfree.info>
     private final int        sampleRate = 8000;
     private final int        numSamples;
-    private final double     sample[];
     private final double     freqOfTone;                      // hz
     private final byte       generatedSnd[];
     public final static Beep beep1      = new Beep(0.1, 1760);
@@ -18,14 +17,15 @@ public class Beep {
 
     public Beep(double duration, int frequency) {
         this.numSamples = (int) (duration * sampleRate);
-        sample = new double[numSamples];
+        //        sample = new double[numSamples];
         this.freqOfTone = frequency;
         this.generatedSnd = new byte[2 * numSamples];
         genTone();
     }
 
-    void genTone() {
+    private void genTone() {
         // fill out the array
+        final double[] sample = new double[numSamples];
         for (int i = 0; i < numSamples; ++i) {
             sample[i] = Math.sin(2 * Math.PI * i / (sampleRate / freqOfTone));
         }

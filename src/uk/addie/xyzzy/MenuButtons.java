@@ -5,7 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 
-public enum MenuButtons implements Invokeable {
+enum MenuButtons implements Invokeable {
     ABOUT {
         @Override public void invoke() {
             // TODO about this app

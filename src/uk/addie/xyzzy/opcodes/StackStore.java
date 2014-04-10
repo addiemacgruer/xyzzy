@@ -16,6 +16,6 @@ public class StackStore implements Invokeable, Serializable {
     }
 
     @Override public void invoke() {
-        Opcode.storeValue(destination, Memory.CURRENT.callStack.peek().pop());
+        Opcode.storeValue(destination, Memory.current().callStack.peek().pop());
     }
 }

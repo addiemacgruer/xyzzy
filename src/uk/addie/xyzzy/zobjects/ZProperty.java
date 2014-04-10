@@ -12,13 +12,13 @@ public class ZProperty {
         }
         final int sn;
         try {
-            sn = Memory.CURRENT.buff().get(prop) & 0xff;
+            sn = Memory.current().buff().get(prop) & 0xff;
         } catch (final IndexOutOfBoundsException ioobe) {
             return 0;
         }
         int size;
         if (Bit.bit7(sn)) {
-            size = Memory.CURRENT.buff().get(prop) & 0x3f;
+            size = Memory.current().buff().get(prop) & 0x3f;
             if (size == 0) {
                 size = 64;
             }
@@ -30,11 +30,11 @@ public class ZProperty {
         return size;
     }
 
-    public static int calcSize(final int prop) {
-        final int sn = Memory.CURRENT.buff().get(prop) & 0xff;
+    private static int calcSize(final int prop) {
+        final int sn = Memory.current().buff().get(prop) & 0xff;
         int size;
         if (Bit.bit7(sn)) {
-            size = Memory.CURRENT.buff().get(prop + 1) & 0x3f;
+            size = Memory.current().buff().get(prop + 1) & 0x3f;
             if (size == 0) {
                 size = 64;
             }
@@ -59,7 +59,7 @@ public class ZProperty {
     public int getNextProperty(final int property) {
         int propOffset;
         if (property == 0) { // get first property
-            propOffset = offset + (Memory.CURRENT.buff().get(offset) & 0xff) * 2 + 1;
+            propOffset = offset + (Memory.current().buff().get(offset) & 0xff) * 2 + 1;
         } else {
             propOffset = getPropertyAddress(property);
             final int size = calcSize(propOffset);
@@ -69,28 +69,28 @@ public class ZProperty {
                 propOffset += size + 2;
             }
         }
-        return Memory.CURRENT.buff().get(propOffset) & 0x3f;
+        return Memory.current().buff().get(propOffset) & 0x3f;
     }
 
     public int getProperty(final int number) {
         final int prop = getPropertyAddress(number);
         if (prop == 0) { //Should take from defaults
-            return Memory.CURRENT.buff().getShort(Header.OBJECTS.value() + (number - 1) * 2);
+            return Memory.current().buff().getShort(Header.OBJECTS.value() + (number - 1) * 2);
         }
         final int size = calcSize(prop);
         if (size == 2) {
-            return Memory.CURRENT.buff().getShort(prop + 1) & 0xffff;
+            return Memory.current().buff().getShort(prop + 1) & 0xffff;
         } else if (size == 1) {
-            return Memory.CURRENT.buff().get(prop + 1) & 0xff;
+            return Memory.current().buff().get(prop + 1) & 0xff;
         } else {
             throw new UnsupportedOperationException();
         }
     }
 
     public int getPropertyAddress(final int number) {
-        int prop = offset + (Memory.CURRENT.buff().get(offset) & 0xff) * 2 + 1;
+        int prop = offset + (Memory.current().buff().get(offset) & 0xff) * 2 + 1;
         while (true) {
-            final int sn = Memory.CURRENT.buff().get(prop) & 0xff;
+            final int sn = Memory.current().buff().get(prop) & 0xff;
             final int thisnumber = sn & 0x3f;
             final int size = calcSize(prop);
             if (thisnumber == number) {
@@ -114,9 +114,9 @@ public class ZProperty {
         }
         final int size = calcSize(prop);
         if (size == 2) {
-            Memory.CURRENT.buff().putShort(prop + 1, (short) value);
+            Memory.current().buff().putShort(prop + 1, (short) value);
         } else if (size == 1) {
-            Memory.CURRENT.buff().put(prop + 1, (byte) value);
+            Memory.current().buff().put(prop + 1, (byte) value);
         } else {
             throw new UnsupportedOperationException();
         }

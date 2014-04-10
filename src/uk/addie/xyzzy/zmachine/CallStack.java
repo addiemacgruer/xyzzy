@@ -31,11 +31,11 @@ public class CallStack implements Serializable {
         }
         final int pc = calculateProgramCounter(rpos);
         final CallStack f = new CallStack(pc, args.size() - 1, returnFunction);
-        Memory.CURRENT.callStack.add(f);
+        Memory.current().callStack.add(f);
         if (Header.VERSION.value() <= 4) {
             for (int i = 1; i <= f.localsCount; i++) {
-                int value = Memory.CURRENT.callStack.peek().getProgramByte() << 8;
-                value += Memory.CURRENT.callStack.peek().getProgramByte();
+                int value = Memory.current().callStack.peek().getProgramByte() << 8;
+                value += Memory.current().callStack.peek().getProgramByte();
                 f.register.put((short) i, (short) value);
             }
         }
@@ -45,7 +45,7 @@ public class CallStack implements Serializable {
     }
 
     public final int                calledWithCount;
-    public final int                localsCount;
+    private final int               localsCount;
     private int                     programCounter;
     private final Map<Short, Short> register = new HashMap<Short, Short>();
     private final Invokeable        returnFunction;
@@ -57,7 +57,7 @@ public class CallStack implements Serializable {
         this.localsCount = 0;
     }
 
-    public CallStack(final int programCounter, final int calledWithCount, final Invokeable returnFunction) {
+    private CallStack(final int programCounter, final int calledWithCount, final Invokeable returnFunction) {
         this.setProgramCounter(programCounter);
         this.calledWithCount = calledWithCount;
         this.returnFunction = returnFunction;
@@ -94,7 +94,7 @@ public class CallStack implements Serializable {
     }
 
     public int getProgramByte() {
-        return Memory.CURRENT.buff().get(programCounter++);
+        return Memory.current().buff().get(programCounter++);
     }
 
     public int peek() {

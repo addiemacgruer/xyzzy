@@ -28,8 +28,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SelectionActivity extends Activity implements ListAdapter {
-    public static String getPath(Context context, Uri uri) {
+public class SelectionActivity extends Activity implements ListAdapter { // NO_UCD (use default)
+    private static String getPath(Context context, Uri uri) {
         if ("content".equalsIgnoreCase(uri.getScheme())) {
             String[] projection = { MediaColumns.DATA };
             Cursor cursor = null;
@@ -53,11 +53,11 @@ public class SelectionActivity extends Activity implements ListAdapter {
         return null;
     }
 
-    List<String>                games            = new ArrayList<String>();
-    Map<String, String>         all              = new HashMap<String, String>();
+    private final List<String>  games            = new ArrayList<String>();
+    final Map<String, String>   all              = new HashMap<String, String>();
     private int                 textSize;
     final List<DataSetObserver> observer         = new ArrayList<DataSetObserver>();
-    public final static String  EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
+    final static String         EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
     private static final int    FILE_SELECT_CODE = 0;
 
     private void addPathToGamesList(String path) {
@@ -214,7 +214,7 @@ public class SelectionActivity extends Activity implements ListAdapter {
         }
     }
 
-    protected void startGame(String name) {
+    void startGame(String name) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(EXTRA_MESSAGE, name);
         startActivity(intent);

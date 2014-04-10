@@ -33,7 +33,7 @@ import uk.addie.xyzzy.zobjects.ZWindow;
 import android.content.Context;
 import android.util.Log;
 
-@SuppressWarnings("unused") public enum Opcode {
+@SuppressWarnings({ "unused", "ucd" }) public enum Opcode {
     ADD(2, 0x14) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short a = arguments.get(0);
@@ -117,7 +117,7 @@ import android.util.Log;
     CATCH(0, 0x9) {
         @Override public void invoke(ZStack<Short> arguments) {
             //TODO catch
-            final int destination = Memory.CURRENT.callStack.peek().getProgramByte();
+            final int destination = Memory.current().callStack.peek().getProgramByte();
             Log.w("Xyzzy", "Catch:" + arguments + " destination:" + destination);
             logCallStack();
         }
@@ -125,7 +125,7 @@ import android.util.Log;
     CHECK_ARG_COUNT(3, 0x1f) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short argumentNumber = arguments.get(0);
-            final short actual = (short) Memory.CURRENT.callStack.peek().calledWithCount;
+            final short actual = (short) Memory.current().callStack.peek().calledWithCount;
             branchOnTest(argumentNumber <= actual);
         }
     },
@@ -156,20 +156,20 @@ import android.util.Log;
             final int length = Math.abs(size);
             if (second == 0) { // zero first
                 for (int i = 0; i < length; i++) {
-                    Memory.CURRENT.buff().put(first + i, 0);
+                    Memory.current().buff().put(first + i, 0);
                 }
                 return;
             }
             // decide copy direction
             if (size < 0 || first > second) { // copy forwards
                 for (int i = 0; i < length; i++) {
-                    byte b = (byte) Memory.CURRENT.buff().get(first + i);
-                    Memory.CURRENT.buff().put(second + i, b);
+                    byte b = (byte) Memory.current().buff().get(first + i);
+                    Memory.current().buff().put(second + i, b);
                 }
             } else { // copy backwards
                 for (int i = length - 1; i >= 0; i--) {
-                    byte b = (byte) Memory.CURRENT.buff().get(first + i);
-                    Memory.CURRENT.buff().put(second + i, b);
+                    byte b = (byte) Memory.current().buff().get(first + i);
+                    Memory.current().buff().put(second + i, b);
                 }
             }
         }
@@ -249,13 +249,13 @@ import android.util.Log;
                 if (Debug.screen) {
                     Log.i("Xyzzy", "UNSPLIT SCREEN AND ERASE ALL");
                 }
-                Memory.CURRENT.resetZWindows();
+                Memory.current().resetZWindows();
                 break;
             default:
                 if (Debug.screen) {
                     Log.i("Xyzzy", "CLEAR SCREEN: " + window);
                 }
-                Memory.CURRENT.zwin.get(window).flush();
+                Memory.current().zwin.get(window).flush();
             }
         }
     },
@@ -329,7 +329,7 @@ import android.util.Log;
             final ZProperty zp = new ZProperty(ZObject.count(object));
             int addr = zp.getPropertyAddress(property);
             if (addr != 0) {
-                if (Header.VERSION.value() >= 4 && (Memory.CURRENT.buff().get(addr) & 0x80) != 0) {
+                if (Header.VERSION.value() >= 4 && (Memory.current().buff().get(addr) & 0x80) != 0) {
                     addr += 2;
                 } else {
                     addr++;
@@ -459,8 +459,8 @@ import android.util.Log;
     },
     JUMP(1, 0xc) {
         @Override public void invoke(ZStack<Short> arguments) {
-            final int label = Memory.CURRENT.callStack.peek().programCounter() + arguments.get(0) - 2;
-            Memory.CURRENT.callStack.peek().setProgramCounter(label);
+            final int label = Memory.current().callStack.peek().programCounter() + arguments.get(0) - 2;
+            Memory.current().callStack.peek().setProgramCounter(label);
         }
     },
     JZ(1, 0x0) {
@@ -474,7 +474,7 @@ import android.util.Log;
             final short variable = arguments.get(0);
             final short value;
             if (variable == 0) {
-                value = (short) Memory.CURRENT.callStack.peek().peek();
+                value = (short) Memory.current().callStack.peek().peek();
             } else {
                 value = (short) readValue(variable);
             }
@@ -485,7 +485,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final int array = arguments.get(0) & 0xffff;
             final int byteIndex = arguments.get(1) & 0xffff;
-            final int value = Memory.CURRENT.buff().get(array + byteIndex);
+            final int value = Memory.current().buff().get(array + byteIndex);
             readDestinationAndStoreResult((short) value);
         }
     },
@@ -494,7 +494,7 @@ import android.util.Log;
             final int array = arguments.get(0) & 0xffff;
             final int wordIndex = arguments.get(1);// & 0xffff;
             final int address = array + 2 * wordIndex;
-            final int value = Memory.CURRENT.buff().getShort(address) & 0xffff;
+            final int value = Memory.current().buff().getShort(address) & 0xffff;
             readDestinationAndStoreResult(value);
         }
     },
@@ -590,13 +590,13 @@ import android.util.Log;
     },
     POP {
         @Override public void invoke(ZStack<Short> arguments) {
-            Memory.CURRENT.callStack.peek().pop();
+            Memory.current().callStack.peek().pop();
         }
     },
     PRINT(0, 0x2) {
         @Override public void invoke(ZStack<Short> arguments) {
-            Memory.streams().append(ZText.encodedAtOffset(Memory.CURRENT.callStack.peek().programCounter()));
-            Memory.CURRENT.callStack.peek().setProgramCounter(ZText.bytePosition + 2);
+            Memory.streams().append(ZText.encodedAtOffset(Memory.current().callStack.peek().programCounter()));
+            Memory.current().callStack.peek().setProgramCounter(ZText.bytePosition + 2);
         }
     },
     PRINT_ADDR(1, 0x7) {
@@ -672,9 +672,9 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short variable = arguments.get(0);
             //TODO error on underflow
-            final short value = Memory.CURRENT.callStack.peek().pop();
+            final short value = Memory.current().callStack.peek().pop();
             if (variable == 0) {
-                Memory.CURRENT.callStack.peek().pop();
+                Memory.current().callStack.peek().pop();
             }
             storeValue(variable, value);
         }
@@ -682,7 +682,7 @@ import android.util.Log;
     PUSH(3, 0x8) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short value = arguments.get(0);
-            Memory.CURRENT.callStack.peek().push(value);
+            Memory.current().callStack.peek().push(value);
         }
     },
     PUT_PROP(3, 0x3) {
@@ -707,11 +707,11 @@ import android.util.Log;
             final short range = arguments.get(0);
             int value = 0;
             if (range < 0) {
-                Memory.CURRENT.random.seed_random(range);
+                Memory.current().random.seed_random(range);
             } else if (range == 0) {
-                Memory.CURRENT.random.seed_random((int) System.currentTimeMillis());
+                Memory.current().random.seed_random((int) System.currentTimeMillis());
             } else {
-                value = Memory.CURRENT.random.random(range);
+                value = Memory.current().random.random(range);
             }
             readDestinationAndStoreResult(value);
         }
@@ -738,13 +738,13 @@ import android.util.Log;
             if (routine != 0 || time != 0) {
                 Log.i("Xyzzy", "Read routine should be timed...");
             }
-            final int maxCharacters = Memory.CURRENT.buff().get(text);
+            final int maxCharacters = Memory.current().buff().get(text);
             String inputString = Memory.streams().promptForInput().toLowerCase(Locale.UK);
             Memory.streams().userInput(inputString);
             inputString = inputString.substring(0, Math.min(maxCharacters, inputString.length()));
-            Memory.CURRENT.buff().put(text + 1, (byte) inputString.length());
+            Memory.current().buff().put(text + 1, (byte) inputString.length());
             for (int i = 0, j = inputString.length(); i < j; i++) {
-                Memory.CURRENT.buff().put(text + 2 + i, (byte) inputString.codePointAt(i));
+                Memory.current().buff().put(text + 2 + i, (byte) inputString.codePointAt(i));
             }
             ZText.tokeniseInputToBuffers(text, parse, inputString);
             if (Header.VERSION.value() >= 5) {
@@ -779,13 +779,13 @@ import android.util.Log;
     },
     RESTART(0, 0x7) {
         @Override public void invoke(ZStack<Short> arguments) {
-            Memory.CURRENT.random.seed_random(0);
+            Memory.current().random.seed_random(0);
             Memory.loadDataFromFile();
-            Memory.CURRENT.callStack.peek().clearStack();
+            Memory.current().callStack.peek().clearStack();
             Main.frame_count = 0;
             if (Header.VERSION.value() != 6) {
                 final int pc = Header.START_PC.value();
-                Memory.CURRENT.callStack.peek().setProgramCounter(pc);
+                Memory.current().callStack.peek().setProgramCounter(pc);
             } else {
                 throw new UnsupportedOperationException("@restart (v6)");
             }
@@ -807,11 +807,11 @@ import android.util.Log;
             } catch (final ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
-            if (!loaded.storyPath.equals(Memory.CURRENT.storyPath)) {
-                Log.i("Xyzzy", "Not a save from this story. " + loaded.storyPath + " v " + Memory.CURRENT.storyPath);
+            if (!loaded.storyPath.equals(Memory.current().storyPath)) {
+                Log.i("Xyzzy", "Not a save from this story. " + loaded.storyPath + " v " + Memory.current().storyPath);
                 readDestinationAndStoreResult(0);
             } else {
-                Memory.CURRENT = loaded;
+                Memory.setCurrent(loaded);
                 ZObject.enumerateObjects();
                 readDestinationAndStoreResult(2);
             }
@@ -821,7 +821,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             Memory loaded = null;
             try {
-                final ByteArrayInputStream bais = new ByteArrayInputStream(Memory.UNDO);
+                final ByteArrayInputStream bais = new ByteArrayInputStream(Memory.undo());
                 final ObjectInputStream ois = new ObjectInputStream(bais);
                 loaded = (Memory) ois.readObject();
                 ois.close();
@@ -830,11 +830,11 @@ import android.util.Log;
             } catch (final ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
-            if (!loaded.storyPath.equals(Memory.CURRENT.storyPath)) {
-                Log.i("Xyzzy", "Not a save from this story. " + loaded.storyPath + " v " + Memory.CURRENT.storyPath);
+            if (!loaded.storyPath.equals(Memory.current().storyPath)) {
+                Log.i("Xyzzy", "Not a save from this story. " + loaded.storyPath + " v " + Memory.current().storyPath);
                 readDestinationAndStoreResult(0);
             } else {
-                Memory.CURRENT = loaded;
+                Memory.setCurrent(loaded);
                 ZObject.enumerateObjects();
                 readDestinationAndStoreResult(2);
             }
@@ -848,7 +848,7 @@ import android.util.Log;
     },
     RET_POPPED(0, 8) {
         @Override public void invoke(ZStack<Short> arguments) {
-            final short value = Memory.CURRENT.callStack.peek().pop();
+            final short value = Memory.current().callStack.peek().pop();
             returnValue(value);
         }
     },
@@ -868,7 +868,7 @@ import android.util.Log;
                 final FileOutputStream save = MainActivity.activity
                         .openFileOutput(saveGameName(), Context.MODE_PRIVATE);
                 final ObjectOutputStream oos = new ObjectOutputStream(save);
-                oos.writeObject(Memory.CURRENT);
+                oos.writeObject(Memory.current());
                 oos.close();
             } catch (final IOException e) {
                 throw new RuntimeException(e);
@@ -883,16 +883,16 @@ import android.util.Log;
     SAVE_UNDO(4, 0x9) {
         @Override public void invoke(ZStack<Short> arguments) {
             long time = System.currentTimeMillis();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(Memory.UNDO.length);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(Memory.undo().length);
             try {
                 final ObjectOutputStream oos = new ObjectOutputStream(baos);
-                oos.writeObject(Memory.CURRENT);
+                oos.writeObject(Memory.current());
                 oos.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            Memory.UNDO = baos.toByteArray();
-            Log.i("Xyzzy", "Made undo file:" + Memory.UNDO.length + " bytes, " + (System.currentTimeMillis() - time)
+            Memory.storeUndo(baos.toByteArray());
+            Log.i("Xyzzy", "Made undo file:" + Memory.undo().length + " bytes, " + (System.currentTimeMillis() - time)
                     + " ms");
             readDestinationAndStoreResult(1);
         }
@@ -909,8 +909,8 @@ import android.util.Log;
             final boolean isWord = Bit.bit7(form);
             final int skip = Bit.low(form, 7);
             for (int i = 0; i < len; i += skip) {
-                int wordAtI = isWord ? Memory.CURRENT.buffer.getShort(table + i * skip) & 0xffff
-                        : Memory.CURRENT.buffer.get(table + i * skip) & 0xff;
+                int wordAtI = isWord ? Memory.current().buffer.getShort(table + i * skip) & 0xffff
+                        : Memory.current().buffer.get(table + i * skip) & 0xff;
                 if (x == wordAtI) {
                     readDestinationAndStoreResult(table + i * skip);
                     branchOnTest(true);
@@ -1024,9 +1024,9 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short window = arguments.get(0);
             Log.i("Xyzzy", "SET WINDOW: " + arguments.get(0));
-            Memory.CURRENT.currentScreen = window;
-            if (Memory.CURRENT.zwin.get(window) == null) {
-                Memory.CURRENT.zwin.put(window, new ZWindow(window));
+            Memory.current().currentScreen = window;
+            if (Memory.current().zwin.get(window) == null) {
+                Memory.current().zwin.put(window, new ZWindow(window));
             }
         }
     },
@@ -1061,9 +1061,9 @@ import android.util.Log;
             if (Debug.screen) {
                 Log.i("Xyzzy", "SPLIT WINDOW: " + lines + " LINES (CURRENT:" + Memory.streams() + ")");
             }
-            int splitScreen = Memory.CURRENT.currentScreen + 1;
-            if (Memory.CURRENT.zwin.get(splitScreen) != null) {
-                Memory.CURRENT.zwin.get(splitScreen).reset();
+            int splitScreen = Memory.current().currentScreen + 1;
+            if (Memory.current().zwin.get(splitScreen) != null) {
+                Memory.current().zwin.get(splitScreen).reset();
             }
         }
     },
@@ -1072,8 +1072,8 @@ import android.util.Log;
             final short variable = arguments.get(0);
             final short value = arguments.get(1);
             if (variable == 0) {
-                Memory.CURRENT.callStack.peek().pop(); // discard the top-of-stack
-                Memory.CURRENT.callStack.peek().push(value);
+                Memory.current().callStack.peek().pop(); // discard the top-of-stack
+                Memory.current().callStack.peek().push(value);
             } else {
                 storeValue(variable, value);
             }
@@ -1084,7 +1084,7 @@ import android.util.Log;
             final int array = arguments.get(0) & 0xffff;
             final int byteIndex = arguments.get(1) & 0xffff;
             final byte value = arguments.get(2).byteValue();
-            Memory.CURRENT.buff().put(array + byteIndex, value);
+            Memory.current().buff().put(array + byteIndex, value);
         }
     },
     STOREW(3, 0x1) {
@@ -1093,7 +1093,7 @@ import android.util.Log;
             final int wordIndex = arguments.get(1) & 0xffff;
             final short value = arguments.get(2);
             final int address = array + 2 * wordIndex;
-            Memory.CURRENT.buff().putShort(address, value);
+            Memory.current().buff().putShort(address, value);
         }
     },
     SUB(2, 21) {
@@ -1135,10 +1135,10 @@ import android.util.Log;
             if (arguments.size() != 2) {
                 throw new UnsupportedOperationException("@tokenise (long arguments)");
             }
-            final int length = Memory.CURRENT.buff().get(text + 1) & 0xff;
+            final int length = Memory.current().buff().get(text + 1) & 0xff;
             final StringBuilder sb = new StringBuilder();
             for (int i = 0; i < length; i++) {
-                sb.append((char) Memory.CURRENT.buff().get(text + i + 2));
+                sb.append((char) Memory.current().buff().get(text + i + 2));
             }
             final String inputString = sb.toString().toLowerCase(Locale.UK);
             ZText.tokeniseInputToBuffers(text, parse, inputString);
@@ -1156,12 +1156,12 @@ import android.util.Log;
         } else if (offset == 1) {
             RTRUE.invoke(null);
         } else {
-            Memory.CURRENT.callStack.peek().adjustProgramCounter(offset - 2);
+            Memory.current().callStack.peek().adjustProgramCounter(offset - 2);
         }
     }
 
     protected static void branchOnTest(boolean test) {
-        final int lobit = Memory.CURRENT.callStack.peek().getProgramByte();
+        final int lobit = Memory.current().callStack.peek().getProgramByte();
         final boolean branchCondition = Bit.bit7(lobit);
         final int offset = calculateOffset(lobit);
         if (!branchCondition ^ test) {
@@ -1174,7 +1174,7 @@ import android.util.Log;
         if (!Bit.bit6(lobit)) { // two bytes
             final boolean negative = Bit.bit5(lobit);
             offset = Bit.low(lobit, 4) << 8;
-            offset += Memory.CURRENT.callStack.peek().getProgramByte();
+            offset += Memory.current().callStack.peek().getProgramByte();
             if (negative) {
                 offset = offset - 4096;
             }
@@ -1193,7 +1193,7 @@ import android.util.Log;
 
     static void callAndStore(ZStack<Short> arguments) {
         final int routine = arguments.get(0) & 0xffff;
-        final int result = Memory.CURRENT.callStack.peek().getProgramByte();
+        final int result = Memory.current().callStack.peek().getProgramByte();
         if (routine == 0) {
             storeValue(result, 0);
         } else {
@@ -1206,38 +1206,38 @@ import android.util.Log;
     }
 
     static void logCallStack() {
-        for (CallStack cs : Memory.CURRENT.callStack) {
+        for (CallStack cs : Memory.current().callStack) {
             Log.d("Xyzzy", cs.toString());
         }
     }
 
     public static void readDestinationAndStoreResult(final int value) {
-        final int destination = Memory.CURRENT.callStack.peek().getProgramByte();
+        final int destination = Memory.current().callStack.peek().getProgramByte();
         storeValue(destination, (short) value);
     }
 
     public static int readValue(final int destination) {
         if (destination == 0) {
             try {
-                return Memory.CURRENT.callStack.peek().pop();
+                return Memory.current().callStack.peek().pop();
             } catch (final EmptyStackException ese) {
                 Error.STK_UNDF.invoke(); // fatal
                 return 0;
             }
         } else if (destination < 16) {
-            return Memory.CURRENT.callStack.peek().get(destination);
+            return Memory.current().callStack.peek().get(destination);
         } else if (destination < 256) {
             final int addr = globalVariableAddress(destination);
-            return Memory.CURRENT.buff().getShort(addr);
+            return Memory.current().buff().getShort(addr);
         } else {
             throw new UnsupportedOperationException("Read value from invalid store:" + destination);
         }
     }
 
     public static void returnValue(final int value) {
-        final Invokeable i = Memory.CURRENT.callStack.peek().returnFunction();
-        Memory.CURRENT.callStack.pop();
-        Memory.CURRENT.callStack.peek().push(value);
+        final Invokeable i = Memory.current().callStack.peek().returnFunction();
+        Memory.current().callStack.pop();
+        Memory.current().callStack.peek().push(value);
         i.invoke();
         if (Debug.callstack) {
             Log.i("Xyzzy", "<--");
@@ -1245,7 +1245,7 @@ import android.util.Log;
     }
 
     static String saveGameName() {
-        File story = new File(Memory.CURRENT.storyPath);
+        File story = new File(Memory.current().storyPath);
         String namepart = story.getName();
         return namepart + ".save";
     }
@@ -1256,12 +1256,12 @@ import android.util.Log;
             Log.i("Xyzzy", "->" + ldestination + "=" + (value & 0xffff));
         }
         if (ldestination == 0) {
-            Memory.CURRENT.callStack.peek().push(value);
+            Memory.current().callStack.peek().push(value);
         } else if (ldestination < 16) {
-            Memory.CURRENT.callStack.peek().put(ldestination, value);
+            Memory.current().callStack.peek().put(ldestination, value);
         } else {
             final int addr = globalVariableAddress(ldestination);
-            Memory.CURRENT.buff().putShort(addr, (short) value);
+            Memory.current().buff().putShort(addr, (short) value);
         }
     }
 

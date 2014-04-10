@@ -10,6 +10,6 @@ public class StackDiscard implements Invokeable, Serializable {
     private static final long serialVersionUID = 1L;
 
     @Override public void invoke() {
-        Memory.CURRENT.callStack.peek().pop(); // throw away result.
+        Memory.current().callStack.peek().pop(); // throw away result.
     }
 }

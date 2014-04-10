@@ -3,7 +3,6 @@ package uk.addie.xyzzy.header;
 
 import uk.addie.xyzzy.state.FileBuffer;
 import uk.addie.xyzzy.state.Memory;
-import android.util.Log;
 
 public enum Header {
     VERSION(0, 1), //
@@ -43,13 +42,6 @@ public enum Header {
     HX_MOUSE_X(1, 1), //
     HX_MOUSE_Y(2, 1), //
     HX_UNICODE_TABLE(3, 1);
-    public static void printHeader() {
-        Log.i("Xyzzy", "Header information:");
-        for (final Header h : values()) {
-            Log.i("Xyzzy", h + ":" + h.value());
-        }
-    }
-
     public static void reset() {
         for (Header h : values()) {
             h.value = -1;
@@ -99,10 +91,10 @@ public enum Header {
         }
         switch (length) {
         case 1:
-            Memory.CURRENT.buff().put(offset, (byte) s);
+            Memory.current().buff().put(offset, (byte) s);
             break;
         case 2:
-            Memory.CURRENT.buff().putShort(offset, (short) s);
+            Memory.current().buff().putShort(offset, (short) s);
             break;
         default:
             throw new UnsupportedOperationException(Integer.toString(s));
@@ -113,7 +105,7 @@ public enum Header {
         if (!dynamic && value != -1) {
             return value;
         }
-        return value(Memory.CURRENT.buffer);
+        return value(Memory.current().buffer);
     }
 
     public int value(FileBuffer fb) {

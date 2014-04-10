@@ -8,12 +8,12 @@ import java.io.Serializable;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.Random;
+import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.header.GameFlag;
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.header.InterpreterFlag1;
 import uk.addie.xyzzy.header.InterpreterType;
 import uk.addie.xyzzy.opcodes.OpMap;
-import uk.addie.xyzzy.os.OS;
 import uk.addie.xyzzy.util.Bit;
 import uk.addie.xyzzy.zmachine.CallStack;
 import uk.addie.xyzzy.zmachine.ZStack;
@@ -26,17 +26,21 @@ import android.util.SparseArray;
 
 public class Memory implements Serializable {
     private static final long serialVersionUID = 1L;
-    public static Memory      CURRENT          = new Memory();
-    public static byte[]      UNDO             = new byte[0];
-    public static ZStream     streams          = new ZStream();
+    private static Memory     CURRENT          = new Memory();
+    private static byte[]     UNDO             = new byte[0];
+    private static ZStream    streams          = new ZStream();
+
+    public static Memory current() {
+        return CURRENT;
+    }
 
     public static void loadDataFromFile() {
         CURRENT.buffer = new FileBuffer(Memory.CURRENT.storyPath);
         if (Header.VERSION.value() < 1 || Header.VERSION.value() > 8) {
-            OS.os_fatal("Unknown Z-code version");
+            Error.UNKNOWN_ZCODE_VERSION.invoke();
         }
         if (Header.VERSION.value() == 3 && Bit.bit0(Header.CONFIG.value())) {
-            OS.os_fatal("Byte swapped story file");
+            Error.BYTE_SWAPPED_STORY_FILE.invoke();
         }
         if (storyid() == Story.Game.ZORK_ZERO && Header.RELEASE.value() == 296) {
             Header.FLAGS.put(Header.FLAGS.value() | GameFlag.GRAPHICS);
@@ -68,6 +72,14 @@ public class Memory implements Serializable {
         ZObject.enumerateObjects();
     }
 
+    public static void setCurrent(Memory cURRENT) {
+        CURRENT = cURRENT;
+    }
+
+    public static void storeUndo(byte[] uNDO) {
+        UNDO = uNDO;
+    }
+
     public static int story_size() {
         int story_size = Header.FILE_SIZE.value() << 1;
         if (story_size > 0) {
@@ -97,6 +109,10 @@ public class Memory implements Serializable {
 
     public static ZStream streams() {
         return streams;
+    }
+
+    public static byte[] undo() {
+        return UNDO;
     }
 
     public static int unpackAddress(final int packed) {

@@ -36,7 +36,7 @@ public class OpMap {
         if (z == null) {
             Log.e("Xyzzy",
                     "Illegal opcode:" + operands + "," + hex + " @"
-                            + Integer.toHexString(Memory.CURRENT.callStack.peek().programCounter()));
+                            + Integer.toHexString(Memory.current().callStack.peek().programCounter()));
             Error.ILL_OPCODE.invoke();
             return;
         }
