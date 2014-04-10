@@ -9,6 +9,7 @@ import uk.addie.xyzzy.header.GameFlag;
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.header.InterpreterFlag1;
 import uk.addie.xyzzy.header.InterpreterType;
+import uk.addie.xyzzy.opcodes.OpMap;
 import uk.addie.xyzzy.os.OS;
 import uk.addie.xyzzy.util.Bit;
 import uk.addie.xyzzy.zmachine.CallStack;
@@ -105,6 +106,7 @@ public class Memory implements Serializable {
         Header.DEFAULT_BACKGROUND.put(1);
         Header.STANDARD_HIGH.put(1);
         Header.STANDARD_LOW.put(0);
+        OpMap.adjustForVersion(Header.VERSION.value());
         Dictionary.initDefault();
         ZObject.enumerateObjects();
         //        throw new UnsupportedOperationException();
