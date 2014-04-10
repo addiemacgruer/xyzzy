@@ -17,13 +17,12 @@ public class ZObject {
         if (count == 0) {
             Log.e("Xyzzy", "Object zero");
             Error.ILL_OBJ.invoke();
-            return ZObject.count(1); // TODO bad
+            return ZObject.count(1); // should really be a fatal error, but a lot of games request it.
         } else if (count < 0) {
             Log.e("Xyzzy", "Negative object count");
             Error.ILL_OBJ.invoke();
         } else if (count > Memory.CURRENT.objectCount) {
             Log.e("Xyzzy", "Object count " + oCount + " > " + Memory.CURRENT.objectCount);
-            //            Error.ERR_ILL_OBJ.invoke();
         }
         final ZObject rval = new ZObject();
         if (Header.VERSION.value() <= 3) {

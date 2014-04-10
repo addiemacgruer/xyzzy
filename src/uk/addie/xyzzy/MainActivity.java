@@ -39,6 +39,21 @@ public class MainActivity extends Activity {
         tv.requestFocus();
     }
 
+    public static int waitOnKey() {
+        lastKey = 0;
+        //        showKeyboard();
+        while (lastKey == 0) {
+            synchronized (inputSyncObject) {
+                try {
+                    inputSyncObject.wait();
+                } catch (InterruptedException e) {
+                    // do nothing
+                }
+            }
+        }
+        return lastKey;
+    }
+
     private MenuItem[] mis;
 
     public void addView(final View tv, final int viewId) {
@@ -191,20 +206,5 @@ public class MainActivity extends Activity {
                         InputMethodManager.SHOW_FORCED, 0);
             }
         });
-    }
-
-    public int waitOnKey() {
-        lastKey = 0;
-        //        showKeyboard();
-        while (lastKey == 0) {
-            synchronized (inputSyncObject) {
-                try {
-                    inputSyncObject.wait();
-                } catch (InterruptedException e) {
-                    // do nothing
-                }
-            }
-        }
-        return lastKey;
     }
 }

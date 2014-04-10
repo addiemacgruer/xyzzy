@@ -54,6 +54,10 @@ public class ZStream implements Serializable {
         }
     }
 
+    /**
+     * @param width
+     *            is justification in v6
+     */
     public void setOutputStream(int number, int table, int width) {
         if (number == 0) {
             return;

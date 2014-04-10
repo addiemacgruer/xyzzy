@@ -770,7 +770,7 @@ import android.util.Log;
             final short one = arguments.get(0);
             //            final short time = Process.zargs.get(1);
             //            final short routine = Process.zargs.get(2);
-            value = MainActivity.activity.waitOnKey();
+            value = MainActivity.waitOnKey();
             Memory.streams().userInput(Character.toString((char) value));
             switch (value) {
             case '#':
