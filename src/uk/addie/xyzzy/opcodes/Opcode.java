@@ -254,9 +254,7 @@ import android.util.Log;
                 if (Debug.screen) {
                     Log.i("Xyzzy", "CLEARS ALL WINDOWS");
                 }
-                for (int i : Memory.CURRENT.zwin.keySet()) {
-                    Memory.CURRENT.zwin.get(i).flush();
-                }
+                ZWindow.printAllScreens();
                 break;
             case -1:
                 if (Debug.screen) {
@@ -1039,8 +1037,8 @@ import android.util.Log;
                 Log.i("Xyzzy", "SET WINDOW: " + arguments.get(0));
             }
             Memory.CURRENT.currentScreen = window;
-            if (!Memory.CURRENT.zwin.containsKey((int) window)) {
-                Memory.CURRENT.zwin.put((int) window, new ZWindow(window));
+            if (Memory.CURRENT.zwin.get(window) == null) {
+                Memory.CURRENT.zwin.put(window, new ZWindow(window));
             }
         }
     },
@@ -1076,7 +1074,7 @@ import android.util.Log;
                 Log.i("Xyzzy", "SPLIT WINDOW: " + lines + " LINES (CURRENT:" + Memory.currentScreen() + ")");
             }
             int splitScreen = Memory.CURRENT.currentScreen + 1;
-            if (Memory.CURRENT.zwin.containsKey(splitScreen)) {
+            if (Memory.CURRENT.zwin.get(splitScreen) != null) {
                 Memory.CURRENT.zwin.get(splitScreen).reset();
             }
         }
@@ -1202,6 +1200,12 @@ import android.util.Log;
         return (Header.GLOBALS.value() & 0xffff) + 2 * (ldestination - 16);
     }
 
+    static void logCallStack() {
+        for (CallStack cs : Memory.CURRENT.callStack) {
+            Log.d("Xyzzy", cs.toString());
+        }
+    }
+
     public static void readDestinationAndStoreResult(final int value) {
         final int destination = Memory.CURRENT.callStack.peek().getProgramByte();
         storeValue(destination, (short) value);
@@ -1235,6 +1239,12 @@ import android.util.Log;
         }
     }
 
+    static String saveGameName() {
+        File story = new File(Memory.CURRENT.storyPath);
+        String namepart = story.getName();
+        return namepart + ".save";
+    }
+
     public static void storeValue(final int destination, final int value) {
         final int ldestination = destination & 0xff;
         if (Debug.stores) {
@@ -1265,18 +1275,6 @@ import android.util.Log;
     }
 
     abstract public void invoke(ZStack<Short> arguments);
-
-    void logCallStack() {
-        for (CallStack cs : Memory.CURRENT.callStack) {
-            Log.d("Xyzzy", cs.toString());
-        }
-    }
-
-    String saveGameName() {
-        File story = new File(Memory.CURRENT.storyPath);
-        String namepart = story.getName();
-        return namepart + ".save";
-    }
 
     @Override public String toString() {
         return "(" + operands + "," + Integer.toHexString(hex) + ") " + super.toString().toLowerCase(Locale.UK);

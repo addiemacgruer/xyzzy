@@ -2,8 +2,6 @@
 package uk.addie.xyzzy.state;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.Random;
@@ -20,6 +18,7 @@ import uk.addie.xyzzy.zobjects.Dictionary;
 import uk.addie.xyzzy.zobjects.ZObject;
 import uk.addie.xyzzy.zobjects.ZWindow;
 import android.util.Log;
+import android.util.SparseArray;
 
 public class Memory implements Serializable {
     public static class Story {
@@ -158,13 +157,13 @@ public class Memory implements Serializable {
         }
     }
 
-    public int                   currentScreen = 0;
-    public Map<Integer, ZWindow> zwin          = new HashMap<Integer, ZWindow>();
-    public ZStack<CallStack>     callStack     = new ZStack<CallStack>(null);
-    public Random                random        = new Random();
-    public int                   objectCount;
-    public String                storyPath;
-    public FileBuffer            buffer;
+    public int                  currentScreen = 0;
+    public SparseArray<ZWindow> zwin          = new SparseArray<ZWindow>();
+    public ZStack<CallStack>    callStack     = new ZStack<CallStack>(null);
+    public Random               random        = new Random();
+    public int                  objectCount;
+    public String               storyPath;
+    public FileBuffer           buffer;
 
     Memory() {
         callStack.add(new CallStack());
@@ -176,7 +175,9 @@ public class Memory implements Serializable {
     }
 
     public void resetZWindows() {
-        for (int z : zwin.keySet()) {
+        int zwinsize = zwin.size();
+        for (int i = 0; i < zwinsize; i++) {
+            int z = zwin.keyAt(i);
             zwin.get(z).reset();
         }
         zwin.clear();

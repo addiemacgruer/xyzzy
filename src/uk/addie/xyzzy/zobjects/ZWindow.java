@@ -108,9 +108,9 @@ public class ZWindow implements Serializable {
     }
 
     public static void printAllScreens() {
-        for (final int i : Memory.CURRENT.zwin.keySet()) {
-            //            System.out.println("WINDOW: " + i);
-            Memory.CURRENT.zwin.get(i).flush();
+        int zwc = Memory.CURRENT.zwin.size();
+        for (int i = 0; i < zwc; i++) { // : Memory.CURRENT.zwin.keySet()) {
+            Memory.CURRENT.zwin.get(Memory.CURRENT.zwin.keyAt(i)).flush();
         }
     }
 
