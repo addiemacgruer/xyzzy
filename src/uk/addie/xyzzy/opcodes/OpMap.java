@@ -18,29 +18,16 @@ public class OpMap {
     }
 
     public static void adjustForVersion(int version) {
-        switch (version) {
-        case 1:
+        if (version <= 4) {
             opmap[1][0xf] = Opcode.NOT;
             opmap[0][0x9] = Opcode.POP;
-            return;
-        case 2:
-            opmap[1][0xf] = Opcode.NOT;
-            opmap[0][0x9] = Opcode.POP;
-            return;
-        case 3:
-            opmap[1][0xf] = Opcode.NOT;
-            opmap[0][0x9] = Opcode.POP;
-            return;
-        case 4:
-            opmap[1][0xf] = Opcode.NOT;
-            opmap[0][0x9] = Opcode.POP;
-            return;
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        default:
-            return;
+            opmap[0][0x5] = Opcode.SAVE;
+            opmap[0][0x6] = Opcode.RESTORE;
+        } else {
+            opmap[1][0xf] = Opcode.CALL_1N;
+            opmap[0][0x9] = Opcode.CATCH;
+            opmap[0][0x5] = null;
+            opmap[0][0x6] = null;
         }
     }
 
