@@ -21,6 +21,7 @@ public class ZStream implements Serializable {
     }
 
     public void append(String string) {
+        Log.d("Xyzzy", "Printing:" + string);
         if (!streams[3] && streams[1]) {
             Memory.CURRENT.zwin.get(Memory.CURRENT.currentScreen).append(string);
         }
@@ -51,6 +52,12 @@ public class ZStream implements Serializable {
     public void setBuffered(boolean buffered) {
         if (!streams[3] && streams[1]) {
             Memory.CURRENT.zwin.get(Memory.CURRENT.currentScreen).setBuffered(buffered);
+        }
+    }
+
+    public void setCursor(short column, short line) {
+        if (!streams[3] && streams[1]) {
+            Memory.CURRENT.zwin.get(Memory.CURRENT.currentScreen).setCursor(column, line);
         }
     }
 

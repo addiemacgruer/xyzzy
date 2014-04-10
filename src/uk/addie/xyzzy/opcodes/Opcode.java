@@ -968,9 +968,8 @@ import android.util.Log;
             if (arguments.size() >= 2) {
                 column = arguments.get(1);
             }
-            if (Debug.screen) {
-                Log.i("Xyzzy", "SET CURSOR: " + line + ", " + column);
-            }
+            Log.i("Xyzzy", "SET CURSOR: " + line + ", " + column);
+            Memory.streams().setCursor(column, line);
         }
     },
     SET_FONT(4, 0x4) {
@@ -1036,9 +1035,7 @@ import android.util.Log;
     SET_WINDOW(3, 0xb) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short window = arguments.get(0);
-            if (Debug.screen) {
-                Log.i("Xyzzy", "SET WINDOW: " + arguments.get(0));
-            }
+            Log.i("Xyzzy", "SET WINDOW: " + arguments.get(0));
             Memory.CURRENT.currentScreen = window;
             if (Memory.CURRENT.zwin.get(window) == null) {
                 Memory.CURRENT.zwin.put(window, new ZWindow(window));

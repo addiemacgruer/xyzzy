@@ -237,7 +237,15 @@ public class ZWindow implements Serializable {
     }
 
     public void setBuffered(final boolean buffered) {
+        Log.i("Xyzzy", "Set buffered:" + buffered);
         this.buffered = buffered;
+    }
+
+    public void setCursor(short column, short line) {
+        // TODO Auto-generated method stub
+        if (buffered) {
+            Log.e("Xyzzy", "Set cursor while buffered.  Wtf?");
+        }
     }
 
     @Override public String toString() {
