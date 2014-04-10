@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.state.Memory;
-import uk.addie.xyzzy.zobjects.ZWindow.TextStyle;
+import uk.addie.xyzzy.zobjects.TextStyle;
 import android.util.Log;
 
 public class ZStream implements Serializable {

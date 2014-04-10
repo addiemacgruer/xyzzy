@@ -5,22 +5,20 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.R;
 import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
-import android.graphics.Typeface;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
-import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.text.style.TypefaceSpan;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
@@ -30,30 +28,6 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 public class ZWindow implements Serializable {
-    public enum TextStyle {
-        BOLD {
-            @Override CharacterStyle characterStyle() {
-                return new StyleSpan(Typeface.BOLD);
-            }
-        },
-        FIXED_PITCH {
-            @Override CharacterStyle characterStyle() {
-                return new TypefaceSpan("monospace");
-            }
-        },
-        ITALIC {
-            @Override CharacterStyle characterStyle() {
-                return new StyleSpan(Typeface.ITALIC);
-            }
-        },
-        REVERSE_VIDEO {
-            @Override CharacterStyle characterStyle() {
-                return new TypefaceSpan("monospace");
-            }
-        };
-        abstract CharacterStyle characterStyle();
-    }
-
     private static int                  background;
     private final static SparseIntArray colours          = new SparseIntArray();
     private static int                  foreground;
@@ -63,22 +37,12 @@ public class ZWindow implements Serializable {
     private static int[]                windowMap        = { R.id.screen0, R.id.screen1 };
     private static long                 latency          = 0;
     static {
+        final int[] amigaColours = { 0x0, 0x7fff, 0x0, 0x1d, 0x340, 0x3bd, 0x59a0, 0x7c1f, 0x77a0, 0x7fff, 0x5ad6,
+            0x4631, 0x2d6b };
         colours.put(-1, 0x0); // transparent
-        colours.put(0, amigaColourToAndroid(0x0000)); // interpreter def foreground
-        colours.put(1, amigaColourToAndroid(0x7fff)); // interpreter def background
-        colours.put(2, amigaColourToAndroid(0x0000)); //black
-        colours.put(3, amigaColourToAndroid(0x001d)); // red
-        colours.put(4, amigaColourToAndroid(0x0340)); //green
-        colours.put(5, amigaColourToAndroid(0x03bd)); // yellow
-        colours.put(6, amigaColourToAndroid(0x59a0)); // blue
-        colours.put(7, amigaColourToAndroid(0x7c1f)); // magenta
-        colours.put(8, amigaColourToAndroid(0x77a0)); // cyan
-        colours.put(9, amigaColourToAndroid(0x7fff)); //white
-        colours.put(10, amigaColourToAndroid(0x5ad6)); // light grey
-        colours.put(11, amigaColourToAndroid(0x4631)); // medium grey
-        colours.put(12, amigaColourToAndroid(0x2d6b)); // dark grey
-    }
-    static {
+        for (int i = 0; i < amigaColours.length; i++) {
+            colours.put(i, amigaColourToAndroid(amigaColours[i]));
+        }
         okl = new View.OnKeyListener() {
             @Override public boolean onKey(final View v, final int keyCode, final KeyEvent event) {
                 if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -105,9 +69,24 @@ public class ZWindow implements Serializable {
         background = colours.get(1);
     }
 
+    static EditText formattedEditText() {
+        final EditText et = new EditText(MainActivity.activity.getApplicationContext());
+        et.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+        et.setTextColor(background);
+        et.setTextSize(textSize);
+        et.setPadding(0, 0, 0, 0);
+        et.setBackgroundColor(foreground);
+        et.setImeActionLabel(">", 0);
+        et.setHorizontallyScrolling(true);
+        et.setInputType(InputType.TYPE_CLASS_TEXT);
+        et.setOnKeyListener(okl);
+        return et;
+    }
+
     public static void printAllScreens() {
         int zwc = Memory.CURRENT.zwin.size();
-        for (int i = 0; i < zwc; i++) { // : Memory.CURRENT.zwin.keySet()) {
+        for (int i = 0; i < zwc; i++) {
             Memory.CURRENT.zwin.get(Memory.CURRENT.zwin.keyAt(i)).flush();
         }
     }
@@ -143,21 +122,32 @@ public class ZWindow implements Serializable {
         return ett;
     }
 
-    private transient SpannableStringBuilder buffer           = new SpannableStringBuilder();
-    private boolean                          buffered         = true;
-    private final Map<TextStyle, Integer>    currentTextStyle = new EnumMap<TextStyle, Integer>(TextStyle.class);
-    final int                                windowCount;
+    private final List<SpannableStringBuilder> buffer           = new ArrayList<SpannableStringBuilder>();
+    private boolean                            buffered         = true;
+    private final Map<TextStyle, Integer>      currentTextStyle = new EnumMap<TextStyle, Integer>(TextStyle.class);
+    final int                                  windowCount;
+    int                                        row, column;
 
     public ZWindow(final int window) {
         windowCount = window;
     }
 
     public void addStyle(final TextStyle ts) {
-        currentTextStyle.put(ts, buffer.length());
+        currentTextStyle.put(ts, column);
     }
 
     public void append(final String s) {
-        buffer.append(s);
+        while (buffer.size() <= row) {
+            buffer.add(new SpannableStringBuilder());
+        }
+        if (buffer.get(row).length() > column) {
+            buffer.set(row, new SpannableStringBuilder(buffer.get(row).subSequence(0, column)));
+        }
+        while (buffer.get(row).length() < column) {
+            buffer.get(row).append(' ');
+        }
+        buffer.get(row).append(s);
+        column += s.length();
     }
 
     public boolean buffered() {
@@ -165,17 +155,23 @@ public class ZWindow implements Serializable {
     }
 
     public void clearStyles() {
+        if (row >= buffer.size()) {
+            currentTextStyle.clear();
+            return;
+        }
         for (final TextStyle ts : currentTextStyle.keySet()) {
             final Integer start = currentTextStyle.get(ts);
-            final int end = buffer.length();
+            final int end = buffer.get(row).length();
             if (Debug.screen) {
                 Log.i("Xyzzy", "Styling " + ts + " from " + start + " to " + end);
             }
             if (ts != TextStyle.REVERSE_VIDEO) {
-                buffer.setSpan(ts.characterStyle(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                buffer.get(row).setSpan(ts.characterStyle(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
-                buffer.setSpan(new BackgroundColorSpan(foreground), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                buffer.setSpan(new ForegroundColorSpan(background), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                buffer.get(row).setSpan(new BackgroundColorSpan(foreground), start, end,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                buffer.get(row).setSpan(new ForegroundColorSpan(background), start, end,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
         currentTextStyle.clear();
@@ -183,31 +179,31 @@ public class ZWindow implements Serializable {
 
     public void flush() {
         clearStyles();
-        if (buffer.length() > 0) {
+        SpannableStringBuilder ssb = new SpannableStringBuilder();
+        int bufferlength = buffer.size();
+        for (int i = 0; i < bufferlength; i++) {
+            ssb.append(buffer.get(i));
+            ssb.append('\n');
+        }
+        if (ssb.length() > 0) {
             final TextView tv = textView();
-            tv.setText(buffer);
+            tv.setText(ssb);
             MainActivity.activity.addView(tv, windowMap[windowCount]);
             buffer.clear();
         }
+        row = 0;
+        column = 0;
     }
 
     public void println() {
-        buffer.append("\n");
+        clearStyles();
+        row++;
+        buffer.add(new SpannableStringBuilder());
+        column = 0;
     }
 
     public synchronized String promptForInput() {
-        final EditText et = new EditText(MainActivity.activity.getApplicationContext());
-        et.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-        et.setTextColor(background);
-        et.setTextSize(textSize);
-        et.setPadding(0, 0, 0, 0);
-        et.setBackgroundColor(foreground);
-        et.setImeActionLabel(">", 0);
-        //        et.setImeOptions(EditorInfo.IME);
-        et.setHorizontallyScrolling(true);
-        et.setInputType(InputType.TYPE_CLASS_TEXT);
-        et.setOnKeyListener(okl);
+        final EditText et = formattedEditText();
         MainActivity.activity.addView(et, windowMap[windowCount]);
         synchronized (MainActivity.inputSyncObject) {
             try {
@@ -227,7 +223,6 @@ public class ZWindow implements Serializable {
 
     private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        buffer = new SpannableStringBuilder();
         foreground = in.readInt();
         background = in.readInt();
     }
@@ -242,10 +237,9 @@ public class ZWindow implements Serializable {
     }
 
     public void setCursor(short column, short line) {
-        // TODO Auto-generated method stub
-        if (buffered) {
-            Log.e("Xyzzy", "Set cursor while buffered.  Wtf?");
-        }
+        clearStyles();
+        this.column = column;
+        this.row = line;
     }
 
     @Override public String toString() {

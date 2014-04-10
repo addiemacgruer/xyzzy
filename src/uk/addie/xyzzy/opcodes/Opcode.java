@@ -25,6 +25,7 @@ import uk.addie.xyzzy.zmachine.CallStack;
 import uk.addie.xyzzy.zmachine.Decoder;
 import uk.addie.xyzzy.zmachine.ZStack;
 import uk.addie.xyzzy.zobjects.Beep;
+import uk.addie.xyzzy.zobjects.TextStyle;
 import uk.addie.xyzzy.zobjects.ZObject;
 import uk.addie.xyzzy.zobjects.ZProperty;
 import uk.addie.xyzzy.zobjects.ZText;
@@ -874,8 +875,7 @@ import android.util.Log;
             }
             if (Header.VERSION.value() > 4) {
                 readDestinationAndStoreResult(1);
-            }
-            if (Header.VERSION.value() <= 4) {
+            } else {
                 branchOnTest(true);
             }
         }
@@ -997,25 +997,25 @@ import android.util.Log;
                 if (Debug.screen) {
                     Log.i("Xyzzy", "REVERSE VIDEO");
                 }
-                Memory.streams().addStyle(ZWindow.TextStyle.REVERSE_VIDEO);
+                Memory.streams().addStyle(TextStyle.REVERSE_VIDEO);
                 break;
             case 2:
                 if (Debug.screen) {
                     Log.i("Xyzzy", "BOLD");
                 }
-                Memory.streams().addStyle(ZWindow.TextStyle.BOLD);
+                Memory.streams().addStyle(TextStyle.BOLD);
                 break;
             case 4:
                 if (Debug.screen) {
                     Log.i("Xyzzy", "ITALIC");
                 }
-                Memory.streams().addStyle(ZWindow.TextStyle.ITALIC);
+                Memory.streams().addStyle(TextStyle.ITALIC);
                 break;
             case 8:
                 if (Debug.screen) {
                     Log.i("Xyzzy", "FIXED PITCH");
                 }
-                Memory.streams().addStyle(ZWindow.TextStyle.FIXED_PITCH);
+                Memory.streams().addStyle(TextStyle.FIXED_PITCH);
                 break;
             }
         }

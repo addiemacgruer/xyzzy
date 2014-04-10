@@ -48,7 +48,7 @@ public enum Error {/* Error codes */
     OBJECT_ZERO("Called object zero.  Substituting object one, and hoping for the best"); /* @get_next_prop called with object 0 */
     public final String  string;
     public final boolean fatal;
-    public boolean       seenBefore = false;
+    private boolean      seenBefore = false;
 
     Error(String string) {
         this.string = string;
