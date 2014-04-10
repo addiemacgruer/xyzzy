@@ -26,7 +26,7 @@ public class CallStack implements Serializable {
     public static void call(final int routine, final ZStack<Short> args, final Invokeable returnFunction) {
         final int rpos = routine & 0xffff;
         if (rpos == 0) {
-            Log.e("Xyzzy", "Called a routine at 0");
+            Log.e("Xyzzy", "Called a routine at 0 (shouldn't have made it to call())");
             return;
         }
         final int pc = calculateProgramCounter(rpos);

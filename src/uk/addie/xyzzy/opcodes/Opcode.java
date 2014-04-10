@@ -75,54 +75,42 @@ import android.util.Log;
     },
     CALL_1N(1, 0xf) {
         @Override public void invoke(ZStack<Short> arguments) {
-            final short routine = arguments.get(0);
-            CallStack.call(routine & 0xffff, arguments, new StackDiscard());
+            callAndDiscard(arguments);
         }
     },
     CALL_1S(1, 0x8) {
         @Override public void invoke(ZStack<Short> arguments) {
-            final short routine = arguments.get(0);
-            final int result = Memory.CURRENT.callStack.peek().getProgramByte();
-            CallStack.call(routine & 0xffff, arguments, new StackStore(result));
+            callAndStore(arguments);
         }
     },
     CALL_2N(2, 0x1a) {
         @Override public void invoke(ZStack<Short> arguments) {
-            final short routine = arguments.get(0);
-            CallStack.call(routine & 0xffff, arguments, new StackDiscard());
+            callAndDiscard(arguments);
         }
     },
     CALL_2S(2, 0x19) {
         @Override public void invoke(ZStack<Short> arguments) {
-            final short routine = arguments.get(0);
-            final int result = Memory.CURRENT.callStack.peek().getProgramByte();
-            CallStack.call(routine & 0xffff, arguments, new StackStore(result));
+            callAndStore(arguments);
         }
     },
     CALL_VN(3, 0x19) {
         @Override public void invoke(ZStack<Short> arguments) {
-            final short routine = arguments.get(0);
-            CallStack.call(routine & 0xffff, arguments, new StackDiscard());
+            callAndDiscard(arguments);
         }
     },
     CALL_VN2(3, 0x1a) {
         @Override public void invoke(ZStack<Short> arguments) {
-            final short routine = arguments.get(0);
-            CallStack.call(routine & 0xffff, arguments, new StackDiscard());
+            callAndDiscard(arguments);
         }
     },
     CALL_VS(3, 0x0) {
         @Override public void invoke(ZStack<Short> arguments) {
-            final short routine = arguments.get(0);
-            final int result = Memory.CURRENT.callStack.peek().getProgramByte();
-            CallStack.call(routine & 0xffff, arguments, new StackStore(result));
+            callAndStore(arguments);
         }
     },
     CALL_VS2(3, 0xc) {
         @Override public void invoke(ZStack<Short> arguments) {
-            final short routine = arguments.get(0);
-            final int result = Memory.CURRENT.callStack.peek().getProgramByte();
-            CallStack.call(routine & 0xffff, arguments, new StackStore(result));
+            callAndStore(arguments);
         }
     },
     CATCH(0, 0x9) {
@@ -1194,6 +1182,23 @@ import android.util.Log;
             offset = Bit.low(lobit, 6);
         }
         return offset;
+    }
+
+    static void callAndDiscard(ZStack<Short> arguments) {
+        final int routine = arguments.get(0) & 0xffff;
+        if (routine != 0) {
+            CallStack.call(routine, arguments, new StackDiscard());
+        }
+    }
+
+    static void callAndStore(ZStack<Short> arguments) {
+        final int routine = arguments.get(0) & 0xffff;
+        final int result = Memory.CURRENT.callStack.peek().getProgramByte();
+        if (routine == 0) {
+            storeValue(result, 0);
+        } else {
+            CallStack.call(routine, arguments, new StackStore(result));
+        }
     }
 
     private static int globalVariableAddress(final int ldestination) {
