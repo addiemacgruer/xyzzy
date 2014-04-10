@@ -66,7 +66,7 @@ public enum Error {/* Error codes */
         }
         Log.e("Xyzzy", string);
         if (!seenBefore) {
-            Memory.currentScreen().append((fatal ? "*** FATAL: " : "*** ERROR: ") + string + " ***");
+            Memory.streams().append((fatal ? "*** FATAL: " : "*** ERROR: ") + string + " ***");
         }
         seenBefore = true;
         if (fatal) {

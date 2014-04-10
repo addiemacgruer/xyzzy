@@ -56,6 +56,9 @@ public class ZObject {
 
     public static void enumerateObjects() {
         Memory.CURRENT.objectCount = 0xffff; // suppress warnings for now
+        reverseParents.clear();
+        reverseSiblings.clear();
+        reverseChildren.clear();
         int objectCount = 1;
         int lowestProperty = 0xffffff;
         while (true) {

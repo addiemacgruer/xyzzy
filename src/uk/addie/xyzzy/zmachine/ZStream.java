@@ -55,7 +55,6 @@ public class ZStream implements Serializable {
     }
 
     public void setOutputStream(int number, int table, int width) {
-        Log.d("Xyzzy", "Setting output stream:" + number + " :" + table + " :" + width);
         if (number == 0) {
             return;
         }

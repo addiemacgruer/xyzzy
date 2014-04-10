@@ -1,6 +1,9 @@
 
 package uk.addie.xyzzy.state;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import uk.addie.xyzzy.MainActivity;
@@ -68,11 +71,6 @@ public class Memory implements Serializable {
     public static byte[]      UNDO             = new byte[0];
     public static ZStream     streams          = new ZStream();
 
-    public static ZStream currentScreen() {
-        //        return CURRENT.zwin.get(CURRENT.currentScreen);
-        return streams;
-    }
-
     public static void loadDataFromFile() {
         CURRENT.buffer = new FileBuffer(Memory.CURRENT.storyPath);
         if (Header.VERSION.value() < 1 || Header.VERSION.value() > 8) {
@@ -139,6 +137,10 @@ public class Memory implements Serializable {
         return storyid;
     }
 
+    public static ZStream streams() {
+        return streams;
+    }
+
     public static int unpackAddress(final int packed) {
         switch (Header.VERSION.value()) {
         case 1:
@@ -159,13 +161,13 @@ public class Memory implements Serializable {
         }
     }
 
-    public int                  currentScreen = 0;
-    public SparseArray<ZWindow> zwin          = new SparseArray<ZWindow>();
-    public ZStack<CallStack>    callStack     = new ZStack<CallStack>(null);
-    public Random               random        = new Random();
-    public int                  objectCount;
-    public String               storyPath;
-    public FileBuffer           buffer;
+    public int                            currentScreen = 0;
+    public transient SparseArray<ZWindow> zwin          = new SparseArray<ZWindow>();
+    public ZStack<CallStack>              callStack     = new ZStack<CallStack>(null);
+    public Random                         random        = new Random();
+    public int                            objectCount;
+    public String                         storyPath;
+    public FileBuffer                     buffer;
 
     Memory() {
         callStack.add(new CallStack());
@@ -174,6 +176,17 @@ public class Memory implements Serializable {
 
     public FileBuffer buff() {
         return buffer;
+    }
+
+    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        int zwc = in.readInt();
+        zwin = new SparseArray<ZWindow>();
+        for (int i = 0; i < zwc; i++) {
+            int key = in.readInt();
+            ZWindow zobj = (ZWindow) in.readObject();
+            zwin.put(key, zobj);
+        }
     }
 
     public void resetZWindows() {
@@ -185,5 +198,16 @@ public class Memory implements Serializable {
         zwin.clear();
         zwin.put(0, new ZWindow(0));
         currentScreen = 0;
+    }
+
+    private void writeObject(final ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        int zwc = zwin.size();
+        out.writeInt(zwc);
+        for (int i = 0; i < zwc; i++) {
+            final int keyAtI = zwin.keyAt(i);
+            out.writeInt(keyAtI);
+            out.writeObject(zwin.get(keyAtI));
+        }
     }
 }

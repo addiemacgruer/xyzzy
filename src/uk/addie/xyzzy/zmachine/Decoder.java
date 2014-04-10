@@ -41,13 +41,13 @@ public class Decoder {
             try {
                 interpretOpcode(opcode);
             } catch (XyzzyException xe) { //oops
-                Memory.currentScreen().append("\n\nFatal error in story file\n");
+                Memory.streams().append("\n\nFatal error in story file\n");
                 Log.e("Xyzzy", "Interpreter:" + xe.toString());
                 xe.printStackTrace();
                 flushTraceToScreen0(xe);
                 finished = true;
             } catch (Exception e) { // double oops
-                Memory.currentScreen().append("\n\nFatal error in interpreter\n");
+                Memory.streams().append("\n\nFatal error in interpreter\n");
                 Log.e("Xyzzy", "Runtime:" + e.toString());
                 e.printStackTrace();
                 flushTraceToScreen0(e);
@@ -58,13 +58,13 @@ public class Decoder {
 
     static void flushTraceToScreen0(Exception xe) {
         if (!finished) {
-            Memory.currentScreen().append(xe.toString() + "\n\n");
+            Memory.streams().append(xe.toString() + "\n\n");
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintWriter pw = new PrintWriter(baos);
             xe.printStackTrace(pw);
             pw.flush();
             String printLog = new String(baos.toByteArray());
-            Memory.currentScreen().append(printLog);
+            Memory.streams().append(printLog);
             ZWindow.printAllScreens();
         }
     }

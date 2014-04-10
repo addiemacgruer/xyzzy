@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.addie.xyzzy.zmachine.Decoder;
-import uk.addie.xyzzy.zobjects.ZWindow;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -26,9 +25,11 @@ import android.widget.RelativeLayout;
 
 public class MainActivity extends Activity {
     public static MainActivity      activity;
-    private static final List<View> textBoxes   = new ArrayList<View>();
-    private static Thread           logicThread = null;
-    public static int               lastKey     = 0;
+    private static final List<View> textBoxes       = new ArrayList<View>();
+    private static Thread           logicThread     = null;
+    public static int               lastKey         = 0;
+    public final static Object      inputSyncObject = new Object();
+    public static int               width, height;
 
     static void focusTextView(final View tv) {
         //        if (tv instanceof EditText) {
@@ -38,8 +39,6 @@ public class MainActivity extends Activity {
         tv.requestFocus();
     }
 
-    public Object      keyWaiter = new Object();
-    public static int  width, height;
     private MenuItem[] mis;
 
     public void addView(final View tv, final int viewId) {
@@ -61,11 +60,8 @@ public class MainActivity extends Activity {
         textBoxes.clear();
         Decoder.terminate();
         logicThread = null;
-        synchronized (keyWaiter) {
-            keyWaiter.notifyAll();
-        }
-        synchronized (ZWindow.syncObject) {
-            ZWindow.syncObject.notifyAll();
+        synchronized (inputSyncObject) {
+            inputSyncObject.notifyAll();
         }
         this.finish();
     }
@@ -130,8 +126,7 @@ public class MainActivity extends Activity {
     }
 
     @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.i("Xyzzy", "keyCode:" + keyCode + " KeyEvent:" + event);
-        synchronized (keyWaiter) {
+        synchronized (inputSyncObject) {
             switch (keyCode) {
             // TODO other keycodes (up, down, ...)
             case KeyEvent.KEYCODE_MENU:
@@ -139,7 +134,7 @@ public class MainActivity extends Activity {
             default:
                 lastKey = event.getUnicodeChar();
             }
-            keyWaiter.notify();
+            inputSyncObject.notifyAll();
         }
         return true;
     }
@@ -147,7 +142,7 @@ public class MainActivity extends Activity {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         int selected = -1;
         if (mis == null) { // then we've not initialised?
-            Log.w("Xyzzy", "Android onOptionsItemSelected before onCreateOptionsMenu?");
+            Log.e("Xyzzy", "Android onOptionsItemSelected before onCreateOptionsMenu?");
             return false;
         }
         for (int i = 0; i < mis.length; ++i) {
@@ -202,9 +197,9 @@ public class MainActivity extends Activity {
         lastKey = 0;
         //        showKeyboard();
         while (lastKey == 0) {
-            synchronized (keyWaiter) {
+            synchronized (inputSyncObject) {
                 try {
-                    keyWaiter.wait();
+                    inputSyncObject.wait();
                 } catch (InterruptedException e) {
                     // do nothing
                 }

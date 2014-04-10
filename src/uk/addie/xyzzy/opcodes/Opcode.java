@@ -67,7 +67,7 @@ import android.util.Log;
     BUFFER_MODE(3, 0x12) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short flag = arguments.get(0);
-            Memory.currentScreen().setBuffered(flag == 1);
+            Memory.streams().setBuffered(flag == 1);
             if (Debug.screen) {
                 Log.i("Xyzzy", "BUFFER MODE: " + (flag == 1 ? "ON" : "OFF"));
             }
@@ -546,7 +546,7 @@ import android.util.Log;
             //            if (Debug.screen) {
             //                Log.i("Xyzzy", "NEW LINE");
             //            }
-            Memory.currentScreen().println();
+            Memory.streams().println();
         }
     },
     NOP(0, 0x4) {
@@ -583,7 +583,7 @@ import android.util.Log;
             default:
                 number = arguments.get(0); // signed
             }
-            Memory.currentScreen().setOutputStream(number, table, width);
+            Memory.streams().setOutputStream(number, table, width);
         }
     },
     PICTURE_DATA(4, 0x6) {
@@ -606,26 +606,26 @@ import android.util.Log;
     },
     PRINT(0, 0x2) {
         @Override public void invoke(ZStack<Short> arguments) {
-            Memory.currentScreen().append(ZText.encodedAtOffset(Memory.CURRENT.callStack.peek().programCounter()));
+            Memory.streams().append(ZText.encodedAtOffset(Memory.CURRENT.callStack.peek().programCounter()));
             Memory.CURRENT.callStack.peek().setProgramCounter(ZText.bytePosition + 2);
         }
     },
     PRINT_ADDR(1, 0x7) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short byteAddressOfString = arguments.get(0);
-            Memory.currentScreen().append(ZText.encodedAtOffset(byteAddressOfString & 0xffff));
+            Memory.streams().append(ZText.encodedAtOffset(byteAddressOfString & 0xffff));
         }
     },
     PRINT_CHAR(3, 0x5) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short outputCharacterCode = arguments.get(0);
-            Memory.currentScreen().append(Character.toString((char) outputCharacterCode));
+            Memory.streams().append(Character.toString((char) outputCharacterCode));
         }
     },
     PRINT_NUM(3, 0x6) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short value = arguments.get(0);
-            Memory.currentScreen().append(Short.toString(value));
+            Memory.streams().append(Short.toString(value));
         }
     },
     PRINT_OBJ(1, 0xa) {
@@ -636,14 +636,14 @@ import android.util.Log;
             if (Debug.screen) {
                 Log.i("Xyzzy", "PRINT OBJECT: " + zo);
             }
-            Memory.currentScreen().append(new ZProperty(zo).toString());
+            Memory.streams().append(new ZProperty(zo).toString());
         }
     },
     PRINT_PADDR(1, 0xd) {
         @Override public void invoke(ZStack<Short> arguments) {
             final int packedAddressOfString = arguments.get(0) & 0xffff;
             final int address = Memory.unpackAddress(packedAddressOfString);
-            Memory.currentScreen().append(ZText.encodedAtOffset(address));
+            Memory.streams().append(ZText.encodedAtOffset(address));
         }
     },
     PRINT_RET(0, 0x3) {
@@ -664,11 +664,11 @@ import android.util.Log;
             // TODO get cursor position
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    Memory.currentScreen().append(Character.toString(text.charAt(charcount++)));
+                    Memory.streams().append(Character.toString(text.charAt(charcount++)));
                 }
                 charcount += skip;
                 // TODO should reset to cursor x position
-                Memory.currentScreen().append("\n");
+                Memory.streams().append("\n");
             }
         }
     },
@@ -750,8 +750,8 @@ import android.util.Log;
                 Log.i("Xyzzy", "Read routine should be timed...");
             }
             final int maxCharacters = Memory.CURRENT.buff().get(text);
-            String inputString = Memory.currentScreen().promptForInput().toLowerCase(Locale.UK);
-            Memory.currentScreen().userInput(inputString);
+            String inputString = Memory.streams().promptForInput().toLowerCase(Locale.UK);
+            Memory.streams().userInput(inputString);
             inputString = inputString.substring(0, Math.min(maxCharacters, inputString.length()));
             Memory.CURRENT.buff().put(text + 1, (byte) inputString.length());
             for (int i = 0, j = inputString.length(); i < j; i++) {
@@ -771,7 +771,7 @@ import android.util.Log;
             //            final short time = Process.zargs.get(1);
             //            final short routine = Process.zargs.get(2);
             value = MainActivity.activity.waitOnKey();
-            Memory.currentScreen().userInput(Character.toString((char) value));
+            Memory.streams().userInput(Character.toString((char) value));
             switch (value) {
             case '#':
                 value = 130;
@@ -823,6 +823,7 @@ import android.util.Log;
                 readDestinationAndStoreResult(0);
             } else {
                 Memory.CURRENT = loaded;
+                ZObject.enumerateObjects();
                 readDestinationAndStoreResult(2);
             }
         }
@@ -845,6 +846,7 @@ import android.util.Log;
                 readDestinationAndStoreResult(0);
             } else {
                 Memory.CURRENT = loaded;
+                ZObject.enumerateObjects();
                 readDestinationAndStoreResult(2);
             }
         }
@@ -882,10 +884,11 @@ import android.util.Log;
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
-            if (Header.VERSION.value() < 5) { //branch
-                branchOnTest(true);
-            } else { // store
+            if (Header.VERSION.value() > 4) {
                 readDestinationAndStoreResult(1);
+            }
+            if (Header.VERSION.value() <= 4) {
+                branchOnTest(true);
             }
         }
     },
@@ -1001,31 +1004,31 @@ import android.util.Log;
                 if (Debug.screen) {
                     Log.i("Xyzzy", "ROMAN");
                 }
-                Memory.currentScreen().clearStyles();
+                Memory.streams().clearStyles();
                 break;
             case 1:
                 if (Debug.screen) {
                     Log.i("Xyzzy", "REVERSE VIDEO");
                 }
-                Memory.currentScreen().addStyle(ZWindow.TextStyle.REVERSE_VIDEO);
+                Memory.streams().addStyle(ZWindow.TextStyle.REVERSE_VIDEO);
                 break;
             case 2:
                 if (Debug.screen) {
                     Log.i("Xyzzy", "BOLD");
                 }
-                Memory.currentScreen().addStyle(ZWindow.TextStyle.BOLD);
+                Memory.streams().addStyle(ZWindow.TextStyle.BOLD);
                 break;
             case 4:
                 if (Debug.screen) {
                     Log.i("Xyzzy", "ITALIC");
                 }
-                Memory.currentScreen().addStyle(ZWindow.TextStyle.ITALIC);
+                Memory.streams().addStyle(ZWindow.TextStyle.ITALIC);
                 break;
             case 8:
                 if (Debug.screen) {
                     Log.i("Xyzzy", "FIXED PITCH");
                 }
-                Memory.currentScreen().addStyle(ZWindow.TextStyle.FIXED_PITCH);
+                Memory.streams().addStyle(ZWindow.TextStyle.FIXED_PITCH);
                 break;
             }
         }
@@ -1071,7 +1074,7 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short lines = arguments.get(0);
             if (Debug.screen) {
-                Log.i("Xyzzy", "SPLIT WINDOW: " + lines + " LINES (CURRENT:" + Memory.currentScreen() + ")");
+                Log.i("Xyzzy", "SPLIT WINDOW: " + lines + " LINES (CURRENT:" + Memory.streams() + ")");
             }
             int splitScreen = Memory.CURRENT.currentScreen + 1;
             if (Memory.CURRENT.zwin.get(splitScreen) != null) {

@@ -59,7 +59,6 @@ public class ZWindow implements Serializable {
     private static int                  foreground;
     final static View.OnKeyListener     okl;
     private static final long           serialVersionUID = 1L;
-    public final static Object          syncObject       = new Object();
     public final static int             textSize         = 16;
     private static int[]                windowMap        = { R.id.screen0, R.id.screen1 };
     private static long                 latency          = 0;
@@ -82,10 +81,9 @@ public class ZWindow implements Serializable {
     static {
         okl = new View.OnKeyListener() {
             @Override public boolean onKey(final View v, final int keyCode, final KeyEvent event) {
-                Log.e("Xyzzy", "TextView:" + v + " keyCode:" + keyCode + " KeyEvent:" + event);
                 if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
-                    synchronized (syncObject) {
-                        syncObject.notify();
+                    synchronized (MainActivity.inputSyncObject) {
+                        MainActivity.inputSyncObject.notifyAll();
                     }
                     return true;
                 }
@@ -211,11 +209,11 @@ public class ZWindow implements Serializable {
         et.setInputType(InputType.TYPE_CLASS_TEXT);
         et.setOnKeyListener(okl);
         MainActivity.activity.addView(et, windowMap[windowCount]);
-        synchronized (syncObject) {
+        synchronized (MainActivity.inputSyncObject) {
             try {
                 Log.i("Xyzzy", "Waiting for input..."
                         + (latency != 0 ? "(" + (System.currentTimeMillis() - latency) + " ms since last)" : ""));
-                syncObject.wait();
+                MainActivity.inputSyncObject.wait();
             } catch (final InterruptedException e) {
                 // don't care if interrupted.
             }
