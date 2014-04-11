@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.addie.xyzzy.gameselection.SelectionActivity;
+import uk.addie.xyzzy.header.ZKeycode;
 import uk.addie.xyzzy.zmachine.Decoder;
 import android.app.Activity;
 import android.content.Context;
@@ -152,9 +153,14 @@ public class MainActivity extends Activity {
         }
         synchronized (inputSyncObject) {
             switch (keyCode) {
-            // TODO other keycodes (up, down, ...)
             case KeyEvent.KEYCODE_MENU:
                 return false;
+            case KeyEvent.KEYCODE_DEL:
+                lastKey = ZKeycode.BACKSPACE;
+                break;
+            case KeyEvent.KEYCODE_ENTER:
+                lastKey = ZKeycode.RETURN;
+                break;
             default:
                 lastKey = event.getUnicodeChar();
             }

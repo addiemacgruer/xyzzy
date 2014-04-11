@@ -264,8 +264,9 @@ public class ZWindow implements Serializable {
         if (column < this.column) {
             reset();
         }
-        this.column = column;
-        this.row = line;
+        // games will occasionally request negative indexes.
+        this.column = Math.max(column, 0);
+        this.row = Math.max(line, 0);
     }
 
     @Override public String toString() {

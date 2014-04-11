@@ -19,7 +19,7 @@ import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore.MediaColumns;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,25 +34,22 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     final static int INTERSTITIALS = 3;
 
     private static String getPath(Context context, Uri uri) {
-        if ("content".equalsIgnoreCase(uri.getScheme())) {
-            String[] projection = { MediaColumns.DATA };
-            Cursor cursor = null;
-            try {
-                cursor = context.getContentResolver().query(uri, projection, null, null, null);
-                int column_index = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
-                if (cursor.moveToFirst()) {
-                    String rval = cursor.getString(column_index);
-                    cursor.close();
-                    return rval;
-                }
+        Log.d("Xyzzy", "getPath:" + context + " uri:" + uri);
+        Cursor cursor = null;
+        Log.i("Xyzzy", "Uri path:" + uri.getPath());
+        try {
+            cursor = context.getContentResolver().query(uri, null, null, null, null);
+            int nameIndex = cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);
+            if (cursor.moveToFirst()) {
+                String rval = cursor.getString(nameIndex);
                 cursor.close();
-            } catch (Exception e) {
-                if (cursor != null) {
-                    cursor.close();
-                }
+                return rval;
             }
-        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
-            return uri.getPath();
+            cursor.close();
+        } catch (Exception e) {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
         return null;
     }
@@ -199,8 +196,8 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
                 Uri uri = data.getData();
                 Log.d("Xyzzy", "File Uri: " + uri.toString());
                 // Get the path
-                String path;
-                path = getPath(this, uri);
+                String path = uri.toString();
+                //                path = getPath(this, uri);
                 Log.d("Xyzzy", "File Path: " + path);
                 if (path != null) {
                     addPathToGamesList(path);
