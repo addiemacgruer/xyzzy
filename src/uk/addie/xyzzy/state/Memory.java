@@ -56,9 +56,9 @@ public class Memory implements Serializable {
         int width = MainActivity.width;
         final int columns = width / ZWindow.textSize;
         Header.SCREEN_WIDTH.put(columns);
-        Header.SCREEN_HEIGHT.put(14); // a lie, but to try and prevent too much buffering required
+        Header.SCREEN_HEIGHT.put(24); // a lie, but to try and prevent too much buffering required
         Header.SCREEN_COLS.put(columns);
-        Header.SCREEN_ROWS.put(14);
+        Header.SCREEN_ROWS.put(24);
         Header.FONT_WIDTH.put(1);
         Header.FONT_HEIGHT.put(1);
         Header.INTERPRETER_NUMBER.put(InterpreterType.DEC_20);

@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -799,13 +798,10 @@ import android.util.Log;
                 final ObjectInputStream ois = new ObjectInputStream(save);
                 loaded = (Memory) ois.readObject();
                 ois.close();
-            } catch (final FileNotFoundException e) {
+            } catch (final Exception e) {
+                Log.e("Xyzzy", "Couldn't restore save:" + e);
                 readDestinationAndStoreResult(0);
                 return;
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
-            } catch (final ClassNotFoundException e) {
-                throw new RuntimeException(e);
             }
             if (!loaded.storyPath.equals(Memory.current().storyPath)) {
                 Log.i("Xyzzy", "Not a save from this story. " + loaded.storyPath + " v " + Memory.current().storyPath);
