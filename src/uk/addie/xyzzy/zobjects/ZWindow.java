@@ -55,11 +55,12 @@ public class ZWindow implements Serializable {
             }
         };
     }
+    private final static double             amiAndroidRatio  = 255.0 / 31.0;                  // ratio 0xff to 0x1f
 
     private static int amigaColourToAndroid(int amiga) {
-        int red = (0x1f & amiga) * 8; // bottom five bits, scaled from 0x1f to 0x2f
-        int green = ((0x3e0 & amiga) >> 5) * 8;
-        int blue = ((0x7c00 & amiga) >> 10) * 8;
+        int red = (int) ((0x1f & amiga) * amiAndroidRatio); // bottom five bits, scaled from 0x1f to 0xff
+        int green = (int) (((0x3e0 & amiga) >> 5) * amiAndroidRatio);
+        int blue = (int) (((0x7c00 & amiga) >> 10) * amiAndroidRatio);
         int androidValue = 0xff000000 | (red << 16) | (green << 8) | blue;
         return androidValue;
     }

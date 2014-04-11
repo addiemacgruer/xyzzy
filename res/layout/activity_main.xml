@@ -7,21 +7,28 @@
     android:layout_alignParentLeft="true"
     android:layout_alignParentTop="true"
     android:orientation="vertical"
+    
+        android:background="#FFFFFF"
     tools:context=".MainActivity" >
 
 
     <uk.addie.xyzzy.ZScrollView
         android:id="@+id/scroller"
-        android:layout_alignTop="@+id/screen1"
+        alignTop="@+id/screen1"
+        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#FFFFFF"
         android:fillViewport="true" >
 
         <LinearLayout
             android:id="@+id/screen0"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:background="#FFFFFF"
             android:orientation="vertical" />
+
     </uk.addie.xyzzy.ZScrollView>
 
     <LinearLayout
