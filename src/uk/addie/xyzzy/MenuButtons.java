@@ -1,6 +1,7 @@
 
 package uk.addie.xyzzy;
 
+import uk.addie.xyzzy.gameselection.SelectionActivity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;

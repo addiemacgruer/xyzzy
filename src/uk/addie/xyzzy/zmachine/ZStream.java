@@ -21,7 +21,6 @@ public class ZStream implements Serializable {
     }
 
     public void append(String string) {
-        Log.d("Xyzzy", "Printing:" + string);
         if (!streams[3] && streams[1]) {
             Memory.current().zwin.get(Memory.current().currentScreen).append(string);
         }

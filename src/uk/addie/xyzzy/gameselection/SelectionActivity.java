@@ -1,5 +1,5 @@
 
-package uk.addie.xyzzy;
+package uk.addie.xyzzy.gameselection;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import uk.addie.xyzzy.MainActivity;
+import uk.addie.xyzzy.R;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -59,7 +61,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     final Map<String, String>   all              = new HashMap<String, String>();
     private int                 textSize;
     final List<DataSetObserver> observer         = new ArrayList<DataSetObserver>();
-    final static String         EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
+    public final static String  EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
     private static final int    FILE_SELECT_CODE = 0;
 
     private void addPathToGamesList(String path) {

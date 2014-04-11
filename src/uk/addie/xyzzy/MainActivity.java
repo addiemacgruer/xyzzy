@@ -4,6 +4,7 @@ package uk.addie.xyzzy;
 import java.util.ArrayList;
 import java.util.List;
 
+import uk.addie.xyzzy.gameselection.SelectionActivity;
 import uk.addie.xyzzy.zmachine.Decoder;
 import android.app.Activity;
 import android.content.Context;
@@ -16,7 +17,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -104,7 +104,7 @@ public class MainActivity extends Activity {
         String message = intent.getStringExtra(SelectionActivity.EXTRA_MESSAGE);
         Xyzzy.story = message;
         super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         boolean layout = true;
         synchronized (this) {
