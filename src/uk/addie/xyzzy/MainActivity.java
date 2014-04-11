@@ -52,14 +52,18 @@ public class MainActivity extends Activity {
     }
 
     private MenuItem[] mis;
+    EditText           readyToDisable = null;
 
     public void addView(final View tv, final int viewId) {
-        //        snooze();
         runOnUiThread(new Runnable() {
             @Override public void run() {
                 LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
                 ll.addView(tv);
                 focusTextView(tv);
+                if (tv instanceof EditText && readyToDisable != null) {
+                    readyToDisable.setEnabled(false);
+                    readyToDisable = null;
+                }
             }
         });
         tv.setTag(viewId);
@@ -84,8 +88,8 @@ public class MainActivity extends Activity {
                 et.setGravity(Gravity.RIGHT);
                 et.setBackgroundColor(background);
                 et.setTextColor(foreground);
-                //                et.setEnabled(false);
                 et.setOnKeyListener(null);
+                readyToDisable = et;
             }
         });
     }
@@ -138,6 +142,14 @@ public class MainActivity extends Activity {
     }
 
     @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.d("Xyzzy", "onKeyDown:" + keyCode + " :" + event);
+        if (event == null) { // ie. it's synthetic
+            lastKey = keyCode;
+            synchronized (inputSyncObject) {
+                inputSyncObject.notifyAll();
+            }
+            return true;
+        }
         synchronized (inputSyncObject) {
             switch (keyCode) {
             // TODO other keycodes (up, down, ...)

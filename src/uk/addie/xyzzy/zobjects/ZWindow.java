@@ -28,6 +28,10 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 public class ZWindow implements Serializable {
+    enum DisplayState {
+        EMPTY, FLUSH_UNSETCURSOR, FLUSH_SETCURSOR, DRAWN_ON;
+    }
+
     private static int                      background;
     private final static SparseIntArray     colours          = new SparseIntArray();
     private static int                      foreground;
@@ -123,11 +127,12 @@ public class ZWindow implements Serializable {
         return ett;
     }
 
-    private final List<SpannableStringBuilder> buffer           = new ArrayList<SpannableStringBuilder>();
-    private boolean                            buffered         = true;
-    private final Map<TextStyle, Integer>      currentTextStyle = new EnumMap<TextStyle, Integer>(TextStyle.class);
-    private final int                          windowCount;
-    private int                                row, column;
+    private transient List<SpannableStringBuilder> buffer           = new ArrayList<SpannableStringBuilder>();
+    private boolean                                buffered         = true;
+    private final Map<TextStyle, Integer>          currentTextStyle = new EnumMap<TextStyle, Integer>(TextStyle.class);
+    private final int                              windowCount;
+    private int                                    row, column;
+    DisplayState                                   displayState     = DisplayState.EMPTY;
 
     public ZWindow(final int window) {
         windowCount = window;
@@ -138,17 +143,34 @@ public class ZWindow implements Serializable {
     }
 
     public void append(final String s) {
+        if (displayState == DisplayState.FLUSH_UNSETCURSOR) {
+            clearBuffer();
+        }
+        displayState = DisplayState.DRAWN_ON;
         while (buffer.size() <= row) {
             buffer.add(new SpannableStringBuilder());
         }
-        if (buffer.get(row).length() > column) {
-            buffer.set(row, new SpannableStringBuilder(buffer.get(row).subSequence(0, column)));
+        if (buffer.get(row).length() > column) { // aargh!  but status lines (and Anchorhead) require this.
+            SpannableStringBuilder oldString = buffer.get(row);
+            buffer.set(row, new SpannableStringBuilder(oldString.subSequence(0, column)));
+            buffer.get(row).append(s);
+            column += s.length();
+            if (oldString.length() > column) {
+                buffer.get(row).append(oldString.subSequence(column, oldString.length()));
+            }
+            return;
         }
         while (buffer.get(row).length() < column) {
             buffer.get(row).append(' ');
         }
         buffer.get(row).append(s);
         column += s.length();
+    }
+
+    private void clearBuffer() {
+        buffer.clear();
+        row = 0;
+        column = 0;
     }
 
     public void clearStyles() {
@@ -186,10 +208,11 @@ public class ZWindow implements Serializable {
             final TextView tv = textView();
             tv.setText(ssb);
             MainActivity.activity.addView(tv, windowMap[windowCount]);
-            buffer.clear();
+            //            buffer.clear();
         }
-        row = 0;
-        column = 0;
+        displayState = DisplayState.FLUSH_UNSETCURSOR;
+        //        row = 0;
+        //        column = 0;
     }
 
     public void println() {
@@ -213,16 +236,15 @@ public class ZWindow implements Serializable {
         }
         final String command = et.getText().toString() + "\n";
         latency = System.currentTimeMillis();
-        Log.i("Xyzzy", "command:" + command);
         MainActivity.activity.finishEditing(et, foreground, background);
         return command;
     }
 
-    @SuppressWarnings("static-method") private void readObject(final ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
+    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         foreground = in.readInt();
         background = in.readInt();
+        buffer = new ArrayList<SpannableStringBuilder>();
     }
 
     public void reset() {
@@ -230,12 +252,15 @@ public class ZWindow implements Serializable {
     }
 
     public void setBuffered(final boolean buffered) {
-        Log.i("Xyzzy", "Set buffered:" + buffered);
+        Log.i("Xyzzy", "Set buffered:" + this + "=" + buffered);
         this.buffered = buffered;
     }
 
     public void setCursor(short column, short line) {
         clearStyles();
+        if (displayState == DisplayState.FLUSH_UNSETCURSOR) {
+            displayState = DisplayState.FLUSH_SETCURSOR;
+        }
         if (column < this.column) {
             reset();
         }

@@ -2,9 +2,11 @@
 package uk.addie.xyzzy;
 
 import uk.addie.xyzzy.gameselection.SelectionActivity;
+import uk.addie.xyzzy.header.ZKeycode;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 
 enum MenuButtons implements Invokeable {
     ABOUT {
@@ -59,5 +61,39 @@ enum MenuButtons implements Invokeable {
         @Override public String toString() {
             return "Leave game";
         }
+    },
+    CURSOR_UP {
+        @Override public void invoke() {
+            pressZKey(ZKeycode.ARROW_UP);
+        }
+    },
+    CURSOR_DOWN {
+        @Override public void invoke() {
+            pressZKey(ZKeycode.ARROW_DOWN);
+        }
+    },
+    CURSOR_LEFT {
+        @Override public void invoke() {
+            pressZKey(ZKeycode.ARROW_LEFT);
+        }
+    },
+    CURSOR_RIGHT {
+        @Override public void invoke() {
+            pressZKey(ZKeycode.ARROW_RIGHT);
+        }
+    },
+    BACKSPACE {
+        @Override public void invoke() {
+            pressZKey(ZKeycode.BACKSPACE);
+        }
+    },
+    ENTER {
+        @Override public void invoke() {
+            pressZKey(ZKeycode.RETURN);
+        }
     };
+    protected void pressZKey(int keyCode) {
+        Log.d("Xyzzy", "Synthetic Z Key:" + keyCode);
+        MainActivity.activity.onKeyDown(keyCode, null);
+    }
 }
