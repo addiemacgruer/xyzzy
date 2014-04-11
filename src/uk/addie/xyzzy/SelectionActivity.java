@@ -21,7 +21,6 @@ import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -29,6 +28,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class SelectionActivity extends Activity implements ListAdapter { // NO_UCD (use default)
+    static int       selected      = -1;
+    final static int INTERSTITIALS = 3;
+
     private static String getPath(Context context, Uri uri) {
         if ("content".equalsIgnoreCase(uri.getScheme())) {
             String[] projection = { MediaColumns.DATA };
@@ -69,8 +71,39 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         return true;
     }
 
+    TextView gameNameAtListPosition(final int position) {
+        TextView tv = selectionPageTextView();
+        final String name = games.get(position);
+        tv.setText(name);
+        if (selected == position) {
+            tv.setTextColor(0xffffffff);
+            tv.setBackgroundColor(0xff000000);
+        } else {
+            tv.setTextColor(0xff000000);
+            tv.setBackgroundColor(0xffffffff);
+        }
+        if (!name.startsWith("+")) {
+            tv.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    //                    startGame(all.get(name)); TODO this is startgame
+                    selected = position;
+                    for (DataSetObserver dso : observer) {
+                        dso.onChanged();
+                    }
+                }
+            });
+        } else {
+            tv.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    showFileChooser();
+                }
+            });
+        }
+        return tv;
+    }
+
     @Override public int getCount() {
-        return games.size();
+        return games.size() + (selected == -1 ? 0 : INTERSTITIALS);
     }
 
     private void getGameNameDialogue(final String pathToGame) {
@@ -103,25 +136,37 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         return 0;
     }
 
-    @Override public View getView(int position, View convertView, ViewGroup parent) {
-        TextView tv = new TextView(getApplicationContext());
-        final String name = games.get(position);
-        tv.setText(name);
-        tv.setTextSize(textSize * 2);
-        tv.setPadding(textSize * 2, textSize * 2, textSize * 2, textSize * 2);
-        tv.setTextColor(0xff000000);
-        if (!name.startsWith("+")) {
-            tv.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                    startGame(all.get(name));
-                }
-            });
+    @Override public View getView(final int listViewPosition, View convertView, ViewGroup parent) {
+        final int position;
+        if (selected == -1) {
+            position = listViewPosition;
+        } else if (listViewPosition <= selected) {
+            position = listViewPosition;
+        } else if (listViewPosition > selected + INTERSTITIALS) {
+            position = listViewPosition - INTERSTITIALS;
         } else {
+            position = selected - listViewPosition;
+        }
+        final TextView tv;
+        if (position >= 0) {
+            tv = gameNameAtListPosition(position);
+        } else if (position == -1) {
+            tv = selectionPageTextView();
+            tv.setText(all.get(games.get(selected)));
+        } else if (position == -2) {
+            tv = selectionPageTextView();
+            tv.setText("Play " + games.get(selected));
             tv.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
-                    showFileChooser();
+                    startGame(all.get(games.get(selected)));
                 }
             });
+        } else if (position == -3) {
+            tv = selectionPageTextView();
+            tv.setText("Remove from list");
+        } else {
+            tv = selectionPageTextView();
+            tv.setText("????");
         }
         return tv;
     }
@@ -167,7 +212,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupGames();
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.selector);
         ListView lv = (ListView) findViewById(R.id.selector);
         lv.setAdapter(this);
@@ -195,6 +240,13 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     @Override public void registerDataSetObserver(DataSetObserver dso) {
         Log.d("Xyzzy", "Registering observer:" + dso);
         this.observer.add(dso);
+    }
+
+    TextView selectionPageTextView() {
+        TextView tv = new TextView(getApplicationContext());
+        tv.setTextSize(textSize * 2);
+        tv.setPadding(textSize * 2, textSize * 2, textSize * 2, textSize * 2);
+        return tv;
     }
 
     private void setupGames() {

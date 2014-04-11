@@ -235,6 +235,9 @@ public class ZWindow implements Serializable {
 
     public void setCursor(short column, short line) {
         clearStyles();
+        if (column < this.column) {
+            reset();
+        }
         this.column = column;
         this.row = line;
     }
