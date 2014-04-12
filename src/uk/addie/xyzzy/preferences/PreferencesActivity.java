@@ -18,22 +18,42 @@ public class PreferencesActivity extends Activity implements OnClickListener, On
     private CheckBox         enableSound;
     private static final int minTextSize = 6;
     private static final int maxTextSize = 48;
+    private CheckBox         reportMinor;
+    private CheckBox         useColour;
 
-    @Override public void onClick(View view) {
-        Log.i("Xyzzy", "Clicked:" + view);
+    private CheckBox initialiseCheckbox(int viewId, Preferences pref) {
+        CheckBox rval = (CheckBox) findViewById(viewId);
+        rval.setOnClickListener(this);
+        rval.setChecked((Boolean) pref.getValue(this));
+        return rval;
     }
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.preferences);
-        enableSound = (CheckBox) findViewById(R.id.enableSound);
-        enableSound.setOnClickListener(this);
+    private void initialiseFontSizeBar() {
         seekBar = (SeekBar) findViewById(R.id.fontsizeSeekbar);
         seekBar.setOnTouchListener(this);
         seekBar.setMax(maxTextSize - minTextSize);
         int textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
         seekBar.setProgress(textSize - minTextSize);
         updateTextSize(textSize);
+    }
+
+    @Override public void onClick(View view) {
+        if (view == enableSound) {
+            Preferences.SOUND_ON.setValue(this, enableSound.isChecked());
+        } else if (view == reportMinor) {
+            Preferences.REPORT_MINOR.setValue(this, reportMinor.isChecked());
+        } else if (view == useColour) {
+            Preferences.USE_COLOUR.setValue(this, useColour.isChecked());
+        }
+    }
+
+    @Override protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.preferences);
+        enableSound = initialiseCheckbox(R.id.enableSound, Preferences.SOUND_ON);
+        reportMinor = initialiseCheckbox(R.id.reportMinor, Preferences.REPORT_MINOR);
+        useColour = initialiseCheckbox(R.id.useColour, Preferences.USE_COLOUR);
+        initialiseFontSizeBar();
     }
 
     @Override public boolean onTouch(View v, MotionEvent event) {

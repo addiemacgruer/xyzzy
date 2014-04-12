@@ -32,6 +32,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Enable sound" />
+                <CheckBox
+            android:id="@+id/useColour"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Use colour" />
+        <CheckBox
+            android:id="@+id/reportMinor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Report minor errors in story files" />
 
     </LinearLayout>
 

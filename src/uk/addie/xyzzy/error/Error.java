@@ -1,6 +1,8 @@
 
 package uk.addie.xyzzy.error;
 
+import uk.addie.xyzzy.MainActivity;
+import uk.addie.xyzzy.preferences.Preferences;
 import uk.addie.xyzzy.state.Memory;
 import uk.addie.xyzzy.zmachine.Decoder;
 import uk.addie.xyzzy.zobjects.ZWindow;
@@ -50,7 +52,6 @@ public enum Error {/* Error codes */
     OBJECT_ZERO("Called object zero.  Substituting object one, and hoping for the best"); /* @get_next_prop called with object 0 */
     public final String  string;
     public final boolean fatal;
-    private boolean      seenBefore = false;
 
     Error(String string) {
         this.string = string;
@@ -67,10 +68,9 @@ public enum Error {/* Error codes */
             return;
         }
         Log.e("Xyzzy", string);
-        if (!seenBefore) {
+        if (fatal || (Boolean) Preferences.REPORT_MINOR.getValue(MainActivity.activity)) {
             Memory.streams().append((fatal ? "*** FATAL: " : "*** ERROR: ") + string + " ***");
         }
-        seenBefore = true;
         if (fatal) {
             ZWindow.printAllScreens();
             throw new XyzzyException(string);

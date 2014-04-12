@@ -18,6 +18,7 @@ import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.os.Main;
+import uk.addie.xyzzy.preferences.Preferences;
 import uk.addie.xyzzy.state.Memory;
 import uk.addie.xyzzy.util.Bit;
 import uk.addie.xyzzy.zmachine.CallStack;
@@ -927,6 +928,9 @@ import android.util.Log;
     },
     SET_COLOUR(2, 0x1b) {
         @Override public void invoke(ZStack<Short> arguments) {
+            if (!(Boolean) Preferences.USE_COLOUR.getValue(MainActivity.activity)) {
+                return;
+            }
             final short foreground = arguments.get(0);
             final short background = arguments.get(1);
             ZWindow.setColour(foreground, background);
@@ -937,6 +941,9 @@ import android.util.Log;
     },
     SET_TRUE_COLOUR(4, 0xd) {
         @Override public void invoke(ZStack<Short> arguments) {
+            if (!(Boolean) Preferences.USE_COLOUR.getValue(MainActivity.activity)) {
+                return;
+            }
             final short foreground = arguments.get(0);
             final short background = arguments.get(1);
             ZWindow.setTrueColour(foreground, background);
@@ -1041,6 +1048,9 @@ import android.util.Log;
     },
     SOUND_EFFECT(3, 0x15) {
         @Override public void invoke(ZStack<Short> arguments) {
+            if (!(Boolean) Preferences.SOUND_ON.getValue(MainActivity.activity)) {
+                return;
+            }
             final short number = arguments.get(0);
             final short effect = arguments.get(1);
             final short volume = arguments.get(2);

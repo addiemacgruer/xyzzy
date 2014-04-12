@@ -30,6 +30,32 @@ public enum Preferences {
         @Override public void setValue(Activity activity, Object value) {
             setBooleanType(activity, value);
         }
+    },
+    REPORT_MINOR {
+        @Override Object defaultValue() {
+            return false;
+        }
+
+        @Override public Object getValue(Activity activity) {
+            return getBooleanType(activity);
+        }
+
+        @Override public void setValue(Activity activity, Object value) {
+            setBooleanType(activity, value);
+        }
+    },
+    USE_COLOUR {
+        @Override Object defaultValue() {
+            return true;
+        }
+
+        @Override public Object getValue(Activity activity) {
+            return getBooleanType(activity);
+        }
+
+        @Override public void setValue(Activity activity, Object value) {
+            setBooleanType(activity, value);
+        }
     };
     abstract Object defaultValue();
 
