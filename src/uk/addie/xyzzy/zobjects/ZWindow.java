@@ -12,6 +12,7 @@ import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.R;
+import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
 import android.text.InputType;
@@ -207,11 +208,11 @@ public class ZWindow implements Serializable {
             final TextView tv = textView();
             tv.setText(ssb);
             MainActivity.activity.addView(tv, windowMap[windowCount]);
-            //            buffer.clear();
         }
         displayState = DisplayState.FLUSH_UNSETCURSOR;
-        //        row = 0;
-        //        column = 0;
+        if (windowCount > 0 && Header.VERSION.value() < 5) { // redraw all but the main screen each turn for old games.
+            buffer.clear();
+        }
     }
 
     public void println() {
@@ -263,9 +264,9 @@ public class ZWindow implements Serializable {
         if (column < this.column) {
             reset();
         }
-        // games will occasionally request negative indexes.
-        this.column = Math.max(column, 0);
-        this.row = Math.max(line, 0);
+        // games will occasionally request negative indexes, especially if the screen is too narrow
+        this.column = Math.max(column, 1) - 1;
+        this.row = Math.max(line, 1) - 1;
     }
 
     @Override public String toString() {
