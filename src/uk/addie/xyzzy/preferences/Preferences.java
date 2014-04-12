@@ -10,11 +10,11 @@ public enum Preferences {
             return 16;
         }
 
-        @Override Object getValue(Activity activity) {
+        @Override public Object getValue(Activity activity) {
             return getIntType(activity);
         }
 
-        @Override void setValue(Activity activity, Object value) {
+        @Override public void setValue(Activity activity, Object value) {
             setIntType(activity, value);
         }
     },
@@ -23,11 +23,11 @@ public enum Preferences {
             return true;
         }
 
-        @Override Object getValue(Activity activity) {
+        @Override public Object getValue(Activity activity) {
             return getBooleanType(activity);
         }
 
-        @Override void setValue(Activity activity, Object value) {
+        @Override public void setValue(Activity activity, Object value) {
             setBooleanType(activity, value);
         }
     };
@@ -43,7 +43,7 @@ public enum Preferences {
         return xyzzyPrefs.getInt(toString(), (Integer) defaultValue());
     }
 
-    abstract Object getValue(Activity activity);
+    public abstract Object getValue(Activity activity);
 
     void setBooleanType(Activity activity, Object value) {
         SharedPreferences.Editor sp = activity.getSharedPreferences("Xyzzy", 0).edit();
@@ -57,5 +57,5 @@ public enum Preferences {
         sp.commit();
     }
 
-    abstract void setValue(Activity activity, Object value);
+    public abstract void setValue(Activity activity, Object value);
 }

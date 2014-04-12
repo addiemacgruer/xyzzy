@@ -6,12 +6,12 @@ import java.util.List;
 
 import uk.addie.xyzzy.gameselection.SelectionActivity;
 import uk.addie.xyzzy.header.ZKeycode;
+import uk.addie.xyzzy.preferences.Preferences;
 import uk.addie.xyzzy.zmachine.Decoder;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -196,8 +196,7 @@ public class MainActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
-        SharedPreferences xyzzyPrefs = getSharedPreferences("Xyzzy", 0);
-        textSize = xyzzyPrefs.getInt("textSize", 16);
+        textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
         for (View v : textBoxes) {
             if (v instanceof TextView) {
                 ((TextView) v).setTextSize(textSize);

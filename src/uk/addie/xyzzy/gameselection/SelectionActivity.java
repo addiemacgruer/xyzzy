@@ -9,6 +9,7 @@ import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.R;
+import uk.addie.xyzzy.preferences.Preferences;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -256,8 +257,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
 
     @Override protected void onResume() {
         super.onResume();
-        SharedPreferences xyzzyPrefs = getSharedPreferences("Xyzzy", 0);
-        this.textSize = xyzzyPrefs.getInt("textSize", 16);
+        this.textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
         Log.d("Xyzzy", "SelectionActivity onResume");
         for (DataSetObserver dso : observer) {
             dso.onChanged();
