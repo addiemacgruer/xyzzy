@@ -68,20 +68,24 @@ public class MainActivity extends Activity {
                 }
                 ll.addView(tv);
                 focusTextView(tv);
-                //                if (tv instanceof EditText && readyToDisable != null) {
-                //                    readyToDisable.setEnabled(false);
-                //                    readyToDisable = null;
-                //                }
             }
         });
         tv.setTag(viewId);
-        textBoxes.add(tv);
+        int maximumScroll = (Integer) Preferences.SCROLL_BACK.getValue(this);
+        synchronized (textBoxes) {
+            textBoxes.add(tv);
+            while (textBoxes.size() > maximumScroll) {
+                textBoxes.remove(0);
+            }
+        }
     }
 
     void endMe() {
         Log.i("Xyzzy", "Shutting down...");
         activity = null;
-        textBoxes.clear();
+        synchronized (textBoxes) {
+            textBoxes.clear();
+        }
         Decoder.terminate();
         logicThread = null;
         synchronized (inputSyncObject) {
@@ -126,13 +130,15 @@ public class MainActivity extends Activity {
                 logicThread.start();
             }
         }
-        for (View v : textBoxes) {
-            final LinearLayout oldLinearLayout = (LinearLayout) v.getParent();
-            if (oldLinearLayout != null) {
-                oldLinearLayout.removeView(v);
+        synchronized (textBoxes) {
+            for (View v : textBoxes) {
+                final LinearLayout oldLinearLayout = (LinearLayout) v.getParent();
+                if (oldLinearLayout != null) {
+                    oldLinearLayout.removeView(v);
+                }
+                final LinearLayout newLinearLayout = (LinearLayout) findViewById((Integer) v.getTag());
+                newLinearLayout.addView(v);
             }
-            final LinearLayout newLinearLayout = (LinearLayout) findViewById((Integer) v.getTag());
-            newLinearLayout.addView(v);
         }
     }
 
@@ -197,9 +203,11 @@ public class MainActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();
         textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
-        for (View v : textBoxes) {
-            if (v instanceof TextView) {
-                ((TextView) v).setTextSize(textSize);
+        synchronized (textBoxes) {
+            for (View v : textBoxes) {
+                if (v instanceof TextView) {
+                    ((TextView) v).setTextSize(textSize);
+                }
             }
         }
     }
@@ -209,10 +217,12 @@ public class MainActivity extends Activity {
             @Override public void run() {
                 LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
                 ll.removeAllViews();
-                List<View> tbCopy = new ArrayList<View>(textBoxes);
-                for (View v : tbCopy) {
-                    if ((Integer) v.getTag() == viewId) {
-                        textBoxes.remove(v);
+                synchronized (textBoxes) {
+                    List<View> tbCopy = new ArrayList<View>(textBoxes);
+                    for (View v : tbCopy) {
+                        if ((Integer) v.getTag() == viewId) {
+                            textBoxes.remove(v);
+                        }
                     }
                 }
             }

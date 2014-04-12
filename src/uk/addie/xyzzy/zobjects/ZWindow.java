@@ -15,6 +15,7 @@ import uk.addie.xyzzy.R;
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
+import android.graphics.Point;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -192,6 +193,23 @@ public class ZWindow implements Serializable {
             }
         }
         currentTextStyle.clear();
+    }
+
+    public Point cursorPosition() {
+        return new Point(column, row);
+    }
+
+    public void eraseLine(int line) {
+        if (line == 1) { // erase line from current cursor to end of row.
+            final SpannableStringBuilder currentRow = buffer.get(row);
+            final int currentRowLength = currentRow.length();
+            if (currentRowLength <= column) {
+                return;
+            }
+            final SpannableStringBuilder replacementRow = new SpannableStringBuilder(currentRow.subSequence(column,
+                    currentRowLength));
+            buffer.set(row, replacementRow);
+        } // otherwise, do nothing.
     }
 
     public void flush() {

@@ -158,6 +158,9 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         } else if (position == -1) {
             tv = selectionPageTextView();
             tv.setText(all.get(games.get(selected)));
+            tv.setTextSize(textSize);
+            tv.setTextColor(0x88000000);
+            tv.setBackgroundColor(0xffffce4e);
         } else if (position == -2) {
             tv = selectionPageTextView();
             tv.setText("Play " + games.get(selected));
@@ -166,9 +169,13 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
                     startGame(all.get(games.get(selected)));
                 }
             });
+            tv.setTextColor(0xff000000);
+            tv.setBackgroundColor(0xffffce4e);
         } else if (position == -3) {
             tv = selectionPageTextView();
             tv.setText("Remove from list");
+            tv.setTextColor(0xff000000);
+            tv.setBackgroundColor(0xffffce4e);
         } else {
             tv = selectionPageTextView();
             tv.setText("????");

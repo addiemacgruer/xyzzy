@@ -31,6 +31,7 @@ import uk.addie.xyzzy.zobjects.ZProperty;
 import uk.addie.xyzzy.zobjects.ZText;
 import uk.addie.xyzzy.zobjects.ZWindow;
 import android.content.Context;
+import android.graphics.Point;
 import android.util.Log;
 
 @SuppressWarnings({ "unused", "ucd" }) public enum Opcode {
@@ -206,7 +207,6 @@ import android.util.Log;
             final short y = arguments.get(1);
             final short x = arguments.get(2);
             // TODO draw_picture
-            throw new UnsupportedOperationException("@draw_picture");
         }
     },
     ENCODE_TEXT(3, 0x1c) {
@@ -222,8 +222,7 @@ import android.util.Log;
     ERASE_LINE(3, 0xe) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short value = arguments.get(0);
-            // TODO erase_line
-            throw new UnsupportedOperationException("@erase_line");
+            Memory.streams().eraseLine(value);
         }
     },
     ERASE_PICTURE(4, 0x7) {
@@ -232,7 +231,6 @@ import android.util.Log;
             final short y = arguments.get(1);
             final short x = arguments.get(2);
             // TODO erase_picture
-            throw new UnsupportedOperationException("@erase_picture");
         }
     },
     ERASE_WINDOW(3, 0xd) {
@@ -276,8 +274,9 @@ import android.util.Log;
     GET_CURSOR(3, 0x10) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short array = arguments.get(0);
-            // TODO get cursor
-            throw new UnsupportedOperationException("@get_cursor");
+            Point cursor = Memory.current().zwin.get(Memory.current().currentScreen).cursorPosition();
+            Memory.current().buffer.put(array, cursor.y); // row first
+            Memory.current().buffer.put(array + 1, cursor.x);// column second 
         }
     },
     GET_NEXT_PROP(2, 0x13) {
@@ -362,7 +361,7 @@ import android.util.Log;
             final short window = arguments.get(0);
             final short propertyNumber = arguments.get(0);
             // TODO get_wind_prop.
-            throw new UnsupportedOperationException("@get_wind_prop");
+            readDestinationAndStoreResult(0);
         }
     },
     INC(1, 0x5) {
@@ -385,7 +384,6 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short number = arguments.get(0);
             // TODO input stream
-            throw new UnsupportedOperationException("@input_stream");
         }
     },
     INSERT_OBJ(2, 0xe) {
@@ -511,6 +509,14 @@ import android.util.Log;
             readDestinationAndStoreResult(result);
         }
     },
+    MAKE_MENU(4, 0x1b) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            // TODO make-menu
+            final short number = arguments.get(0);
+            final short table = arguments.get(1);
+            branchOnTest(false);
+        }
+    },
     MOD(2, 0x18) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short a = arguments.get(0);
@@ -520,6 +526,20 @@ import android.util.Log;
             }
             final short value = (short) (a % b);
             readDestinationAndStoreResult(value);
+        }
+    },
+    MOUSE_WINDOW(4, 0x17) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            // TODO mouse_window
+            final short window = arguments.get(0);
+        }
+    },
+    MOVE_WINDOW(4, 0x10) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            // TODO move_window
+            final short window = arguments.get(0);
+            final short y = arguments.get(1);
+            final short x = arguments.get(2);
         }
     },
     MUL(2, 0x16) {
@@ -580,7 +600,13 @@ import android.util.Log;
             final short pictureNumber = arguments.get(0);
             final short array = arguments.get(1);
             // TODO picture_data
-            throw new UnsupportedOperationException("@picture_data");
+            branchOnTest(false);
+        }
+    },
+    PICTURE_TABLE(4, 0x1c) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            final short table = arguments.get(0);
+            //TODO picture-table.  Should cache the pictures in the table given.
         }
     },
     PIRACY(0, 0xf) {
@@ -591,6 +617,19 @@ import android.util.Log;
     POP {
         @Override public void invoke(ZStack<Short> arguments) {
             Memory.current().callStack.peek().pop();
+        }
+    },
+    POP_STACK(4, 0x15) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            final short items = arguments.get(0);
+            if (arguments.size() > 1) {
+                final short stack = arguments.get(1);
+                //TODO user stacks
+            } else {
+                for (int i = 0; i < items; i++) {
+                    Memory.current().callStack.peek().pop();
+                }
+            }
         }
     },
     PRINT(0, 0x2) {
@@ -611,6 +650,12 @@ import android.util.Log;
             Memory.streams().append(Character.toString((char) outputCharacterCode));
         }
     },
+    PRINT_FORM(4, 0x1a) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            final short formattedTable = arguments.get(0);
+            // TODO print-form
+        }
+    },
     PRINT_NUM(3, 0x6) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short value = arguments.get(0);
@@ -620,7 +665,6 @@ import android.util.Log;
     PRINT_OBJ(1, 0xa) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short object = arguments.get(0);
-            //TODO halt on invalid number
             final ZObject zo = ZObject.count(object);
             if (Debug.screen) {
                 Log.i("Xyzzy", "PRINT OBJECT: " + zo);
@@ -664,8 +708,7 @@ import android.util.Log;
     PRINT_UNICODE(4, 0xb) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short charNumber = arguments.get(0);
-            // TODO print_unicode
-            throw new UnsupportedOperationException("@print_unicode");
+            Memory.streams().append(Character.toString((char) charNumber));
         }
     },
     PULL(3, 0x9) {
@@ -685,6 +728,14 @@ import android.util.Log;
             Memory.current().callStack.peek().push(value);
         }
     },
+    PUSH_STACK(4, 0x18) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            final short value = arguments.get(0);
+            final short stack = arguments.get(1);
+            // TODO push-stack
+            branchOnTest(false);
+        }
+    },
     PUT_PROP(3, 0x3) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short object = arguments.get(0);
@@ -693,6 +744,14 @@ import android.util.Log;
             final ZObject zo = ZObject.count(object);
             final ZProperty zp = new ZProperty(zo);
             zp.putProperty(property, value);
+        }
+    },
+    PUT_WIND_PROP(4, 0x19) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            final short window = arguments.get(0);
+            final short propertyNmber = arguments.get(1);
+            final short value = arguments.get(2);
+            // TODO put-wind-prop
         }
     },
     QUIT(0, 0xa) {
@@ -769,6 +828,16 @@ import android.util.Log;
                 break;
             }
             readDestinationAndStoreResult(value);
+        }
+    },
+    READ_MOUSE(4, 0x16) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            //TODO read-mouse
+            final short array = arguments.get(0);
+            Memory.current().buffer.put(array + 0, 0); // mouse X
+            Memory.current().buffer.put(array + 1, 0); // mouse Y
+            Memory.current().buffer.put(array + 2, 0); // mouse buttons
+            Memory.current().buffer.put(array + 3, 0); // menu word
         }
     },
     REMOVE_OBJ(1, 0x9) {
@@ -918,6 +987,13 @@ import android.util.Log;
             branchOnTest(false); // eat the branch address
         }
     },
+    SCROLL_WINDOW(4, 0x14) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            // TODO scroll-window
+            final short window = arguments.get(0);
+            final short pixels = arguments.get(1);
+        }
+    },
     SET_ATTR(2, 0xb) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short object = arguments.get(0);
@@ -939,19 +1015,6 @@ import android.util.Log;
             }
         }
     },
-    SET_TRUE_COLOUR(4, 0xd) {
-        @Override public void invoke(ZStack<Short> arguments) {
-            if (!(Boolean) Preferences.USE_COLOUR.getValue(MainActivity.activity)) {
-                return;
-            }
-            final short foreground = arguments.get(0);
-            final short background = arguments.get(1);
-            ZWindow.setTrueColour(foreground, background);
-            if (Debug.screen) {
-                Log.w("Xyzzy", "set_true_colour " + foreground + " " + background);
-            }
-        }
-    },
     SET_CURSOR(3, 0xf) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short line = arguments.get(0);
@@ -969,7 +1032,6 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short font = arguments.get(0);
             // TODO set_font
-            throw new UnsupportedOperationException("@set_font");
         }
     },
     SET_MARGINS(4, 0x8) {
@@ -978,7 +1040,6 @@ import android.util.Log;
             final short right = arguments.get(0);
             final short window = arguments.get(0);
             // TODO set_margins
-            throw new UnsupportedOperationException("@set_margins");
         }
     },
     SET_TEXT_STYLE(3, 0x11) {
@@ -1025,6 +1086,19 @@ import android.util.Log;
             }
         }
     },
+    SET_TRUE_COLOUR(4, 0xd) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            if (!(Boolean) Preferences.USE_COLOUR.getValue(MainActivity.activity)) {
+                return;
+            }
+            final short foreground = arguments.get(0);
+            final short background = arguments.get(1);
+            ZWindow.setTrueColour(foreground, background);
+            if (Debug.screen) {
+                Log.w("Xyzzy", "set_true_colour " + foreground + " " + background);
+            }
+        }
+    },
     SET_WINDOW(3, 0xb) {
         @Override public void invoke(ZStack<Short> arguments) {
             final short window = arguments.get(0);
@@ -1042,6 +1116,7 @@ import android.util.Log;
             if (Header.VERSION.value() != 3) {
                 NOP.invoke(arguments);
             } else {
+                //TODO show-status
                 throw new UnsupportedOperationException("@show-status");
             }
         }
@@ -1158,6 +1233,22 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             //TODO verify
             branchOnTest(true);
+        }
+    },
+    WINDOW_SIZE(4, 0x11) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            // TODO window-size
+            final short window = arguments.get(0);
+            final short y = arguments.get(1);
+            final short x = arguments.get(2);
+        }
+    },
+    WINDOW_STYLE(4, 0x12) {
+        @Override public void invoke(ZStack<Short> arguments) {
+            // TODO window-style
+            final short window = arguments.get(0);
+            final short flags = arguments.get(1);
+            final short operation = arguments.get(2);
         }
     };
     protected static void branch(final int offset) {

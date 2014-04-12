@@ -84,30 +84,54 @@ enum MenuButtons implements MenuButton {
         @Override public void invoke() {
             pressZKey(ZKeycode.ARROW_UP);
         }
+
+        @Override public String toString() {
+            return "Cursor up";
+        }
     },
     CURSOR_DOWN {
         @Override public void invoke() {
             pressZKey(ZKeycode.ARROW_DOWN);
+        }
+
+        @Override public String toString() {
+            return "Cursor down";
         }
     },
     CURSOR_LEFT {
         @Override public void invoke() {
             pressZKey(ZKeycode.ARROW_LEFT);
         }
+
+        @Override public String toString() {
+            return "Cursor left";
+        }
     },
     CURSOR_RIGHT {
         @Override public void invoke() {
             pressZKey(ZKeycode.ARROW_RIGHT);
+        }
+
+        @Override public String toString() {
+            return "Cursor right";
         }
     },
     BACKSPACE {
         @Override public void invoke() {
             pressZKey(ZKeycode.BACKSPACE);
         }
+
+        @Override public String toString() {
+            return "Backspace";
+        }
     },
     ENTER {
         @Override public void invoke() {
             pressZKey(ZKeycode.RETURN);
+        }
+
+        @Override public String toString() {
+            return "Enter";
         }
     };
     @Override public int menuButtonIcon() {

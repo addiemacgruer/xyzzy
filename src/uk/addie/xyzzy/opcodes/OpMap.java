@@ -12,9 +12,11 @@ public class OpMap {
     private static final Opcode[][] opmap;
     static {
         opmap = new Opcode[5][];
-        for (int i = 0; i < opmap.length; i++) {
-            opmap[i] = new Opcode[0x20];
-        }
+        opmap[2] = new Opcode[0x20];
+        opmap[1] = new Opcode[0x10];
+        opmap[0] = new Opcode[0x10];
+        opmap[3] = new Opcode[0x20];
+        opmap[4] = new Opcode[0x20];
     }
 
     public static void adjustForVersion(int version) {
@@ -44,6 +46,19 @@ public class OpMap {
             Log.i("Xyzzy", z + " " + Decoder.arguments());
         }
         z.invoke(arguments);
+    }
+
+    public static void logAllOpcodes() {
+        for (int j = 0; j < opmap.length; j++) {
+            for (int i = 0; i < opmap[j].length; i++) {
+                Opcode z = opmap[j][i];
+                if (z != null) {
+                    Log.d("Xyzzy", j + ":" + Integer.toHexString(i) + " " + z);
+                } else {
+                    Log.d("Xyzzy", j + ":" + Integer.toHexString(i) + " illegal");
+                }
+            }
+        }
     }
 
     public static void map(final Opcode z) {

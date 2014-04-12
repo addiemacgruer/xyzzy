@@ -68,6 +68,7 @@ public class Memory implements Serializable {
         Header.STANDARD_HIGH.put(1);
         Header.STANDARD_LOW.put(0);
         OpMap.adjustForVersion(Header.VERSION.value());
+        //        OpMap.logAllOpcodes();
         Dictionary.initDefault();
         ZObject.enumerateObjects();
     }

@@ -56,6 +56,19 @@ public enum Preferences {
         @Override public void setValue(Activity activity, Object value) {
             setBooleanType(activity, value);
         }
+    },
+    SCROLL_BACK {
+        @Override Object defaultValue() {
+            return 50;
+        }
+
+        @Override public Object getValue(Activity activity) {
+            return getIntType(activity);
+        }
+
+        @Override public void setValue(Activity activity, Object value) {
+            setIntType(activity, value);
+        }
     };
     abstract Object defaultValue();
 

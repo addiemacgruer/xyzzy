@@ -35,6 +35,12 @@ public class ZStream implements Serializable {
         }
     }
 
+    public void eraseLine(int line) {
+        if (!streams[3] && streams[1]) {
+            Memory.current().zwin.get(Memory.current().currentScreen).eraseLine(line);
+        }
+    }
+
     public void println() {
         if (!streams[3] && streams[1]) {
             Memory.current().zwin.get(Memory.current().currentScreen).println();
