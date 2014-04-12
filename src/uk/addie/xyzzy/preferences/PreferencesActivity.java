@@ -3,7 +3,6 @@ package uk.addie.xyzzy.preferences;
 
 import uk.addie.xyzzy.R;
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -32,8 +31,7 @@ public class PreferencesActivity extends Activity implements OnClickListener, On
         seekBar = (SeekBar) findViewById(R.id.fontsizeSeekbar);
         seekBar.setOnTouchListener(this);
         seekBar.setMax(maxTextSize - minTextSize);
-        SharedPreferences xyzzyPrefs = getSharedPreferences("Xyzzy", 0);
-        int textSize = xyzzyPrefs.getInt("textSize", 16);
+        int textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
         seekBar.setProgress(textSize - minTextSize);
         updateTextSize(textSize);
     }
@@ -43,19 +41,12 @@ public class PreferencesActivity extends Activity implements OnClickListener, On
             int newTextSize = seekBar.getProgress() + minTextSize;
             updateTextSize(newTextSize);
             if (event.getAction() == MotionEvent.ACTION_UP) {
-                saveTextSize(newTextSize);
+                Preferences.TEXT_SIZE.setValue(this, newTextSize);
             }
         } else {
             Log.i("Xyzzy", "Touched:" + v + " :" + event);
         }
         return false;
-    }
-
-    private void saveTextSize(int newTextSize) {
-        Log.w("Xyzzy", "New text size:" + newTextSize);
-        SharedPreferences.Editor sp = getSharedPreferences("Xyzzy", 0).edit();
-        sp.putInt("textSize", newTextSize);
-        sp.commit();
     }
 
     void updateTextSize(int textSize) {
