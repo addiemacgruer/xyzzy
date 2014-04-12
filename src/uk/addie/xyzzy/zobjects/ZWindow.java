@@ -37,7 +37,6 @@ public class ZWindow implements Serializable {
     private static int                      foreground;
     private final static View.OnKeyListener okl;
     private static final long               serialVersionUID = 1L;
-    public final static int                 textSize         = 16;
     private static int[]                    windowMap        = { R.id.screen0, R.id.screen1 };
     private static long                     latency          = 0;
     static {
@@ -79,7 +78,6 @@ public class ZWindow implements Serializable {
         et.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
         et.setTextColor(background);
-        et.setTextSize(textSize);
         et.setPadding(0, 0, 0, 0);
         et.setBackgroundColor(foreground);
         et.setImeActionLabel(">", 0);
@@ -122,7 +120,6 @@ public class ZWindow implements Serializable {
         final TextView ett = new TextView(MainActivity.activity.getApplicationContext());
         ett.setTextColor(foreground);
         ett.setBackgroundColor(background);
-        ett.setTextSize(textSize);
         ett.setPadding(0, 0, 0, 0);
         return ett;
     }
@@ -201,8 +198,10 @@ public class ZWindow implements Serializable {
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         int bufferlength = buffer.size();
         for (int i = 0; i < bufferlength; i++) {
+            if (i != 0) {
+                ssb.append('\n');
+            }
             ssb.append(buffer.get(i));
-            ssb.append('\n');
         }
         if (ssb.length() > 0) {
             final TextView tv = textView();

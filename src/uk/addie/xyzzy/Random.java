@@ -3,6 +3,8 @@ package uk.addie.xyzzy;
 
 import java.io.Serializable;
 
+import android.util.Log;
+
 public class Random implements Serializable {
     /**
      * 
@@ -11,7 +13,7 @@ public class Random implements Serializable {
     private int               interval         = 0;
     private int               counter          = 0;
 
-    public int random(final short range) {
+    public int random(final int range) {
         if (range <= 0) { /* set random seed */
             seed_random(-range);
             return 0;
@@ -24,11 +26,10 @@ public class Random implements Serializable {
                 counter = 1;
             }
         } else { /* ...in standard mode */
-            result = (short) System.currentTimeMillis();
-            //            A = 0x015a4e35L * A + 1;
-            //            result = (short) (A >> 16 & 0x7fff);
+            result = (int) System.currentTimeMillis();
         }
         final int randomResult = (result % range) + 1;
+        Log.d("Xyzzy", "Random result:" + randomResult + "/" + range);
         return randomResult;
     }
 

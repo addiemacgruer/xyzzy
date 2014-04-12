@@ -7,9 +7,11 @@ import java.util.List;
 import uk.addie.xyzzy.gameselection.SelectionActivity;
 import uk.addie.xyzzy.header.ZKeycode;
 import uk.addie.xyzzy.zmachine.Decoder;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -23,14 +25,15 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
-    public static MainActivity      activity;
-    private static final List<View> textBoxes       = new ArrayList<View>();
-    private static Thread           logicThread     = null;
-    private static int              lastKey         = 0;
-    public final static Object      inputSyncObject = new Object();
-    public static int               width, height;
+    public static MainActivity activity;
+    static final List<View>    textBoxes       = new ArrayList<View>();
+    private static Thread      logicThread     = null;
+    private static int         lastKey         = 0;
+    public final static Object inputSyncObject = new Object();
+    public static int          width, height;
 
     static void focusTextView(final View tv) {
         tv.setFocusableInTouchMode(true);
@@ -54,17 +57,21 @@ public class MainActivity extends Activity {
 
     private MenuItem[] mis;
     EditText           readyToDisable = null;
+    public int         textSize;
 
     public void addView(final View tv, final int viewId) {
         runOnUiThread(new Runnable() {
             @Override public void run() {
                 LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
+                if (tv instanceof TextView) {
+                    ((TextView) tv).setTextSize(textSize);
+                }
                 ll.addView(tv);
                 focusTextView(tv);
-                if (tv instanceof EditText && readyToDisable != null) {
-                    readyToDisable.setEnabled(false);
-                    readyToDisable = null;
-                }
+                //                if (tv instanceof EditText && readyToDisable != null) {
+                //                    readyToDisable.setEnabled(false);
+                //                    readyToDisable = null;
+                //                }
             }
         });
         tv.setTag(viewId);
@@ -102,6 +109,7 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
+        Log.d("Xyzzy", "MainActivity onCreate");
         getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         activity = this;
         getScreenSize();
@@ -111,33 +119,34 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         //        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-        boolean layout = true;
         synchronized (this) {
             if (logicThread == null) {
                 Log.i("Xyzzy", "Starting new thread");
                 logicThread = new Thread(new Xyzzy(), "XyzzyInterpreter");
                 logicThread.start();
-                layout = false;
             }
         }
-        if (layout) {
-            for (View v : textBoxes) {
-                final LinearLayout oldLinearLayout = (LinearLayout) v.getParent();
-                if (oldLinearLayout != null) {
-                    oldLinearLayout.removeView(v);
-                }
-                final LinearLayout newLinearLayout = (LinearLayout) findViewById((Integer) v.getTag());
-                newLinearLayout.addView(v);
+        for (View v : textBoxes) {
+            final LinearLayout oldLinearLayout = (LinearLayout) v.getParent();
+            if (oldLinearLayout != null) {
+                oldLinearLayout.removeView(v);
             }
+            final LinearLayout newLinearLayout = (LinearLayout) findViewById((Integer) v.getTag());
+            newLinearLayout.addView(v);
         }
     }
 
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
+    @SuppressLint("NewApi") @Override public boolean onCreateOptionsMenu(Menu menu) {
         Log.d("Control", "OCOM");
         mis = new MenuItem[MenuButtons.values().length];
         int i = 0;
         for (MenuButtons mb : MenuButtons.values()) {
-            mis[i++] = menu.add(mb.toString());
+            final MenuItem nextMenu = menu.add(mb.toString());
+            if (mb.menuButtonIcon() != -1) {
+                nextMenu.setIcon(mb.menuButtonIcon());
+                nextMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            }
+            mis[i++] = nextMenu;
         }
         return true;
     }
@@ -153,11 +162,12 @@ public class MainActivity extends Activity {
         }
         synchronized (inputSyncObject) {
             switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
             case KeyEvent.KEYCODE_MENU:
                 return false;
-            case KeyEvent.KEYCODE_DEL:
-                lastKey = ZKeycode.BACKSPACE;
-                break;
+                //            case KeyEvent.KEYCODE_DEL: // TODO bad idea while editing text
+                //                lastKey = ZKeycode.BACKSPACE;
+                //                break;
             case KeyEvent.KEYCODE_ENTER:
                 lastKey = ZKeycode.RETURN;
                 break;
@@ -184,11 +194,28 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    @Override protected void onResume() {
+        super.onResume();
+        SharedPreferences xyzzyPrefs = getSharedPreferences("Xyzzy", 0);
+        textSize = xyzzyPrefs.getInt("textSize", 16);
+        for (View v : textBoxes) {
+            if (v instanceof TextView) {
+                ((TextView) v).setTextSize(textSize);
+            }
+        }
+    }
+
     public void removeChildren(final int viewId) {
         runOnUiThread(new Runnable() {
             @Override public void run() {
                 LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
                 ll.removeAllViews();
+                List<View> tbCopy = new ArrayList<View>(textBoxes);
+                for (View v : tbCopy) {
+                    if ((Integer) v.getTag() == viewId) {
+                        textBoxes.remove(v);
+                    }
+                }
             }
         });
     }

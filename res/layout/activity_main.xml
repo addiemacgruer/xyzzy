@@ -6,17 +6,15 @@
     android:layout_height="fill_parent"
     android:layout_alignParentLeft="true"
     android:layout_alignParentTop="true"
+    android:background="#FFFFFF"
     android:orientation="vertical"
-    
-        android:background="#FFFFFF"
     tools:context=".MainActivity" >
-
 
     <uk.addie.xyzzy.ZScrollView
         android:id="@+id/scroller"
-        android:layout_below="@+id/screen1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/screen1"
         android:background="#FFFFFF"
         android:fillViewport="true" >
 
@@ -24,15 +22,20 @@
             android:id="@+id/screen0"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="bottom"
             android:background="#FFFFFF"
+            android:gravity="bottom"
             android:orientation="vertical" />
-
     </uk.addie.xyzzy.ZScrollView>
 
     <LinearLayout
         android:id="@id/screen1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" />
+        android:orientation="vertical"
+        android:layout_marginLeft="0pt"
+        android:layout_marginRight="0pt"
+        android:layout_marginTop="0pt"
+        android:layout_marginBottom="0pt"
+         />
+
 </RelativeLayout>

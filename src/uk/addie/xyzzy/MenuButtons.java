@@ -3,15 +3,20 @@ package uk.addie.xyzzy;
 
 import uk.addie.xyzzy.gameselection.SelectionActivity;
 import uk.addie.xyzzy.header.ZKeycode;
+import uk.addie.xyzzy.preferences.PreferencesActivity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 
-enum MenuButtons implements Invokeable {
+enum MenuButtons implements MenuButton {
     ABOUT {
         @Override public void invoke() {
             // TODO about this app
+        }
+
+        @Override public int menuButtonIcon() {
+            return R.drawable.ic_action_about;
         }
 
         @Override public String toString() {
@@ -23,6 +28,10 @@ enum MenuButtons implements Invokeable {
             // TODO help with this app
         }
 
+        @Override public int menuButtonIcon() {
+            return R.drawable.ic_action_help;
+        }
+
         @Override public String toString() {
             return "Help";
         }
@@ -32,13 +41,22 @@ enum MenuButtons implements Invokeable {
             MainActivity.activity.showKeyboard();
         }
 
+        @Override public int menuButtonIcon() {
+            return R.drawable.ic_action_keyboard;
+        }
+
         @Override public String toString() {
             return "Show keyboard";
         }
     },
     SETTINGS {
         @Override public void invoke() {
-            // TODO settings
+            Intent intent = new Intent(MainActivity.activity, PreferencesActivity.class);
+            MainActivity.activity.startActivity(intent);
+        }
+
+        @Override public int menuButtonIcon() {
+            return R.drawable.ic_action_settings;
         }
 
         @Override public String toString() {
@@ -92,6 +110,10 @@ enum MenuButtons implements Invokeable {
             pressZKey(ZKeycode.RETURN);
         }
     };
+    @Override public int menuButtonIcon() {
+        return -1;
+    }
+
     protected void pressZKey(int keyCode) {
         Log.d("Xyzzy", "Synthetic Z Key:" + keyCode);
         MainActivity.activity.onKeyDown(keyCode, null);

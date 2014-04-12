@@ -9,6 +9,7 @@ import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.R;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -21,6 +22,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -30,8 +33,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class SelectionActivity extends Activity implements ListAdapter { // NO_UCD (use default)
-    static int       selected      = -1;
-    final static int INTERSTITIALS = 3;
+    static int                         selected      = -1;
+    protected static SelectionActivity activity;
+    final static int                   INTERSTITIALS = 3;
 
     private static String getPath(Context context, Uri uri) {
         Log.d("Xyzzy", "getPath:" + context + " uri:" + uri);
@@ -60,6 +64,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     final List<DataSetObserver> observer         = new ArrayList<DataSetObserver>();
     public final static String  EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
     private static final int    FILE_SELECT_CODE = 0;
+    private MenuItem[]          mis;
 
     private void addPathToGamesList(String path) {
         Log.d("Xyzzy", "Adding path:" + path);
@@ -209,12 +214,54 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
+        Log.d("Xyzzy", "SelectionActivity onCreate");
         super.onCreate(savedInstanceState);
+        activity = this;
         setupGames();
-        //        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.selector);
         ListView lv = (ListView) findViewById(R.id.selector);
         lv.setAdapter(this);
+    }
+
+    @SuppressLint("NewApi") @Override public boolean onCreateOptionsMenu(Menu menu) {
+        Log.d("Control", "OCOM");
+        mis = new MenuItem[MenuButtons.values().length];
+        int i = 0;
+        for (MenuButtons mb : MenuButtons.values()) {
+            final MenuItem nextMenu = menu.add(mb.toString());
+            if (mb.menuButtonIcon() != -1) {
+                Log.d("Xyzzy", "Menu icon:" + mb.menuButtonIcon());
+                nextMenu.setIcon(mb.menuButtonIcon());
+                nextMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            }
+            mis[i++] = nextMenu;
+        }
+        return true;
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        int selected = -1;
+        if (mis == null) { // then we've not initialised?
+            Log.e("Xyzzy", "Android onOptionsItemSelected before onCreateOptionsMenu?");
+            return false;
+        }
+        for (int i = 0; i < mis.length; ++i) {
+            if (item == mis[i]) {
+                selected = i;
+            }
+        }
+        MenuButtons.values()[selected].invoke();
+        return true;
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        SharedPreferences xyzzyPrefs = getSharedPreferences("Xyzzy", 0);
+        this.textSize = xyzzyPrefs.getInt("textSize", 16);
+        Log.d("Xyzzy", "SelectionActivity onResume");
+        for (DataSetObserver dso : observer) {
+            dso.onChanged();
+        }
     }
 
     void regenerateData() {
@@ -249,8 +296,6 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     }
 
     private void setupGames() {
-        SharedPreferences xyzzyPrefs = getSharedPreferences("Xyzzy", 0);
-        this.textSize = xyzzyPrefs.getInt("textSize", 16);
         regenerateData();
     }
 

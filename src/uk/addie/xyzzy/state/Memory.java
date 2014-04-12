@@ -54,7 +54,7 @@ public class Memory implements Serializable {
         config |= InterpreterFlag1.CONFIG_TIMEDINPUT; // we don't, it's exceptionally annoying
         Header.CONFIG.put(config);
         int width = MainActivity.width;
-        final int columns = width / ZWindow.textSize;
+        final int columns = Math.max(width / MainActivity.activity.textSize, 80); // some games will complain if they're less than 80 columns
         Header.SCREEN_WIDTH.put(columns);
         Header.SCREEN_HEIGHT.put(24); // a lie, but to try and prevent too much buffering required
         Header.SCREEN_COLS.put(columns);

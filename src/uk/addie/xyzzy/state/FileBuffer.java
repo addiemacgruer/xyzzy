@@ -56,6 +56,8 @@ import android.util.Log;
                 fis = MainActivity.activity.getAssets().open(path.substring(1));
             } else if (path.startsWith("content:")) {
                 fis = MainActivity.activity.getContentResolver().openInputStream(Uri.parse(path));
+            } else if (path.startsWith("file:")) {
+                fis = new FileInputStream(path.substring(5));
             } else {
                 fis = new FileInputStream(path);
             }
