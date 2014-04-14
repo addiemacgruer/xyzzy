@@ -12,35 +12,27 @@ import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.R;
-import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
 import android.graphics.Point;
-import android.text.InputType;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.SparseIntArray;
-import android.view.KeyEvent;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.LinearLayout.LayoutParams;
-import android.widget.TextView;
 
 public class ZWindow implements Serializable {
-    enum DisplayState {
+    private enum DisplayState {
         EMPTY, FLUSH_UNSETCURSOR, FLUSH_SETCURSOR, DRAWN_ON;
     }
 
-    private static int                      background;
-    private final static SparseIntArray     colours          = new SparseIntArray();
-    private static int                      foreground;
-    private final static View.OnKeyListener okl;
-    private static final long               serialVersionUID = 1L;
-    private static int[]                    windowMap        = { R.id.screen0, R.id.screen1, R.id.screen2,
-            R.id.screen3, R.id.screen4, R.id.screen5, R.id.screen6, R.id.screen7 };
-    private static long                     latency          = 0;
+    public static int                   background;
+    private final static SparseIntArray colours          = new SparseIntArray();
+    public static int                   foreground;
+    private static final long           serialVersionUID = 1L;
+    private static int[]                windowMap        = { R.id.screen0, R.id.screen1, R.id.screen2, R.id.screen3,
+            R.id.screen4, R.id.screen5, R.id.screen6, R.id.screen7 };
+    private static long                 latency          = 0;
     static {
         final int[] amigaColours = { 0x0, 0x7fff, 0x0, 0x1d, 0x340, 0x3bd, 0x59a0, 0x7c1f, 0x77a0, 0x7fff, 0x5ad6,
             0x4631, 0x2d6b };
@@ -48,19 +40,8 @@ public class ZWindow implements Serializable {
         for (int i = 0; i < amigaColours.length; i++) {
             colours.put(i, amigaColourToAndroid(amigaColours[i]));
         }
-        okl = new View.OnKeyListener() {
-            @Override public boolean onKey(final View v, final int keyCode, final KeyEvent event) {
-                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
-                    synchronized (MainActivity.inputSyncObject) {
-                        MainActivity.inputSyncObject.notifyAll();
-                    }
-                    return true;
-                }
-                return false;
-            }
-        };
     }
-    private final static double             amiAndroidRatio  = 255.0 / 31.0;        // ratio 0xff to 0x1f
+    private final static double         amiAndroidRatio  = 255.0 / 31.0;        // ratio 0xff to 0x1f
 
     private static int amigaColourToAndroid(int amiga) {
         int red = (int) ((0x1f & amiga) * amiAndroidRatio); // bottom five bits, scaled from 0x1f to 0xff
@@ -73,20 +54,6 @@ public class ZWindow implements Serializable {
     public static void defaultColours() {
         foreground = colours.get(0);
         background = colours.get(1);
-    }
-
-    private static EditText formattedEditText() {
-        final EditText et = new EditText(MainActivity.activity.getApplicationContext());
-        et.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-        et.setTextColor(background);
-        et.setPadding(0, 0, 0, 0);
-        et.setBackgroundColor(foreground);
-        et.setImeActionLabel(">", 0);
-        et.setHorizontallyScrolling(true);
-        et.setInputType(InputType.TYPE_CLASS_TEXT);
-        et.setOnKeyListener(okl);
-        return et;
     }
 
     public static void printAllScreens() {
@@ -118,20 +85,12 @@ public class ZWindow implements Serializable {
         MainActivity.activity.setBackgroundColour(background);
     }
 
-    private static TextView textView() {
-        final TextView ett = new TextView(MainActivity.activity.getApplicationContext());
-        ett.setTextColor(foreground);
-        ett.setBackgroundColor(background);
-        ett.setPadding(0, 0, 0, 0);
-        return ett;
-    }
-
     private transient List<SpannableStringBuilder> buffer           = new ArrayList<SpannableStringBuilder>();
     private boolean                                buffered         = true;
     private final Map<TextStyle, Integer>          currentTextStyle = new EnumMap<TextStyle, Integer>(TextStyle.class);
     private final int                              windowCount;
     private int                                    row, column;
-    DisplayState                                   displayState     = DisplayState.EMPTY;
+    private DisplayState                           displayState     = DisplayState.EMPTY;
     private int                                    naturalHeight    = 0;
 
     public ZWindow(final int window) {
@@ -139,6 +98,7 @@ public class ZWindow implements Serializable {
     }
 
     public void addStyle(final TextStyle ts) {
+        Log.i("Xyzzy", "Window:" + windowCount + " -- Styling " + ts + " from " + column);
         currentTextStyle.put(ts, column);
     }
 
@@ -174,6 +134,7 @@ public class ZWindow implements Serializable {
     }
 
     public void clearStyles() {
+        Log.d("Xyzzy", "clearStyles:" + windowCount);
         if (row >= buffer.size()) {
             currentTextStyle.clear();
             return;
@@ -181,9 +142,7 @@ public class ZWindow implements Serializable {
         for (final TextStyle ts : currentTextStyle.keySet()) {
             final Integer start = currentTextStyle.get(ts);
             final int end = buffer.get(row).length();
-            if (Debug.screen) {
-                Log.i("Xyzzy", "Styling " + ts + " from " + start + " to " + end);
-            }
+            Log.i("Xyzzy", "Window:" + windowCount + " -- Styling " + ts + " from " + start + " to " + end);
             if (ts != TextStyle.REVERSE_VIDEO) {
                 buffer.get(row).setSpan(ts.characterStyle(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
@@ -214,7 +173,6 @@ public class ZWindow implements Serializable {
     }
 
     public void flush() {
-        Log.d("Xyzzy", "Window:" + windowCount + " flushed");
         clearStyles();
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         int bufferlength = buffer.size();
@@ -225,9 +183,7 @@ public class ZWindow implements Serializable {
             ssb.append(buffer.get(i));
         }
         if (ssb.length() > 0) {
-            final TextView tv = textView();
-            tv.setText(ssb);
-            MainActivity.activity.addView(tv, windowMap[windowCount]);
+            MainActivity.activity.addTextView(ssb, foreground, background, windowMap[windowCount]);
         }
         displayState = DisplayState.FLUSH_UNSETCURSOR;
         if (windowCount > 0 && buffer.size() > naturalHeight) { // purge eg. quoteboxes at the end of each turn
@@ -238,27 +194,26 @@ public class ZWindow implements Serializable {
     }
 
     public void println() {
-        clearStyles();
+        //        clearStyles();
         row++;
         buffer.add(new SpannableStringBuilder());
         column = 0;
     }
 
     public synchronized String promptForInput() {
-        final EditText et = formattedEditText();
-        MainActivity.activity.addView(et, windowMap[windowCount]);
+        MainActivity.activity.addEditView(foreground, background, windowMap[windowCount]);
+        final String command;
         synchronized (MainActivity.inputSyncObject) {
             try {
                 Log.i("Xyzzy", "Waiting for input..."
                         + (latency != 0 ? "(" + (System.currentTimeMillis() - latency) + " ms since last)" : ""));
                 MainActivity.inputSyncObject.wait();
             } catch (final InterruptedException e) {
-                // don't care if interrupted.
+                // don't care if interrupted; you'll get a "what?" from the story file.
             }
+            command = MainActivity.inputSyncObject.string + "\n";
         }
-        final String command = et.getText().toString() + "\n";
         latency = System.currentTimeMillis();
-        MainActivity.activity.finishEditing(et, foreground, background);
         return command;
     }
 
@@ -279,7 +234,7 @@ public class ZWindow implements Serializable {
     }
 
     public void setCursor(short column, short line) {
-        clearStyles();
+        Log.d("Xyzzy", "Window:" + windowCount + " setCursor " + column + "," + line);
         if (displayState == DisplayState.FLUSH_UNSETCURSOR) {
             displayState = DisplayState.FLUSH_SETCURSOR;
         }

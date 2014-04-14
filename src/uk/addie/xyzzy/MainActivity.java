@@ -5,14 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.addie.xyzzy.gameselection.SelectionActivity;
-import uk.addie.xyzzy.header.ZKeycode;
 import uk.addie.xyzzy.preferences.Preferences;
 import uk.addie.xyzzy.zmachine.Decoder;
+import uk.addie.xyzzy.zobjects.ZWindow;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
+import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -28,40 +30,115 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-    public static MainActivity activity;
-    static final List<View>    textBoxes       = new ArrayList<View>();
-    private static Thread      logicThread     = null;
-    private static int         lastKey         = 0;
-    public final static Object inputSyncObject = new Object();
-    public static int          width, height;
+    public static MainActivity      activity;
+    static final List<View>         textBoxes       = new ArrayList<View>();
+    private static Thread           logicThread     = null;
+    public final static InputSync   inputSyncObject = new InputSync();
+    public static int               width, height;
+    final static View.OnKeyListener okl;
+    static {
+        okl = new View.OnKeyListener() {
+            private void delayDisable(final EditText et) {
+                new Thread(new Runnable() {
+                    @Override public void run() {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        MainActivity.activity.runOnUiThread(new Runnable() {
+                            @Override public void run() {
+                                et.setEnabled(false);
+                            }
+                        });
+                    }
+                }).start();
+            }
+
+            @Override public boolean onKey(final View v, final int keyCode, final KeyEvent event) {
+                EditText et = (EditText) v;
+                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
+                    synchronized (MainActivity.inputSyncObject) {
+                        MainActivity.inputSyncObject.string = et.getText().toString();
+                        MainActivity.inputSyncObject.notifyAll();
+                    }
+                    et.setGravity(Gravity.RIGHT);
+                    et.setTextColor(ZWindow.foreground);
+                    et.setBackgroundColor(ZWindow.background);
+                    delayDisable(et);
+                    return true;
+                    //                    MainActivity.activity.finishEditing(et, foreground, background); TODO
+                }
+                return false;
+            }
+        };
+    }
 
     static void focusTextView(final View tv) {
         tv.setFocusableInTouchMode(true);
         tv.requestFocus();
     }
 
-    private static void synchronizeBackgroundThreadOnInput() {
-        synchronized (inputSyncObject) {
-            inputSyncObject.notifyAll();
-        }
+    static EditText formattedEditText(int foreground, int background) {
+        // TODO called from wrong thread exception?
+        final EditText et = new EditText(MainActivity.activity.getApplicationContext());
+        et.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+        et.setTextColor(foreground);
+        et.setPadding(0, 0, 0, 0);
+        et.setBackgroundColor(background);
+        et.setImeActionLabel(">", 0);
+        et.setHorizontallyScrolling(true);
+        et.setInputType(InputType.TYPE_CLASS_TEXT);
+        et.setOnKeyListener(okl);
+        return et;
+    }
+
+    static TextView textView(int foreground, int background) {
+        final TextView ett = new TextView(MainActivity.activity.getApplicationContext());
+        ett.setTextColor(foreground);
+        ett.setBackgroundColor(background);
+        ett.setPadding(0, 0, 0, 0);
+        return ett;
     }
 
     public static int waitOnKey() {
-        lastKey = 0;
-        while (lastKey == 0) {
-            synchronized (inputSyncObject) {
-                try {
-                    inputSyncObject.wait();
-                } catch (InterruptedException e) {
-                    // do nothing
-                }
+        synchronized (inputSyncObject) {
+            inputSyncObject.character = 0;
+            try {
+                inputSyncObject.wait();
+            } catch (InterruptedException e) {
+                // do nothing
             }
+            return inputSyncObject.character;
         }
-        return lastKey;
     }
 
     private MenuItem[] mis;
     public int         textSize;
+
+    public void addEditView(final int foreground, final int background, final int windowId) {
+        runOnUiThread(new Runnable() {
+            @Override public void run() {
+                final TextView tv = formattedEditText(background, foreground);
+                tv.setOnKeyListener(okl);
+                tv.setTag(windowId);
+                MainActivity.activity.addView(tv, windowId);
+            }
+        });
+    }
+
+    public void addTextView(final SpannableStringBuilder ssb, final int foreground, final int background,
+            final int windowId) {
+        runOnUiThread(new Runnable() {
+            @Override public void run() {
+                final TextView tv = textView(foreground, background);
+                tv.setText(ssb);
+                tv.setTag(windowId);
+                MainActivity.activity.addView(tv, windowId);
+            }
+        });
+    }
 
     public void addView(final View tv, final int viewId) {
         final int maximumScroll = (Integer) Preferences.SCROLL_BACK.getValue(this);
@@ -96,7 +173,9 @@ public class MainActivity extends Activity {
         }
         Decoder.terminate();
         logicThread = null;
-        synchronizeBackgroundThreadOnInput();
+        synchronized (inputSyncObject) {
+            inputSyncObject.notifyAll();
+        }
         this.finish();
     }
 
@@ -165,24 +244,26 @@ public class MainActivity extends Activity {
     @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
         Log.d("Xyzzy", "onKeyDown:" + keyCode + " :" + event);
         if (event == null) { // ie. it's synthetic
-            lastKey = keyCode;
-            synchronizeBackgroundThreadOnInput();
+            synchronized (inputSyncObject) {
+                inputSyncObject.character = keyCode;
+                inputSyncObject.notifyAll();
+            }
             return true;
         }
+        int lastKey;
         switch (keyCode) {
         case KeyEvent.KEYCODE_BACK:
         case KeyEvent.KEYCODE_MENU:
-            return false;
         case KeyEvent.KEYCODE_DEL: // TODO bad idea while editing text
-            lastKey = ZKeycode.BACKSPACE;
-            return false;
         case KeyEvent.KEYCODE_ENTER:
-            lastKey = ZKeycode.RETURN;
-            break;
+            return false;
         default:
             lastKey = event.getUnicodeChar();
         }
-        synchronizeBackgroundThreadOnInput();
+        synchronized (inputSyncObject) {
+            inputSyncObject.character = lastKey;
+            inputSyncObject.notifyAll();
+        }
         return true;
     }
 
