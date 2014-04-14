@@ -35,7 +35,7 @@ enum MenuButtons implements MenuButton {
         }
 
         @Override public String toString() {
-            return "Show keyboard";
+            return "Toggle keyboard";
         }
     },
     SETTINGS {

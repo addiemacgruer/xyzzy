@@ -40,9 +40,14 @@ public class MainActivity extends Activity {
         tv.requestFocus();
     }
 
+    private static void synchronizeBackgroundThreadOnInput() {
+        synchronized (inputSyncObject) {
+            inputSyncObject.notifyAll();
+        }
+    }
+
     public static int waitOnKey() {
         lastKey = 0;
-        //        showKeyboard();
         while (lastKey == 0) {
             synchronized (inputSyncObject) {
                 try {
@@ -56,7 +61,6 @@ public class MainActivity extends Activity {
     }
 
     private MenuItem[] mis;
-    EditText           readyToDisable = null;
     public int         textSize;
 
     public void addView(final View tv, final int viewId) {
@@ -92,9 +96,7 @@ public class MainActivity extends Activity {
         }
         Decoder.terminate();
         logicThread = null;
-        synchronized (inputSyncObject) {
-            inputSyncObject.notifyAll();
-        }
+        synchronizeBackgroundThreadOnInput();
         this.finish();
     }
 
@@ -105,7 +107,6 @@ public class MainActivity extends Activity {
                 et.setBackgroundColor(background);
                 et.setTextColor(foreground);
                 et.setOnKeyListener(null);
-                readyToDisable = et;
             }
         });
     }
@@ -165,27 +166,23 @@ public class MainActivity extends Activity {
         Log.d("Xyzzy", "onKeyDown:" + keyCode + " :" + event);
         if (event == null) { // ie. it's synthetic
             lastKey = keyCode;
-            synchronized (inputSyncObject) {
-                inputSyncObject.notifyAll();
-            }
+            synchronizeBackgroundThreadOnInput();
             return true;
         }
-        synchronized (inputSyncObject) {
-            switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-            case KeyEvent.KEYCODE_MENU:
-                return false;
-                //            case KeyEvent.KEYCODE_DEL: // TODO bad idea while editing text
-                //                lastKey = ZKeycode.BACKSPACE;
-                //                break;
-            case KeyEvent.KEYCODE_ENTER:
-                lastKey = ZKeycode.RETURN;
-                break;
-            default:
-                lastKey = event.getUnicodeChar();
-            }
-            inputSyncObject.notifyAll();
+        switch (keyCode) {
+        case KeyEvent.KEYCODE_BACK:
+        case KeyEvent.KEYCODE_MENU:
+            return false;
+        case KeyEvent.KEYCODE_DEL: // TODO bad idea while editing text
+            lastKey = ZKeycode.BACKSPACE;
+            return false;
+        case KeyEvent.KEYCODE_ENTER:
+            lastKey = ZKeycode.RETURN;
+            break;
+        default:
+            lastKey = event.getUnicodeChar();
         }
+        synchronizeBackgroundThreadOnInput();
         return true;
     }
 
