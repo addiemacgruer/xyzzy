@@ -21,6 +21,10 @@ class Xyzzy implements Runnable {
             return;
         }
         Header.reset();
+        Memory.current().zwin.clear();
+        for (int i = 0; i < 8; i++) {
+            Memory.current().zwin.put(i, new ZWindow(i));
+        }
         ZWindow.defaultColours();
         Opcode.RESTART.invoke(null);
         ZObject.enumerateObjects();

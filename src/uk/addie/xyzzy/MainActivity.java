@@ -60,23 +60,27 @@ public class MainActivity extends Activity {
     public int         textSize;
 
     public void addView(final View tv, final int viewId) {
+        final int maximumScroll = (Integer) Preferences.SCROLL_BACK.getValue(this);
         runOnUiThread(new Runnable() {
             @Override public void run() {
                 LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
                 if (tv instanceof TextView) {
                     ((TextView) tv).setTextSize(textSize);
                 }
+                while (ll.getChildCount() > maximumScroll) {
+                    View view = ll.getChildAt(0);
+                    ll.removeViewAt(0);
+                    synchronized (textBoxes) {
+                        textBoxes.remove(view);
+                    }
+                }
                 ll.addView(tv);
                 focusTextView(tv);
             }
         });
         tv.setTag(viewId);
-        int maximumScroll = (Integer) Preferences.SCROLL_BACK.getValue(this);
         synchronized (textBoxes) {
             textBoxes.add(tv);
-            while (textBoxes.size() > maximumScroll) {
-                textBoxes.remove(0);
-            }
         }
     }
 
@@ -210,6 +214,19 @@ public class MainActivity extends Activity {
                 }
             }
         }
+    }
+
+    public void removeChild(final View view) {
+        runOnUiThread(new Runnable() {
+            @Override public void run() {
+                int viewId = (Integer) view.getTag();
+                LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
+                ll.removeView(view);
+                synchronized (textBoxes) {
+                    textBoxes.remove(view);
+                }
+            }
+        });
     }
 
     public void removeChildren(final int viewId) {

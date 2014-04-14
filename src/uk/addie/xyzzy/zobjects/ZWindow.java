@@ -39,7 +39,8 @@ public class ZWindow implements Serializable {
     private static int                      foreground;
     private final static View.OnKeyListener okl;
     private static final long               serialVersionUID = 1L;
-    private static int[]                    windowMap        = { R.id.screen0, R.id.screen1 };
+    private static int[]                    windowMap        = { R.id.screen0, R.id.screen1, R.id.screen2,
+            R.id.screen3, R.id.screen4, R.id.screen5, R.id.screen6, R.id.screen7 };
     private static long                     latency          = 0;
     static {
         final int[] amigaColours = { 0x0, 0x7fff, 0x0, 0x1d, 0x340, 0x3bd, 0x59a0, 0x7c1f, 0x77a0, 0x7fff, 0x5ad6,
@@ -60,7 +61,7 @@ public class ZWindow implements Serializable {
             }
         };
     }
-    private final static double             amiAndroidRatio  = 255.0 / 31.0;                  // ratio 0xff to 0x1f
+    private final static double             amiAndroidRatio  = 255.0 / 31.0;        // ratio 0xff to 0x1f
 
     private static int amigaColourToAndroid(int amiga) {
         int red = (int) ((0x1f & amiga) * amiAndroidRatio); // bottom five bits, scaled from 0x1f to 0xff

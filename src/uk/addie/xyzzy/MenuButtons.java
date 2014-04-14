@@ -3,6 +3,7 @@ package uk.addie.xyzzy;
 
 import uk.addie.xyzzy.gameselection.SelectionActivity;
 import uk.addie.xyzzy.header.ZKeycode;
+import uk.addie.xyzzy.htmlview.HtmlViewActivity;
 import uk.addie.xyzzy.preferences.PreferencesActivity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -12,7 +13,8 @@ import android.util.Log;
 enum MenuButtons implements MenuButton {
     ABOUT {
         @Override public void invoke() {
-            // TODO about this app
+            Intent intent = new Intent(MainActivity.activity, HtmlViewActivity.class);
+            MainActivity.activity.startActivity(intent);
         }
 
         @Override public int menuButtonIcon() {
@@ -21,19 +23,6 @@ enum MenuButtons implements MenuButton {
 
         @Override public String toString() {
             return "About Xyzzy";
-        }
-    },
-    HELP {
-        @Override public void invoke() {
-            // TODO help with this app
-        }
-
-        @Override public int menuButtonIcon() {
-            return R.drawable.ic_action_help;
-        }
-
-        @Override public String toString() {
-            return "Help";
         }
     },
     SHOW_KEYBOARD {

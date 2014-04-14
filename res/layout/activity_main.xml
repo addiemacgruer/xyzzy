@@ -31,11 +31,76 @@
         android:id="@id/screen1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_below="@+id/screen2"
+        android:layout_marginBottom="0pt"
         android:layout_marginLeft="0pt"
         android:layout_marginRight="0pt"
         android:layout_marginTop="0pt"
+        android:orientation="vertical" />
+
+    <LinearLayout
+        android:id="@id/screen2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/screen3"
         android:layout_marginBottom="0pt"
-         />
+        android:layout_marginLeft="0pt"
+        android:layout_marginRight="0pt"
+        android:layout_marginTop="0pt"
+        android:orientation="vertical" />
+
+    <LinearLayout
+        android:id="@id/screen3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/screen4"
+        android:layout_marginBottom="0pt"
+        android:layout_marginLeft="0pt"
+        android:layout_marginRight="0pt"
+        android:layout_marginTop="0pt"
+        android:orientation="vertical" />
+
+    <LinearLayout
+        android:id="@id/screen4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/screen5"
+        android:layout_marginBottom="0pt"
+        android:layout_marginLeft="0pt"
+        android:layout_marginRight="0pt"
+        android:layout_marginTop="0pt"
+        android:orientation="vertical" />
+
+    <LinearLayout
+        android:id="@id/screen5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/screen6"
+        android:layout_marginBottom="0pt"
+        android:layout_marginLeft="0pt"
+        android:layout_marginRight="0pt"
+        android:layout_marginTop="0pt"
+        android:orientation="vertical" />
+
+    <LinearLayout
+        android:id="@id/screen6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/screen7"
+        android:layout_marginBottom="0pt"
+        android:layout_marginLeft="0pt"
+        android:layout_marginRight="0pt"
+        android:layout_marginTop="0pt"
+        android:orientation="vertical" />
+
+    <LinearLayout
+        android:id="@id/screen7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0pt"
+        android:layout_marginLeft="0pt"
+        android:layout_marginRight="0pt"
+        android:layout_marginTop="0pt"
+        android:orientation="vertical" />
 
 </RelativeLayout>
