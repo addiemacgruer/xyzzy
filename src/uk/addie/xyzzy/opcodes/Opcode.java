@@ -1156,8 +1156,10 @@ import android.util.Log;
                 Log.i("Xyzzy", "SPLIT WINDOW: " + lines + " LINES (CURRENT:" + Memory.streams() + ")");
             }
             int splitScreen = Memory.current().currentScreen + 1;
-            if (Memory.current().zwin.get(splitScreen) != null) {
-                Memory.current().zwin.get(splitScreen).reset();
+            final ZWindow nextScreen = Memory.current().zwin.get(splitScreen);
+            if (nextScreen != null) {
+                nextScreen.reset();
+                nextScreen.setNaturalHeight(lines);
             }
         }
     },
@@ -1208,6 +1210,11 @@ import android.util.Log;
         @Override public void invoke(ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final short attribute = arguments.get(1);
+            if (object == 0) {
+                Error.TEST_ATTR_0.invoke();
+                branchOnTest(false);
+                return;
+            }
             final ZObject zo = ZObject.count(object);
             final boolean value = zo.testAttribute(attribute);
             branchOnTest(value);

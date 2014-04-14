@@ -12,7 +12,6 @@ import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.R;
-import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
 import android.graphics.Point;
@@ -133,6 +132,7 @@ public class ZWindow implements Serializable {
     private final int                              windowCount;
     private int                                    row, column;
     DisplayState                                   displayState     = DisplayState.EMPTY;
+    private int                                    naturalHeight    = 0;
 
     public ZWindow(final int window) {
         windowCount = window;
@@ -214,6 +214,7 @@ public class ZWindow implements Serializable {
     }
 
     public void flush() {
+        Log.d("Xyzzy", "Window:" + windowCount + " flushed");
         clearStyles();
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         int bufferlength = buffer.size();
@@ -229,8 +230,10 @@ public class ZWindow implements Serializable {
             MainActivity.activity.addView(tv, windowMap[windowCount]);
         }
         displayState = DisplayState.FLUSH_UNSETCURSOR;
-        if (windowCount > 0 && Header.VERSION.value() < 5) { // redraw all but the main screen each turn for old games.
-            buffer.clear();
+        if (windowCount > 0 && buffer.size() > naturalHeight) { // purge eg. quoteboxes at the end of each turn
+            while (buffer.size() > naturalHeight) {
+                buffer.remove(naturalHeight);
+            }
         }
     }
 
@@ -286,6 +289,10 @@ public class ZWindow implements Serializable {
         // games will occasionally request negative indexes, especially if the screen is too narrow
         this.column = Math.max(column, 1) - 1;
         this.row = Math.max(line, 1) - 1;
+    }
+
+    public void setNaturalHeight(int lines) {
+        this.naturalHeight = lines;
     }
 
     @Override public String toString() {
