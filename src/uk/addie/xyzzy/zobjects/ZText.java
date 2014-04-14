@@ -18,7 +18,7 @@ public class ZText {
 
     public static String encodedAtOffset(final int offset) {
         final List<Character> cb = new ArrayList<Character>();
-        //        int alphabet = Header.H_ALPHABET.value(FastMem.CURRENT.zmp);
+        //        int alphabet = Header.H_ALPHABET.value(FastMem.CURRENT.zmp); //TODO v5 alternative alphabets
         int b = 0;
         for (b = offset; true; b += 2) {
             final int word = Memory.current().buff().getShort(b) & 0xffff;
@@ -89,6 +89,39 @@ public class ZText {
         return sb.toString();
     }
 
+    public static long encodeString(final String string) {
+        final int wordLength = Header.VERSION.value() <= 3 ? 6 : 9;
+        final byte chars[] = new byte[9];
+        int position = 0;
+        for (int i = 0; i < string.length(); i++) {
+            final char character = string.charAt(i);
+            final byte a0Value = zvalue(a0, character);
+            if (a0Value != 0) {
+                chars[position] = a0Value;
+                position++;
+            } else {
+                chars[position++] = 5;
+                if (position < chars.length) {
+                    chars[position++] = zvalue(a2, character);
+                }
+            }
+            if (position >= chars.length) {
+                break;
+            }
+        }
+        for (; position < chars.length; position++) {
+            chars[position] = 5;
+        }
+        long rval = 0;
+        for (int i = 0; i < chars.length; i += 3) {
+            rval <<= 16;
+            final int shortValue = (chars[i] << 10) + (chars[i + 1] << 5) + chars[i + 2];
+            rval += shortValue;
+        }
+        rval |= 0x8000;
+        return rval;
+    }
+
     public static void tokeniseInputToBuffers(final int text, final int parse, final String inputString) {
         int offset = text + 2;
         final StringBuffer currentWord = new StringBuffer();
@@ -129,5 +162,14 @@ public class ZText {
             start++;
         }
         return sb.toString();
+    }
+
+    private static byte zvalue(char[] set, char character) {
+        for (int i = 0; i < set.length; i++) {
+            if (set[i] == character) {
+                return (byte) i;
+            }
+        }
+        return 0;
     }
 }

@@ -2,10 +2,12 @@
 package uk.addie.xyzzy.zobjects;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.state.Memory;
+import android.util.Log;
 
 public class Dictionary {
     public static Dictionary DEFAULT;
@@ -14,8 +16,8 @@ public class Dictionary {
         DEFAULT = new Dictionary(Header.DICTIONARY.value());
     }
 
-    private final Map<String, Integer> entryMap = new HashMap<String, Integer>();
-    private final int                  offset;
+    private final Map<Long, Integer> entryMap = new HashMap<Long, Integer>();
+    private final int                offset;
 
     private Dictionary(final int offset) {
         this.offset = offset;
@@ -23,20 +25,32 @@ public class Dictionary {
     }
 
     int addressOfWord(final String aWord) {
-        final String word = aWord.substring(0, Math.min(aWord.length(), 9));
-        if (entryMap.containsKey(word)) {
-            return entryMap.get(word);
+        final long encoded = ZText.encodeString(aWord.toLowerCase(Locale.UK));
+        if (entryMap.containsKey(encoded)) {
+            return entryMap.get(encoded);
         }
         return 0;
     }
 
     private void buildHashMap() {
         final int entryLength = entryLength();
+        final int bytesPerWord = Header.VERSION.value() <= 3 ? 4 : 6;
         final int moffset = offset + numberOfInputCodes() + 4;
         for (int wordCount = 0, total = numberOfEntries(); wordCount < total; wordCount++) {
             final int wordByte = moffset + wordCount * entryLength;
+            // TODO
             final String word = ZText.encodedAtOffset(wordByte);
-            entryMap.put(word, wordByte);
+            long value = 0;
+            for (int i = 0; i < bytesPerWord; i++) {
+                value <<= 8;
+                value += Memory.current().buffer.get(wordByte + i);
+            }
+            final long encoded = ZText.encodeString(word);
+            if (value != encoded) {
+                Log.d("Xyzzy", "Dictionary:" + word + " " + Long.toHexString(value) + "=" + Long.toHexString(encoded)
+                        + "?");
+            }
+            entryMap.put(value, wordByte);
         }
     }
 

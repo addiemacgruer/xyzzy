@@ -211,12 +211,21 @@ import android.util.Log;
     },
     ENCODE_TEXT(3, 0x1c) {
         @Override public void invoke(ZStack<Short> arguments) {
+            // TODO needs testing, few games use it.
             final short zsciiText = arguments.get(0);
             final short length = arguments.get(1);
             final short from = arguments.get(2);
-            final short codedText = arguments.get(0);
-            // TODO encode_text
-            throw new UnsupportedOperationException("@encode_text");
+            final short codedText = arguments.get(3);
+            StringBuilder sb = new StringBuilder();
+            for (int i = from; i < from + length; i++) {
+                sb.append((char) Memory.current().buffer.get(i));
+            }
+            final long encodedText = ZText.encodeString(sb.toString());
+            int bytesToStore = Header.VERSION.value() <= 3 ? 4 : 6;
+            for (int i = 0; i < bytesToStore; i++) {
+                byte b = (byte) (encodedText >> (8 * (bytesToStore - i)) & 0xff);
+                Memory.current().buffer.put(codedText + i, b);
+            }
         }
     },
     ERASE_LINE(3, 0xe) {
