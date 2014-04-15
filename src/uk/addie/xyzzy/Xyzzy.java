@@ -11,7 +11,15 @@ import uk.addie.xyzzy.zobjects.ZWindow;
 import android.util.Log;
 
 class Xyzzy implements Runnable {
-    static String story;
+    private static String story;
+
+    static String story() {
+        return story;
+    }
+
+    public Xyzzy(String story) {
+        Xyzzy.story = story;
+    }
 
     @Override public void run() {
         Log.i("Xyzzy", "Starting background logic thread");

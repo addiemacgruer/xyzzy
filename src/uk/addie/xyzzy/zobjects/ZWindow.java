@@ -206,12 +206,12 @@ public class ZWindow implements Serializable {
             try {
                 Log.i("Xyzzy", "Waiting for input..."
                         + (latency != 0 ? "(" + (System.currentTimeMillis() - latency) + " ms since last)" : ""));
-                MainActivity.inputSyncObject.string = null;
+                MainActivity.inputSyncObject.setString(null);
                 MainActivity.inputSyncObject.wait();
             } catch (final InterruptedException e) {
                 Log.e("Xyzzy", "Wait on string interrupted:", e);
             }
-            command = MainActivity.inputSyncObject.string + "\n";
+            command = MainActivity.inputSyncObject.string() + "\n";
         }
         latency = System.currentTimeMillis();
         return command;

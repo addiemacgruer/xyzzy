@@ -6,9 +6,6 @@ import java.io.Serializable;
 import android.util.Log;
 
 public class Random implements Serializable {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
     private int               counter          = 0;
     private int               interval         = 0;

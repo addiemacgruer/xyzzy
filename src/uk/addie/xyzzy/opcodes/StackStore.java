@@ -3,10 +3,10 @@ package uk.addie.xyzzy.opcodes;
 
 import java.io.Serializable;
 
-import uk.addie.xyzzy.Invokeable;
+import uk.addie.xyzzy.interfaces.IInvokeable;
 import uk.addie.xyzzy.state.Memory;
 
-public class StackStore implements Invokeable, Serializable {
+public class StackStore implements IInvokeable, Serializable {
     /**
      * 
      */

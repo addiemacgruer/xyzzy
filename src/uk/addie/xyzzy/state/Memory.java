@@ -14,6 +14,7 @@ import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.header.InterpreterFlag1;
 import uk.addie.xyzzy.header.InterpreterType;
 import uk.addie.xyzzy.opcodes.OpMap;
+import uk.addie.xyzzy.preferences.Preferences;
 import uk.addie.xyzzy.util.Bit;
 import uk.addie.xyzzy.zmachine.CallStack;
 import uk.addie.xyzzy.zmachine.ZStack;
@@ -54,7 +55,8 @@ public class Memory implements Serializable {
         config |= InterpreterFlag1.CONFIG_TIMEDINPUT; // we don't, it's exceptionally annoying
         Header.CONFIG.put(config);
         final int width = MainActivity.width;
-        final int columns = Math.max(width / MainActivity.activity.textSize, 80); // some games will complain if they're less than 80 columns
+        final int textSize = (Integer) Preferences.TEXT_SIZE.getValue(MainActivity.activity);
+        final int columns = Math.max(width / textSize, 80); // some games will complain if they're less than 80 columns
         Header.SCREEN_WIDTH.put(columns);
         Header.SCREEN_HEIGHT.put(24); // a lie, but to try and prevent too much buffering required
         Header.SCREEN_COLS.put(columns);

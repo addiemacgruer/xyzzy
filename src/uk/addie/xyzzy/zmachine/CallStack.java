@@ -5,9 +5,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import uk.addie.xyzzy.Invokeable;
 import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.header.Header;
+import uk.addie.xyzzy.interfaces.IInvokeable;
 import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
 import android.util.Log;
@@ -23,7 +23,7 @@ public class CallStack implements Serializable {
         return pc;
     }
 
-    public static void call(final int routine, final ZStack<Short> args, final Invokeable returnFunction) {
+    public static void call(final int routine, final ZStack<Short> args, final IInvokeable returnFunction) {
         final int rpos = routine & 0xffff;
         if (rpos == 0) {
             Log.e("Xyzzy", "Called a routine at 0 (shouldn't have made it to call())");
@@ -48,7 +48,7 @@ public class CallStack implements Serializable {
     private final int               localsCount;
     private int                     programCounter;
     private final Map<Short, Short> register = new HashMap<Short, Short>();
-    private final Invokeable        returnFunction;
+    private final IInvokeable        returnFunction;
     private final ZStack<Short>     stack    = new ZStack<Short>((short) 0);
 
     public CallStack() {
@@ -57,7 +57,7 @@ public class CallStack implements Serializable {
         localsCount = 0;
     }
 
-    private CallStack(final int programCounter, final int calledWithCount, final Invokeable returnFunction) {
+    private CallStack(final int programCounter, final int calledWithCount, final IInvokeable returnFunction) {
         this.setProgramCounter(programCounter);
         this.calledWithCount = calledWithCount;
         this.returnFunction = returnFunction;
@@ -124,7 +124,7 @@ public class CallStack implements Serializable {
         }
     }
 
-    public Invokeable returnFunction() {
+    public IInvokeable returnFunction() {
         return returnFunction;
     }
 

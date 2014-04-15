@@ -2,6 +2,7 @@
 package uk.addie.xyzzy;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import uk.addie.xyzzy.gameselection.SelectionActivity;
@@ -11,7 +12,6 @@ import uk.addie.xyzzy.zobjects.ZWindow;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
                         try {
                             Thread.sleep(1000);
                         } catch (final InterruptedException e) {
-                            throw new RuntimeException(e);
+                            Log.e("Xyzzy", "MainActivity.okl.delayDisable interrupted", e);
                         }
                         MainActivity.activity.runOnUiThread(new Runnable() {
                             @Override public void run() {
@@ -55,19 +55,22 @@ public class MainActivity extends Activity {
                 }, "Disable old EditText").start();
             }
 
+            private void giveDisabledAppearance(final EditText et) {
+                et.setGravity(Gravity.RIGHT);
+                et.setTextColor(ZWindow.foreground);
+                et.setBackgroundColor(ZWindow.background);
+                delayDisable(et);
+            }
+
             @Override public boolean onKey(final View v, final int keyCode, final KeyEvent event) {
                 final EditText et = (EditText) v;
                 if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
                     synchronized (MainActivity.inputSyncObject) {
-                        MainActivity.inputSyncObject.string = et.getText().toString();
+                        MainActivity.inputSyncObject.setString(et.getText().toString());
                         MainActivity.inputSyncObject.notifyAll();
                     }
-                    et.setGravity(Gravity.RIGHT);
-                    et.setTextColor(ZWindow.foreground);
-                    et.setBackgroundColor(ZWindow.background);
-                    delayDisable(et);
+                    giveDisabledAppearance(et);
                     return true;
-                    //                    MainActivity.activity.finishEditing(et, foreground, background); TODO
                 }
                 return false;
             }
@@ -80,7 +83,6 @@ public class MainActivity extends Activity {
     }
 
     static EditText formattedEditText(final int foreground, final int background) {
-        // TODO called from wrong thread exception?
         final EditText et = new EditText(MainActivity.activity.getApplicationContext());
         et.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -104,18 +106,18 @@ public class MainActivity extends Activity {
 
     public static int waitOnKey() { // returns 0 if interrupted or shutting down.
         synchronized (inputSyncObject) {
-            inputSyncObject.character = 0;
+            inputSyncObject.setCharacter(0);
             try {
                 inputSyncObject.wait();
             } catch (final InterruptedException e) {
                 Log.e("Xyzzy", "Wait on key interrupted:", e);
             }
-            return inputSyncObject.character;
+            return inputSyncObject.character();
         }
     }
 
     private MenuItem[] mis;
-    public int         textSize;
+    int                textSize;
 
     public void addEditView(final int foreground, final int background, final int windowId) {
         runOnUiThread(new Runnable() {
@@ -143,11 +145,7 @@ public class MainActivity extends Activity {
     public void addView(final View tv, final int viewId) {
         final int maximumScroll = (Integer) Preferences.SCROLL_BACK.getValue(this);
         runOnUiThread(new Runnable() {
-            @Override public void run() {
-                final LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
-                if (tv instanceof TextView) {
-                    ((TextView) tv).setTextSize(textSize);
-                }
+            private void removeSurplusScrollback(final LinearLayout ll) {
                 while (ll.getChildCount() > maximumScroll) {
                     final View view = ll.getChildAt(0);
                     ll.removeViewAt(0);
@@ -155,6 +153,14 @@ public class MainActivity extends Activity {
                         textBoxes.remove(view);
                     }
                 }
+            }
+
+            @Override public void run() {
+                if (tv instanceof TextView) {
+                    ((TextView) tv).setTextSize(textSize);
+                }
+                final LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
+                removeSurplusScrollback(ll);
                 ll.addView(tv);
                 focusTextView(tv);
             }
@@ -196,34 +202,22 @@ public class MainActivity extends Activity {
         height = display.getHeight();
     }
 
+    private String getStorySelection() {
+        return getIntent().getStringExtra(SelectionActivity.STORY_NAME);
+    }
+
     @Override protected void onCreate(final Bundle savedInstanceState) {
         Log.d("Xyzzy", "MainActivity onCreate");
         getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         activity = this;
         getScreenSize();
-        final Intent intent = getIntent();
-        final String message = intent.getStringExtra(SelectionActivity.EXTRA_MESSAGE);
-        Xyzzy.story = message;
+        final String story = getStorySelection();
         super.onCreate(savedInstanceState);
-        //        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         synchronized (this) {
-            if (logicThread == null) {
-                Log.i("Xyzzy", "Starting new thread");
-                logicThread = new Thread(new Xyzzy(), "XyzzyInterpreter");
-                logicThread.start();
-            }
+            startBackgroundLogicThread(story);
         }
-        synchronized (textBoxes) {
-            for (final View v : textBoxes) {
-                final LinearLayout oldLinearLayout = (LinearLayout) v.getParent();
-                if (oldLinearLayout != null) {
-                    oldLinearLayout.removeView(v);
-                }
-                final LinearLayout newLinearLayout = (LinearLayout) findViewById((Integer) v.getTag());
-                newLinearLayout.addView(v);
-            }
-        }
+        redisplayScreen();
     }
 
     @SuppressLint("NewApi") @Override public boolean onCreateOptionsMenu(final Menu menu) {
@@ -234,7 +228,9 @@ public class MainActivity extends Activity {
             final MenuItem nextMenu = menu.add(mb.toString());
             if (mb.menuButtonIcon() != -1) {
                 nextMenu.setIcon(mb.menuButtonIcon());
-                nextMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+                    nextMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                }
             }
             mis[i++] = nextMenu;
         }
@@ -245,12 +241,11 @@ public class MainActivity extends Activity {
         Log.d("Xyzzy", "onKeyDown:" + keyCode + " :" + event);
         if (event == null) { // ie. it's synthetic
             synchronized (inputSyncObject) {
-                inputSyncObject.character = keyCode;
+                inputSyncObject.setCharacter(keyCode);
                 inputSyncObject.notifyAll();
             }
             return true;
         }
-        int lastKey;
         switch (keyCode) {
         case KeyEvent.KEYCODE_BACK:
         case KeyEvent.KEYCODE_MENU:
@@ -258,26 +253,20 @@ public class MainActivity extends Activity {
         case KeyEvent.KEYCODE_ENTER:
             return false;
         default:
-            lastKey = event.getUnicodeChar();
+            synchronized (inputSyncObject) {
+                inputSyncObject.setCharacter(event.getUnicodeChar());
+                inputSyncObject.notifyAll();
+            }
+            return true;
         }
-        synchronized (inputSyncObject) {
-            inputSyncObject.character = lastKey;
-            inputSyncObject.notifyAll();
-        }
-        return true;
     }
 
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        int selected = -1;
         if (mis == null) { // then we've not initialised?
             Log.e("Xyzzy", "Android onOptionsItemSelected before onCreateOptionsMenu?");
             return false;
         }
-        for (int i = 0; i < mis.length; ++i) {
-            if (item == mis[i]) {
-                selected = i;
-            }
-        }
+        int selected = Utility.arrayOffsetOf(item, mis);
         MenuButtons.values()[selected].invoke();
         return true;
     }
@@ -290,6 +279,19 @@ public class MainActivity extends Activity {
                 if (v instanceof TextView) {
                     ((TextView) v).setTextSize(textSize);
                 }
+            }
+        }
+    }
+
+    private void redisplayScreen() {
+        synchronized (textBoxes) {
+            for (final View v : textBoxes) {
+                final LinearLayout oldLinearLayout = (LinearLayout) v.getParent();
+                if (oldLinearLayout != null) {
+                    oldLinearLayout.removeView(v);
+                }
+                final LinearLayout newLinearLayout = (LinearLayout) findViewById((Integer) v.getTag());
+                newLinearLayout.addView(v);
             }
         }
     }
@@ -313,10 +315,10 @@ public class MainActivity extends Activity {
                 final LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
                 ll.removeAllViews();
                 synchronized (textBoxes) {
-                    final List<View> tbCopy = new ArrayList<View>(textBoxes);
-                    for (final View v : tbCopy) {
+                    for (Iterator<View> it = textBoxes.iterator(); it.hasNext();) {
+                        View v = it.next();
                         if ((Integer) v.getTag() == viewId) {
-                            textBoxes.remove(v);
+                            it.remove();
                         }
                     }
                 }
@@ -327,8 +329,8 @@ public class MainActivity extends Activity {
     public void setBackgroundColour(final int colour) {
         runOnUiThread(new Runnable() {
             @Override public void run() {
-                final RelativeLayout ll = (RelativeLayout) MainActivity.activity.findViewById(R.id.screen);
-                ll.setBackgroundColor(colour);
+                final RelativeLayout rl = (RelativeLayout) MainActivity.activity.findViewById(R.id.screen);
+                rl.setBackgroundColor(colour);
             }
         });
     }
@@ -343,5 +345,13 @@ public class MainActivity extends Activity {
                         InputMethodManager.SHOW_FORCED, 0);
             }
         });
+    }
+
+    private void startBackgroundLogicThread(final String message) {
+        if (logicThread == null) {
+            Log.i("Xyzzy", "Starting new thread");
+            logicThread = new Thread(new Xyzzy(message), "XyzzyInterpreter");
+            logicThread.start();
+        }
     }
 }

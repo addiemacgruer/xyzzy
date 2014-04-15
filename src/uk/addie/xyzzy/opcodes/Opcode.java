@@ -12,10 +12,10 @@ import java.io.ObjectOutputStream;
 import java.util.EmptyStackException;
 import java.util.Locale;
 
-import uk.addie.xyzzy.Invokeable;
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.header.Header;
+import uk.addie.xyzzy.interfaces.IInvokeable;
 import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.os.Main;
 import uk.addie.xyzzy.preferences.Preferences;
@@ -1353,7 +1353,7 @@ import android.util.Log;
     }
 
     public static void returnValue(final int value) {
-        final Invokeable i = Memory.current().callStack.peek().returnFunction();
+        final IInvokeable i = Memory.current().callStack.peek().returnFunction();
         Memory.current().callStack.pop();
         Memory.current().callStack.peek().push(value);
         i.invoke();

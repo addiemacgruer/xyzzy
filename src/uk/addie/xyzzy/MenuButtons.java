@@ -4,13 +4,14 @@ package uk.addie.xyzzy;
 import uk.addie.xyzzy.gameselection.SelectionActivity;
 import uk.addie.xyzzy.header.ZKeycode;
 import uk.addie.xyzzy.htmlview.HtmlViewActivity;
+import uk.addie.xyzzy.interfaces.IMenuButton;
 import uk.addie.xyzzy.preferences.PreferencesActivity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 
-enum MenuButtons implements MenuButton {
+enum MenuButtons implements IMenuButton {
     ABOUT {
         @Override public void invoke() {
             final Intent intent = new Intent(MainActivity.activity, HtmlViewActivity.class);
@@ -23,6 +24,50 @@ enum MenuButtons implements MenuButton {
 
         @Override public String toString() {
             return "About Xyzzy";
+        }
+    },
+    SETTINGS {
+        @Override public void invoke() {
+            final Intent intent = new Intent(MainActivity.activity, PreferencesActivity.class);
+            MainActivity.activity.startActivity(intent);
+        }
+
+        @Override public int menuButtonIcon() {
+            return R.drawable.ic_action_settings;
+        }
+
+        @Override public String toString() {
+            return "Settings";
+        }
+    },
+    SHOW_KEYBOARD {
+        @Override public void invoke() {
+            MainActivity.activity.showKeyboard();
+        }
+
+        @Override public int menuButtonIcon() {
+            return R.drawable.ic_action_keyboard;
+        }
+
+        @Override public String toString() {
+            return "Toggle keyboard";
+        }
+    },
+    LEAVE_GAME {
+        @Override public void invoke() {
+            new AlertDialog.Builder(MainActivity.activity)
+                    .setMessage("Are you sure you want to leave?  Progress will not be saved.").setCancelable(false)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override public void onClick(final DialogInterface dialog, final int id) {
+                            final Intent intent = new Intent(MainActivity.activity, SelectionActivity.class);
+                            MainActivity.activity.startActivity(intent);
+                            MainActivity.activity.endMe();
+                        }
+                    }).setNegativeButton("No", null).show();
+        }
+
+        @Override public String toString() {
+            return "Leave game";
         }
     },
     BACKSPACE {
@@ -77,50 +122,6 @@ enum MenuButtons implements MenuButton {
 
         @Override public String toString() {
             return "Enter";
-        }
-    },
-    LEAVE_GAME {
-        @Override public void invoke() {
-            new AlertDialog.Builder(MainActivity.activity)
-                    .setMessage("Are you sure you want to leave?  Progress will not be saved.").setCancelable(false)
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override public void onClick(final DialogInterface dialog, final int id) {
-                            final Intent intent = new Intent(MainActivity.activity, SelectionActivity.class);
-                            MainActivity.activity.startActivity(intent);
-                            MainActivity.activity.endMe();
-                        }
-                    }).setNegativeButton("No", null).show();
-        }
-
-        @Override public String toString() {
-            return "Leave game";
-        }
-    },
-    SETTINGS {
-        @Override public void invoke() {
-            final Intent intent = new Intent(MainActivity.activity, PreferencesActivity.class);
-            MainActivity.activity.startActivity(intent);
-        }
-
-        @Override public int menuButtonIcon() {
-            return R.drawable.ic_action_settings;
-        }
-
-        @Override public String toString() {
-            return "Settings";
-        }
-    },
-    SHOW_KEYBOARD {
-        @Override public void invoke() {
-            MainActivity.activity.showKeyboard();
-        }
-
-        @Override public int menuButtonIcon() {
-            return R.drawable.ic_action_keyboard;
-        }
-
-        @Override public String toString() {
-            return "Toggle keyboard";
         }
     };
     protected static void pressZKey(final int keyCode) {

@@ -32,7 +32,7 @@ import android.widget.Toast;
 
 public class SelectionActivity extends Activity implements ListAdapter { // NO_UCD (use default)
     protected static SelectionActivity activity;
-    public final static String         EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
+    public final static String         STORY_NAME    = "uk.addie.xyzzy.MESSAGE";
     private static final int           FILE_SELECT_CODE = 0;
     final static int                   INTERSTITIALS    = 3;
     static int                         selected         = -1;
@@ -316,7 +316,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
 
     void startGame(final String name) {
         final Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(EXTRA_MESSAGE, name);
+        intent.putExtra(STORY_NAME, name);
         startActivity(intent);
     }
 
