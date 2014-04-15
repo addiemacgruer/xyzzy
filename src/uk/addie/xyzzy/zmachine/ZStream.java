@@ -10,17 +10,17 @@ import android.util.Log;
 
 public class ZStream implements Serializable {
     private static final long          serialVersionUID = 1L;
-    private final boolean[]            streams          = { false, true, false, false, false };
-    private final ZStack<Integer>      stream3position  = new ZStack<Integer>(0);
     private final ZStack<StringBuffer> stream3output    = new ZStack<StringBuffer>(null);
+    private final ZStack<Integer>      stream3position  = new ZStack<Integer>(0);
+    private final boolean[]            streams          = { false, true, false, false, false };
 
-    public void addStyle(TextStyle textStyle) {
+    public void addStyle(final TextStyle textStyle) {
         if (!streams[3] && streams[1]) {
             Memory.current().zwin.get(Memory.current().currentScreen).addStyle(textStyle);
         }
     }
 
-    public void append(String string) {
+    public void append(final String string) {
         if (!streams[3] && streams[1]) {
             Memory.current().zwin.get(Memory.current().currentScreen).append(string);
         }
@@ -35,7 +35,7 @@ public class ZStream implements Serializable {
         }
     }
 
-    public void eraseLine(int line) {
+    public void eraseLine(final int line) {
         if (!streams[3] && streams[1]) {
             Memory.current().zwin.get(Memory.current().currentScreen).eraseLine(line);
         }
@@ -54,13 +54,13 @@ public class ZStream implements Serializable {
         return Memory.current().zwin.get(Memory.current().currentScreen).promptForInput();
     }
 
-    public void setBuffered(boolean buffered) {
+    public void setBuffered(final boolean buffered) {
         if (!streams[3] && streams[1]) {
             Memory.current().zwin.get(Memory.current().currentScreen).setBuffered(buffered);
         }
     }
 
-    public void setCursor(short column, short line) {
+    public void setCursor(final short column, final short line) {
         if (!streams[3] && streams[1]) {
             Memory.current().zwin.get(Memory.current().currentScreen).setCursor(column, line);
         }
@@ -70,7 +70,7 @@ public class ZStream implements Serializable {
      * @param width
      *            is justification in v6
      */
-    public void setOutputStream(int number, int table, int width) {
+    public void setOutputStream(final int number, final int table, final int width) {
         if (number == 0) {
             return;
         }
@@ -91,7 +91,7 @@ public class ZStream implements Serializable {
         }
     }
 
-    public void userInput(String string) {
+    public void userInput(final String string) {
         Log.i("Xyzzy", "User input:" + string);
         if (streams[4]) {
             throw new UnsupportedOperationException("Writing user transcript");

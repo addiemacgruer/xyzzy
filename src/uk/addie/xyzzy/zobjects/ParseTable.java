@@ -5,8 +5,8 @@ import uk.addie.xyzzy.state.Memory;
 import android.util.Log;
 
 class ParseTable {
-    private final int        offset;
     private final Dictionary dictionary;
+    private final int        offset;
 
     ParseTable(final int offset, final Dictionary dictionary) {
         this.offset = offset;

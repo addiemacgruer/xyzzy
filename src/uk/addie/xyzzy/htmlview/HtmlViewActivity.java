@@ -19,7 +19,7 @@ import android.webkit.WebViewClient;
 public class HtmlViewActivity extends Activity { // NO_UCD (instantiated by
                                                  // Android Runtime)
     private class HelpClient extends WebViewClient {
-        @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        @Override public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
             fillContent();
             return true;
         }
@@ -35,14 +35,14 @@ public class HtmlViewActivity extends Activity { // NO_UCD (instantiated by
             while (ins.hasNext()) {
                 output.append(ins.nextLine() + " ");
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
         mWebView.loadDataWithBaseURL(null, output.toString(), "text/html", "utf-8", null);
     }
 
     /** Called by Android when ready to display. */
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);

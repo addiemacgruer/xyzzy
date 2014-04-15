@@ -12,8 +12,22 @@ import android.util.Log;
 import android.util.SparseArray;
 
 public class ZObject {
+    private final static SparseArray<Set<Integer>> reverseChildren = new SparseArray<Set<Integer>>();
+
+    private final static SparseArray<Set<Integer>> reverseParents  = new SparseArray<Set<Integer>>();
+
+    private final static SparseArray<Set<Integer>> reverseSiblings = new SparseArray<Set<Integer>>();
+
+    private static void addToReverseMap(final SparseArray<Set<Integer>> map, final int object, final int linked) {
+        final Set<Integer> target = getReverse(map, linked);
+        target.add(object);
+    }
+    private static void clearFromReverseMap(final SparseArray<Set<Integer>> map, final int object, final int linked) {
+        final Set<Integer> target = getReverse(map, linked);
+        target.remove(object);
+    }
     public static ZObject count(final int oCount) {
-        int count = oCount;
+        final int count = oCount;
         if (count == 0) {
             Log.e("Xyzzy", "Object zero");
             Error.ILL_OBJ.invoke();
@@ -33,7 +47,6 @@ public class ZObject {
         rval.count = count;
         return rval;
     }
-
     public static void detachFromTree(final short object) {
         if (Debug.moves) {
             Log.i("Xyzzy", "Detaching " + count(object) + " from tree");
@@ -41,18 +54,17 @@ public class ZObject {
         final ZObject zo = count(object);
         // detach from the existing tree
         final int oldSibling = zo.sibling();
-        Set<Integer> expectedSiblings = new HashSet<Integer>(getReverse(reverseSiblings, object));
-        Set<Integer> expectedChildren = new HashSet<Integer>(getReverse(reverseChildren, object));
-        for (int i : expectedSiblings) {
+        final Set<Integer> expectedSiblings = new HashSet<Integer>(getReverse(reverseSiblings, object));
+        final Set<Integer> expectedChildren = new HashSet<Integer>(getReverse(reverseChildren, object));
+        for (final int i : expectedSiblings) {
             count(i).setSibling(oldSibling);
         }
-        for (int i : expectedChildren) {
+        for (final int i : expectedChildren) {
             count(i).setChild(oldSibling);
         }
         zo.setSibling(0);
         zo.setParent(0);
     }
-
     public static void enumerateObjects() {
         Memory.current().objectCount = 0xffff; // suppress warnings for now
         reverseParents.clear();
@@ -76,23 +88,7 @@ public class ZObject {
         Memory.current().objectCount = objectCount;
     }
 
-    private int                                    count;
-    private int                                    offset;
-    private final static SparseArray<Set<Integer>> reverseChildren = new SparseArray<Set<Integer>>();
-    private final static SparseArray<Set<Integer>> reverseSiblings = new SparseArray<Set<Integer>>();
-    private final static SparseArray<Set<Integer>> reverseParents  = new SparseArray<Set<Integer>>();
-
-    private static void addToReverseMap(SparseArray<Set<Integer>> map, int object, int linked) {
-        Set<Integer> target = getReverse(map, linked);
-        target.add(object);
-    }
-
-    private static void clearFromReverseMap(SparseArray<Set<Integer>> map, int object, int linked) {
-        Set<Integer> target = getReverse(map, linked);
-        target.remove(object);
-    }
-
-    private static Set<Integer> getReverse(SparseArray<Set<Integer>> map, int linked) {
+    private static Set<Integer> getReverse(final SparseArray<Set<Integer>> map, final int linked) {
         Set<Integer> target = map.get(linked);
         if (target == null) {
             target = new HashSet<Integer>();
@@ -100,6 +96,10 @@ public class ZObject {
         }
         return target;
     }
+
+    private int                                    count;
+
+    private int                                    offset;
 
     private int[] attrcalc(final int myCount) {
         int localCount = myCount;

@@ -9,17 +9,17 @@ import java.util.List;
 import android.util.Log;
 
 public class ZStack<T> implements Serializable, Iterable<T> {
-    private final T           nullValue;
     private static final long serialVersionUID = 1L;
-    private final List<T>     list             = new ArrayList<T>();
     private T                 last             = null;
+    private final List<T>     list             = new ArrayList<T>();
+    private final T           nullValue;
     private int               size             = 0;
 
-    public ZStack(T nullValue) {
+    public ZStack(final T nullValue) {
         this.nullValue = nullValue;
     }
 
-    public void add(T value) {
+    public void add(final T value) {
         list.add(value);
         last = value;
         size++;
@@ -31,7 +31,7 @@ public class ZStack<T> implements Serializable, Iterable<T> {
         size = 0;
     }
 
-    public T get(int i) {
+    public T get(final int i) {
         if (i < 0 || i >= list.size()) {
             Log.w("Xyzzy", "Stack index out of range.");
             return nullValue;
@@ -51,14 +51,14 @@ public class ZStack<T> implements Serializable, Iterable<T> {
     }
 
     public T pop() {
-        T rval = peek();
+        final T rval = peek();
         last = null;
         list.remove(size - 1);
         size--;
         return rval;
     }
 
-    void push(T value) {
+    void push(final T value) {
         last = value;
         list.add(value);
         size++;
@@ -69,10 +69,10 @@ public class ZStack<T> implements Serializable, Iterable<T> {
     }
 
     @Override public String toString() {
-        StringBuilder rval = new StringBuilder();
+        final StringBuilder rval = new StringBuilder();
         rval.append('[');
         boolean first = true;
-        for (T val : list) {
+        for (final T val : list) {
             if (!first) {
                 rval.append(',');
             }

@@ -25,10 +25,10 @@ import android.util.Log;
 import android.util.SparseArray;
 
 public class Memory implements Serializable {
-    private static final long serialVersionUID = 1L;
     private static Memory     CURRENT          = new Memory();
-    private static byte[]     UNDO             = new byte[0];
+    private static final long serialVersionUID = 1L;
     private static ZStream    streams          = new ZStream();
+    private static byte[]     UNDO             = new byte[0];
 
     public static Memory current() {
         return CURRENT;
@@ -53,7 +53,7 @@ public class Memory implements Serializable {
         config |= InterpreterFlag1.CONFIG_FIXED;
         config |= InterpreterFlag1.CONFIG_TIMEDINPUT; // we don't, it's exceptionally annoying
         Header.CONFIG.put(config);
-        int width = MainActivity.width;
+        final int width = MainActivity.width;
         final int columns = Math.max(width / MainActivity.activity.textSize, 80); // some games will complain if they're less than 80 columns
         Header.SCREEN_WIDTH.put(columns);
         Header.SCREEN_HEIGHT.put(24); // a lie, but to try and prevent too much buffering required
@@ -73,11 +73,11 @@ public class Memory implements Serializable {
         ZObject.enumerateObjects();
     }
 
-    public static void setCurrent(Memory cURRENT) {
+    public static void setCurrent(final Memory cURRENT) {
         CURRENT = cURRENT;
     }
 
-    public static void storeUndo(byte[] uNDO) {
+    public static void storeUndo(final byte[] uNDO) {
         UNDO = uNDO;
     }
 
@@ -100,7 +100,7 @@ public class Memory implements Serializable {
         final String serial = Header.serial(CURRENT.buff());
         Story.Game storyid = Story.Game.UNKNOWN;
         for (final Story s : Story.stories) {
-            if (s.release == Header.RELEASE.value() && s.serial == serial) {
+            if (s.release == Header.RELEASE.value() && s.serial.equals(serial)) {
                 storyid = s.story;
                 break;
             }
@@ -136,13 +136,13 @@ public class Memory implements Serializable {
         }
     }
 
-    public int                            currentScreen = 0;
-    public transient SparseArray<ZWindow> zwin          = new SparseArray<ZWindow>();
-    public ZStack<CallStack>              callStack     = new ZStack<CallStack>(null);
-    public Random                         random        = new Random();
-    public int                            objectCount;
-    public String                         storyPath;
     public FileBuffer                     buffer;
+    public ZStack<CallStack>              callStack     = new ZStack<CallStack>(null);
+    public int                            currentScreen = 0;
+    public int                            objectCount;
+    public Random                         random        = new Random();
+    public String                         storyPath;
+    public transient SparseArray<ZWindow> zwin          = new SparseArray<ZWindow>();
 
     Memory() {
         callStack.add(new CallStack());
@@ -155,19 +155,19 @@ public class Memory implements Serializable {
 
     private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        int zwc = in.readInt();
+        final int zwc = in.readInt();
         zwin = new SparseArray<ZWindow>();
         for (int i = 0; i < zwc; i++) {
-            int key = in.readInt();
-            ZWindow zobj = (ZWindow) in.readObject();
+            final int key = in.readInt();
+            final ZWindow zobj = (ZWindow) in.readObject();
             zwin.put(key, zobj);
         }
     }
 
     public void resetZWindows() {
-        int zwinsize = zwin.size();
+        final int zwinsize = zwin.size();
         for (int i = 0; i < zwinsize; i++) {
-            int z = zwin.keyAt(i);
+            final int z = zwin.keyAt(i);
             zwin.get(z).reset();
         }
         zwin.clear();
@@ -177,7 +177,7 @@ public class Memory implements Serializable {
 
     private void writeObject(final ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        int zwc = zwin.size();
+        final int zwc = zwin.size();
         out.writeInt(zwc);
         for (int i = 0; i < zwc; i++) {
             final int keyAtI = zwin.keyAt(i);

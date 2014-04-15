@@ -5,45 +5,45 @@ import uk.addie.xyzzy.state.FileBuffer;
 import uk.addie.xyzzy.state.Memory;
 
 public enum Header {
-    VERSION(0, 1), //
-    CONFIG(1, 1, true), //
-    RELEASE(2), //
-    RESIDENT_SIZE(4), //
-    START_PC(6), //
-    DICTIONARY(8), //
-    OBJECTS(10), //
-    GLOBALS(12), //
-    DYNAMIC_SIZE(14), //
-    FLAGS(16, true), //
-    SERIAL(18, 6), //
     ABBREVIATIONS(24), //
-    FILE_SIZE(26), //
+    ALPHABET(52), //
     CHECKSUM(28), //
-    INTERPRETER_NUMBER(30, 1, true), //
-    INTERPRETER_VERSION(31, 1, true), //
-    SCREEN_ROWS(32, 1, true), //
-    SCREEN_COLS(33, 1, true), //
-    SCREEN_WIDTH(34, true), //
-    SCREEN_HEIGHT(36, true), //
-    FONT_HEIGHT(38, 1, true), // this is the font width in V5
-    FONT_WIDTH(39, 1, true), //  this is the font height in V5
-    FUNCTIONS_OFFSET(40), //
-    STRINGS_OFFSET(42), //
+    CONFIG(1, 1, true), //
     DEFAULT_BACKGROUND(44, 1, true), //
     DEFAULT_FOREGROUND(45, 1, true), //
-    TERMINATING_KEYS(46, 1), //
-    LINE_WIDTH(48), //
-    STANDARD_HIGH(50, 1, true), //
-    STANDARD_LOW(51, 1, true), //
-    ALPHABET(52), //
+    DICTIONARY(8), //
+    DYNAMIC_SIZE(14), //
     EXTENSION_TABLE(54), //
-    USER_NAME(56), //
-    HX_TABLE_SIZE(0, 1), //
+    FILE_SIZE(26), //
+    FLAGS(16, true), //
+    FONT_HEIGHT(38, 1, true), //
+    FONT_WIDTH(39, 1, true), //
+    FUNCTIONS_OFFSET(40), //
+    GLOBALS(12), //
     HX_MOUSE_X(1, 1), //
     HX_MOUSE_Y(2, 1), //
-    HX_UNICODE_TABLE(3, 1);
+    HX_TABLE_SIZE(0, 1), //
+    HX_UNICODE_TABLE(3, 1), //
+    INTERPRETER_NUMBER(30, 1, true), //
+    INTERPRETER_VERSION(31, 1, true), // this is the font width in V5
+    LINE_WIDTH(48), //  this is the font height in V5
+    OBJECTS(10), //
+    RELEASE(2), //
+    RESIDENT_SIZE(4), //
+    SCREEN_COLS(33, 1, true), //
+    SCREEN_HEIGHT(36, true), //
+    SCREEN_ROWS(32, 1, true), //
+    SCREEN_WIDTH(34, true), //
+    SERIAL(18, 6), //
+    STANDARD_HIGH(50, 1, true), //
+    STANDARD_LOW(51, 1, true), //
+    START_PC(6), //
+    STRINGS_OFFSET(42), //
+    TERMINATING_KEYS(46, 1), //
+    USER_NAME(56), //
+    VERSION(0, 1);
     public static void reset() {
-        for (Header h : values()) {
+        for (final Header h : values()) {
             h.value = -1;
         }
     }
@@ -56,18 +56,18 @@ public enum Header {
         return serial.toString();
     }
 
-    public final int     offset;
-    public final int     length;
     public final boolean dynamic;
+    public final int     length;
+    public final int     offset;
     private int          value = -1;
 
     private Header(final int offset) {
         this.offset = offset;
         length = 2;
-        this.dynamic = false;
+        dynamic = false;
     }
 
-    private Header(final int offset, boolean dynamic) {
+    private Header(final int offset, final boolean dynamic) {
         this.offset = offset;
         length = 2;
         this.dynamic = dynamic;
@@ -76,10 +76,10 @@ public enum Header {
     private Header(final int offset, final int length) {
         this.offset = offset;
         this.length = length;
-        this.dynamic = false;
+        dynamic = false;
     }
 
-    private Header(final int offset, final int length, boolean dynamic) {
+    private Header(final int offset, final int length, final boolean dynamic) {
         this.offset = offset;
         this.length = length;
         this.dynamic = dynamic;
@@ -108,7 +108,7 @@ public enum Header {
         return value(Memory.current().buffer);
     }
 
-    public int value(FileBuffer fb) {
+    public int value(final FileBuffer fb) {
         if (!dynamic && value != -1) {
             return value;
         }

@@ -6,20 +6,20 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 
 public class Beep {
+    public final static Beep beep1      = new Beep(0.1, 1760);
+    public final static Beep beep2      = new Beep(0.1, 440);
+    private final double     freqOfTone;                      // hz
+    private final byte       generatedSnd[];
+    private final int        numSamples;
     // originally from http://marblemice.blogspot.com/2010/04/generate-and-play-tone-in-android.html
     // and modified by Steve Pomeroy <steve@staticfree.info>
     private final int        sampleRate = 8000;
-    private final int        numSamples;
-    private final double     freqOfTone;                      // hz
-    private final byte       generatedSnd[];
-    public final static Beep beep1      = new Beep(0.1, 1760);
-    public final static Beep beep2      = new Beep(0.1, 440);
 
-    public Beep(double duration, int frequency) {
-        this.numSamples = (int) (duration * sampleRate);
+    public Beep(final double duration, final int frequency) {
+        numSamples = (int) (duration * sampleRate);
         //        sample = new double[numSamples];
-        this.freqOfTone = frequency;
-        this.generatedSnd = new byte[2 * numSamples];
+        freqOfTone = frequency;
+        generatedSnd = new byte[2 * numSamples];
         genTone();
     }
 
@@ -34,7 +34,7 @@ public class Beep {
         int idx = 0;
         for (final double dVal : sample) {
             // scale to maximum amplitude
-            final short val = (short) ((dVal * 32767));
+            final short val = (short) (dVal * 32767);
             // in 16 bit wav PCM, first byte is the low order byte
             generatedSnd[idx++] = (byte) (val & 0x00ff);
             generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);

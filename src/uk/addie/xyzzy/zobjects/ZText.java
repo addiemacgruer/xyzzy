@@ -154,7 +154,7 @@ public class ZText {
         final StringBuilder sb = new StringBuilder();
         int start = offset;
         while (true) {
-            char c = (char) Memory.current().buffer.get(start);
+            final char c = (char) Memory.current().buffer.get(start);
             if (c == 0) {
                 break;
             }
@@ -164,7 +164,7 @@ public class ZText {
         return sb.toString();
     }
 
-    private static byte zvalue(char[] set, char character) {
+    private static byte zvalue(final char[] set, final char character) {
         for (int i = 0; i < set.length; i++) {
             if (set[i] == character) {
                 return (byte) i;

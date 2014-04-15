@@ -36,7 +36,7 @@ import android.util.Log;
 
 @SuppressWarnings({ "unused", "ucd" }) public enum Opcode {
     ADD(2, 0x14) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             final short result = (short) (a + b);
@@ -44,7 +44,7 @@ import android.util.Log;
         }
     },
     AND(2, 0x9) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             final short result = (short) (a & b);
@@ -52,7 +52,7 @@ import android.util.Log;
         }
     },
     ART_SHIFT(4, 0x3) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short number = arguments.get(0);
             final short places = arguments.get(1);
             final short result;
@@ -67,7 +67,7 @@ import android.util.Log;
         }
     },
     BUFFER_MODE(3, 0x12) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short flag = arguments.get(0);
             Memory.streams().setBuffered(flag == 1);
             if (Debug.screen) {
@@ -76,47 +76,47 @@ import android.util.Log;
         }
     },
     CALL_1N(1, 0xf) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             callAndDiscard(arguments);
         }
     },
     CALL_1S(1, 0x8) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             callAndStore(arguments);
         }
     },
     CALL_2N(2, 0x1a) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             callAndDiscard(arguments);
         }
     },
     CALL_2S(2, 0x19) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             callAndStore(arguments);
         }
     },
     CALL_VN(3, 0x19) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             callAndDiscard(arguments);
         }
     },
     CALL_VN2(3, 0x1a) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             callAndDiscard(arguments);
         }
     },
     CALL_VS(3, 0x0) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             callAndStore(arguments);
         }
     },
     CALL_VS2(3, 0xc) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             callAndStore(arguments);
         }
     },
     CATCH(0, 0x9) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             //TODO catch
             final int destination = Memory.current().callStack.peek().getProgramByte();
             Log.w("Xyzzy", "Catch:" + arguments + " destination:" + destination);
@@ -124,14 +124,14 @@ import android.util.Log;
         }
     },
     CHECK_ARG_COUNT(3, 0x1f) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short argumentNumber = arguments.get(0);
             final short actual = (short) Memory.current().callStack.peek().calledWithCount;
             branchOnTest(argumentNumber <= actual);
         }
     },
     CHECK_UNICODE(4, 0xc) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short charNumber = arguments.get(0);
             int result;
             switch (charNumber) {
@@ -142,7 +142,7 @@ import android.util.Log;
         }
     },
     CLEAR_ATTR(2, 0xc) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final short attribute = arguments.get(1);
             final ZObject zo = ZObject.count(object);
@@ -150,7 +150,7 @@ import android.util.Log;
         }
     },
     COPY_TABLE(3, 0x1d) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short first = arguments.get(0);
             final short second = arguments.get(1);
             final short size = arguments.get(2);
@@ -164,26 +164,26 @@ import android.util.Log;
             // decide copy direction
             if (size < 0 || first > second) { // copy forwards
                 for (int i = 0; i < length; i++) {
-                    byte b = (byte) Memory.current().buff().get(first + i);
+                    final byte b = (byte) Memory.current().buff().get(first + i);
                     Memory.current().buff().put(second + i, b);
                 }
             } else { // copy backwards
                 for (int i = length - 1; i >= 0; i--) {
-                    byte b = (byte) Memory.current().buff().get(first + i);
+                    final byte b = (byte) Memory.current().buff().get(first + i);
                     Memory.current().buff().put(second + i, b);
                 }
             }
         }
     },
     DEC(1, 0x6) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short variable = arguments.get(0);
             final short value = (short) readValue(variable);
             storeValue(variable, value - 1);
         }
     },
     DEC_CHK(2, 0x4) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short variable = (short) (readValue(arguments.get(0)) - 1);
             final short value = arguments.get(1);
             storeValue(arguments.get(0), variable);
@@ -191,7 +191,7 @@ import android.util.Log;
         }
     },
     DIV(2, 0x17) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             if (b == 0) {
@@ -202,7 +202,7 @@ import android.util.Log;
         }
     },
     DRAW_PICTURE(4, 0x5) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short pictureNumber = arguments.get(0);
             final short y = arguments.get(1);
             final short x = arguments.get(2);
@@ -210,32 +210,32 @@ import android.util.Log;
         }
     },
     ENCODE_TEXT(3, 0x1c) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             // TODO needs testing, few games use it.
             final short zsciiText = arguments.get(0);
             final short length = arguments.get(1);
             final short from = arguments.get(2);
             final short codedText = arguments.get(3);
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             for (int i = from; i < from + length; i++) {
                 sb.append((char) Memory.current().buffer.get(i));
             }
             final long encodedText = ZText.encodeString(sb.toString());
-            int bytesToStore = Header.VERSION.value() <= 3 ? 4 : 6;
+            final int bytesToStore = Header.VERSION.value() <= 3 ? 4 : 6;
             for (int i = 0; i < bytesToStore; i++) {
-                byte b = (byte) (encodedText >> (8 * (bytesToStore - i)) & 0xff);
+                final byte b = (byte) (encodedText >> 8 * (bytesToStore - i) & 0xff);
                 Memory.current().buffer.put(codedText + i, b);
             }
         }
     },
     ERASE_LINE(3, 0xe) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short value = arguments.get(0);
             Memory.streams().eraseLine(value);
         }
     },
     ERASE_PICTURE(4, 0x7) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short pictureNumber = arguments.get(0);
             final short y = arguments.get(1);
             final short x = arguments.get(2);
@@ -243,7 +243,7 @@ import android.util.Log;
         }
     },
     ERASE_WINDOW(3, 0xd) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final int window = arguments.get(0);
             switch (window) {
             case -2:
@@ -267,7 +267,7 @@ import android.util.Log;
         }
     },
     GET_CHILD(1, 0x2) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final int object = arguments.get(0);
             final int value;
             if (object == 0) {
@@ -281,15 +281,15 @@ import android.util.Log;
         }
     },
     GET_CURSOR(3, 0x10) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short array = arguments.get(0);
-            Point cursor = Memory.current().zwin.get(Memory.current().currentScreen).cursorPosition();
+            final Point cursor = Memory.current().zwin.get(Memory.current().currentScreen).cursorPosition();
             Memory.current().buffer.put(array, cursor.y); // row first
             Memory.current().buffer.put(array + 1, cursor.x);// column second 
         }
     },
     GET_NEXT_PROP(2, 0x13) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final short property = arguments.get(1);
             final ZObject zo = ZObject.count(object);
@@ -299,7 +299,7 @@ import android.util.Log;
         }
     },
     GET_PARENT(1, 0x3) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final Short object = arguments.get(0);
             if (object == 0) {
                 Error.GET_PARENT_0.invoke();
@@ -311,7 +311,7 @@ import android.util.Log;
         }
     },
     GET_PROP(2, 0x11) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final short property = arguments.get(1);
             if (object == 0) {
@@ -326,7 +326,7 @@ import android.util.Log;
         }
     },
     GET_PROP_ADDR(2, 0x12) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final short property = arguments.get(1);
             if (object == 0) {
@@ -347,7 +347,7 @@ import android.util.Log;
         }
     },
     GET_PROP_LEN(1, 0x4) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short propertyAddress = (short) (arguments.get(0) - 1);
             if (propertyAddress == -1) {
                 readDestinationAndStoreResult(0);
@@ -358,7 +358,7 @@ import android.util.Log;
         }
     },
     GET_SIBLING(1, 0x1) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final int value = ZObject.count(object).sibling();
             readDestinationAndStoreResult((short) value);
@@ -366,7 +366,7 @@ import android.util.Log;
         }
     },
     GET_WIND_PROP(4, 0x13) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short window = arguments.get(0);
             final short propertyNumber = arguments.get(0);
             // TODO get_wind_prop.
@@ -374,14 +374,14 @@ import android.util.Log;
         }
     },
     INC(1, 0x5) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short variable = arguments.get(0);
             final short value = (short) readValue(variable);
             storeValue(variable, value + 1);
         }
     },
     INC_CHK(2, 0x5) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short variable = arguments.get(0);
             final short value = arguments.get(1);
             final short presentValue = (short) (readValue(variable) + 1);
@@ -390,13 +390,13 @@ import android.util.Log;
         }
     },
     INPUT_STREAM(3, 0x14) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short number = arguments.get(0);
             // TODO input stream
         }
     },
     INSERT_OBJ(2, 0xe) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final short destination = arguments.get(1);
             final ZObject zo = ZObject.count(object);
@@ -424,7 +424,7 @@ import android.util.Log;
         }
     },
     JE(2, 0x1) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             boolean anymatch = false;
             final short a = arguments.get(0);
             for (int i = 1; i < arguments.size(); i++) {
@@ -438,14 +438,14 @@ import android.util.Log;
         }
     },
     JG(2, 0x3) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             branchOnTest(a > b);
         }
     },
     JIN(2, 0x6) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short obj1 = arguments.get(0);
             final short obj2 = arguments.get(1);
             if (obj2 == 0) {
@@ -458,26 +458,26 @@ import android.util.Log;
         }
     },
     JL(2, 0x2) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             branchOnTest(a < b);
         }
     },
     JUMP(1, 0xc) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final int label = Memory.current().callStack.peek().programCounter() + arguments.get(0) - 2;
             Memory.current().callStack.peek().setProgramCounter(label);
         }
     },
     JZ(1, 0x0) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);
             branchOnTest(a == 0);
         }
     },
     LOAD(1, 0xe) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short variable = arguments.get(0);
             final short value;
             if (variable == 0) {
@@ -489,7 +489,7 @@ import android.util.Log;
         }
     },
     LOADB(2, 0x10) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final int array = arguments.get(0) & 0xffff;
             final int byteIndex = arguments.get(1) & 0xffff;
             final int value = Memory.current().buff().get(array + byteIndex);
@@ -497,7 +497,7 @@ import android.util.Log;
         }
     },
     LOADW(2, 0xf) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final int array = arguments.get(0) & 0xffff;
             final int wordIndex = arguments.get(1);// & 0xffff;
             final int address = array + 2 * wordIndex;
@@ -506,7 +506,7 @@ import android.util.Log;
         }
     },
     LOG_SHIFT(4, 0x2) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final int number = arguments.get(0) & 0xffff; //remove sign digit
             final short places = arguments.get(1);
             int result = number; // Process.zargs.get(0);
@@ -519,7 +519,7 @@ import android.util.Log;
         }
     },
     MAKE_MENU(4, 0x1b) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             // TODO make-menu
             final short number = arguments.get(0);
             final short table = arguments.get(1);
@@ -527,7 +527,7 @@ import android.util.Log;
         }
     },
     MOD(2, 0x18) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             if (b == 0) {
@@ -538,13 +538,13 @@ import android.util.Log;
         }
     },
     MOUSE_WINDOW(4, 0x17) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             // TODO mouse_window
             final short window = arguments.get(0);
         }
     },
     MOVE_WINDOW(4, 0x10) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             // TODO move_window
             final short window = arguments.get(0);
             final short y = arguments.get(1);
@@ -552,7 +552,7 @@ import android.util.Log;
         }
     },
     MUL(2, 0x16) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             final short value = (short) (a * b);
@@ -560,7 +560,7 @@ import android.util.Log;
         }
     },
     NEW_LINE(0, 0xb) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             //            if (Debug.screen) {
             //                Log.i("Xyzzy", "NEW LINE");
             //            }
@@ -568,19 +568,19 @@ import android.util.Log;
         }
     },
     NOP(0, 0x4) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             //no-op
         }
     },
     NOT(3, 0x18) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short value = arguments.get(0);
             final short result = (short) ~value;
             readDestinationAndStoreResult(result);
         }
     },
     OR(2, 0x8) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             final short value = (short) (a | b);
@@ -588,7 +588,7 @@ import android.util.Log;
         }
     },
     OUTPUT_STREAM(3, 0x13) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             int width = 0, table = 0, number = 0;
             switch (arguments.size()) {
             case 3: // V6
@@ -605,7 +605,7 @@ import android.util.Log;
         }
     },
     PICTURE_DATA(4, 0x6) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short pictureNumber = arguments.get(0);
             final short array = arguments.get(1);
             // TODO picture_data
@@ -613,23 +613,23 @@ import android.util.Log;
         }
     },
     PICTURE_TABLE(4, 0x1c) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short table = arguments.get(0);
             //TODO picture-table.  Should cache the pictures in the table given.
         }
     },
     PIRACY(0, 0xf) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             branchOnTest(true);
         }
     },
     POP {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             Memory.current().callStack.peek().pop();
         }
     },
     POP_STACK(4, 0x15) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short items = arguments.get(0);
             if (arguments.size() > 1) {
                 final short stack = arguments.get(1);
@@ -642,37 +642,37 @@ import android.util.Log;
         }
     },
     PRINT(0, 0x2) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             Memory.streams().append(ZText.encodedAtOffset(Memory.current().callStack.peek().programCounter()));
             Memory.current().callStack.peek().setProgramCounter(ZText.bytePosition + 2);
         }
     },
     PRINT_ADDR(1, 0x7) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short byteAddressOfString = arguments.get(0);
             Memory.streams().append(ZText.encodedAtOffset(byteAddressOfString & 0xffff));
         }
     },
     PRINT_CHAR(3, 0x5) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short outputCharacterCode = arguments.get(0);
             Memory.streams().append(Character.toString((char) outputCharacterCode));
         }
     },
     PRINT_FORM(4, 0x1a) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short formattedTable = arguments.get(0);
             // TODO print-form
         }
     },
     PRINT_NUM(3, 0x6) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short value = arguments.get(0);
             Memory.streams().append(Short.toString(value));
         }
     },
     PRINT_OBJ(1, 0xa) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final ZObject zo = ZObject.count(object);
             if (Debug.screen) {
@@ -682,26 +682,26 @@ import android.util.Log;
         }
     },
     PRINT_PADDR(1, 0xd) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final int packedAddressOfString = arguments.get(0) & 0xffff;
             final int address = Memory.unpackAddress(packedAddressOfString);
             Memory.streams().append(ZText.encodedAtOffset(address));
         }
     },
     PRINT_RET(0, 0x3) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             PRINT.invoke(arguments);
             NEW_LINE.invoke(arguments);
             RTRUE.invoke(arguments);
         }
     },
     PRINT_TABLE(3, 0x1e) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short zsciiText = arguments.get(0);
             final short width = arguments.get(1);
             final short height = arguments.get(2);
             final short skip = arguments.get(3);
-            String text = ZText.unencodedAtOffset(zsciiText);
+            final String text = ZText.unencodedAtOffset(zsciiText);
             int charcount = 0;
             // TODO get cursor position
             for (int i = 0; i < height; i++) {
@@ -715,13 +715,13 @@ import android.util.Log;
         }
     },
     PRINT_UNICODE(4, 0xb) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short charNumber = arguments.get(0);
             Memory.streams().append(Character.toString((char) charNumber));
         }
     },
     PULL(3, 0x9) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short variable = arguments.get(0);
             //TODO error on underflow
             final short value = Memory.current().callStack.peek().pop();
@@ -732,13 +732,13 @@ import android.util.Log;
         }
     },
     PUSH(3, 0x8) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short value = arguments.get(0);
             Memory.current().callStack.peek().push(value);
         }
     },
     PUSH_STACK(4, 0x18) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short value = arguments.get(0);
             final short stack = arguments.get(1);
             // TODO push-stack
@@ -746,7 +746,7 @@ import android.util.Log;
         }
     },
     PUT_PROP(3, 0x3) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final short property = arguments.get(1);
             final short value = arguments.get(2);
@@ -756,7 +756,7 @@ import android.util.Log;
         }
     },
     PUT_WIND_PROP(4, 0x19) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short window = arguments.get(0);
             final short propertyNmber = arguments.get(1);
             final short value = arguments.get(2);
@@ -764,14 +764,14 @@ import android.util.Log;
         }
     },
     QUIT(0, 0xa) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             NEW_LINE.invoke(arguments);
             ZWindow.printAllScreens();
             Decoder.terminate();
         }
     },
     RANDOM(3, 0x7) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short range = arguments.get(0);
             int value = 0;
             if (range < 0) {
@@ -785,7 +785,7 @@ import android.util.Log;
         }
     },
     READ(3, 0x4) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             ZWindow.printAllScreens();
             int text = 0, parse = 0, time = 0, routine = 0;
             switch (arguments.size()) {
@@ -821,7 +821,7 @@ import android.util.Log;
         }
     },
     READ_CHAR(3, 0x16) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             ZWindow.printAllScreens();
             int value;
             final short one = arguments.get(0);
@@ -840,7 +840,7 @@ import android.util.Log;
         }
     },
     READ_MOUSE(4, 0x16) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             //TODO read-mouse
             final short array = arguments.get(0);
             Memory.current().buffer.put(array + 0, 0); // mouse X
@@ -850,13 +850,13 @@ import android.util.Log;
         }
     },
     REMOVE_OBJ(1, 0x9) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             ZObject.detachFromTree(object);
         }
     },
     RESTART(0, 0x7) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             Memory.current().random.seed_random(0);
             Memory.loadDataFromFile();
             Memory.current().callStack.peek().clearStack();
@@ -870,7 +870,7 @@ import android.util.Log;
         }
     },
     RESTORE(4, 0x1) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             Memory loaded = null;
             try {
                 final FileInputStream save = MainActivity.activity.openFileInput(saveGameName());
@@ -878,7 +878,7 @@ import android.util.Log;
                 loaded = (Memory) ois.readObject();
                 ois.close();
             } catch (final Exception e) {
-                Log.e("Xyzzy", "Couldn't restore save:" + e);
+                Log.e("Xyzzy", "Couldn't restore save:", e);
                 readDestinationAndStoreResult(0);
                 return;
             }
@@ -893,7 +893,7 @@ import android.util.Log;
         }
     },
     RESTORE_UNDO(4, 0xa) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             Memory loaded = null;
             try {
                 final ByteArrayInputStream bais = new ByteArrayInputStream(Memory.undo());
@@ -916,29 +916,29 @@ import android.util.Log;
         }
     },
     RET(1, 0xb) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short value = arguments.get(0);
             returnValue(value);
         }
     },
     RET_POPPED(0, 8) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short value = Memory.current().callStack.peek().pop();
             returnValue(value);
         }
     },
     RFALSE(0, 0x1) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             returnValue(0);
         }
     },
     RTRUE(0, 0x0) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             returnValue(1);
         }
     },
     SAVE(4, 0x0) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             try {
                 final FileOutputStream save = MainActivity.activity
                         .openFileOutput(saveGameName(), Context.MODE_PRIVATE);
@@ -956,14 +956,14 @@ import android.util.Log;
         }
     },
     SAVE_UNDO(4, 0x9) {
-        @Override public void invoke(ZStack<Short> arguments) {
-            long time = System.currentTimeMillis();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(Memory.undo().length);
+        @Override public void invoke(final ZStack<Short> arguments) {
+            final long time = System.currentTimeMillis();
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream(Memory.undo().length);
             try {
                 final ObjectOutputStream oos = new ObjectOutputStream(baos);
                 oos.writeObject(Memory.current());
                 oos.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
             Memory.storeUndo(baos.toByteArray());
@@ -973,7 +973,7 @@ import android.util.Log;
         }
     },
     SCAN_TABLE(3, 0x17) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final int x = arguments.get(0) & 0xffff;
             final int table = arguments.get(1) & 0xffff;
             final int len = arguments.get(2) & 0xffff;
@@ -984,8 +984,8 @@ import android.util.Log;
             final boolean isWord = Bit.bit7(form);
             final int skip = Bit.low(form, 7);
             for (int i = 0; i < len; i += skip) {
-                int wordAtI = isWord ? Memory.current().buffer.getShort(table + i * skip) & 0xffff
-                        : Memory.current().buffer.get(table + i * skip) & 0xff;
+                final int wordAtI = isWord ? Memory.current().buffer.getShort(table + i * skip) & 0xffff : Memory
+                        .current().buffer.get(table + i * skip) & 0xff;
                 if (x == wordAtI) {
                     readDestinationAndStoreResult(table + i * skip);
                     branchOnTest(true);
@@ -997,14 +997,14 @@ import android.util.Log;
         }
     },
     SCROLL_WINDOW(4, 0x14) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             // TODO scroll-window
             final short window = arguments.get(0);
             final short pixels = arguments.get(1);
         }
     },
     SET_ATTR(2, 0xb) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final short attribute = arguments.get(1);
             final ZObject zo = ZObject.count(object);
@@ -1012,7 +1012,7 @@ import android.util.Log;
         }
     },
     SET_COLOUR(2, 0x1b) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             if (!(Boolean) Preferences.USE_COLOUR.getValue(MainActivity.activity)) {
                 return;
             }
@@ -1025,7 +1025,7 @@ import android.util.Log;
         }
     },
     SET_CURSOR(3, 0xf) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short line = arguments.get(0);
             short column = 0;
             if (arguments.size() >= 2) {
@@ -1038,13 +1038,13 @@ import android.util.Log;
         }
     },
     SET_FONT(4, 0x4) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short font = arguments.get(0);
             // TODO set_font
         }
     },
     SET_MARGINS(4, 0x8) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short left = arguments.get(0);
             final short right = arguments.get(0);
             final short window = arguments.get(0);
@@ -1052,7 +1052,7 @@ import android.util.Log;
         }
     },
     SET_TEXT_STYLE(3, 0x11) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short style = arguments.get(0);
             //            if (!Debug.screen) {
             //                return;
@@ -1096,7 +1096,7 @@ import android.util.Log;
         }
     },
     SET_TRUE_COLOUR(4, 0xd) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             if (!(Boolean) Preferences.USE_COLOUR.getValue(MainActivity.activity)) {
                 return;
             }
@@ -1109,7 +1109,7 @@ import android.util.Log;
         }
     },
     SET_WINDOW(3, 0xb) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short window = arguments.get(0);
             if (Debug.screen) {
                 Log.i("Xyzzy", "SET WINDOW: " + arguments.get(0));
@@ -1121,7 +1121,7 @@ import android.util.Log;
         }
     },
     SHOW_STATUS(0, 0xc) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             if (Header.VERSION.value() != 3) {
                 NOP.invoke(arguments);
             } else {
@@ -1131,7 +1131,7 @@ import android.util.Log;
         }
     },
     SOUND_EFFECT(3, 0x15) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             if (!(Boolean) Preferences.SOUND_ON.getValue(MainActivity.activity)) {
                 return;
             }
@@ -1150,12 +1150,12 @@ import android.util.Log;
         }
     },
     SPLIT_WINDOW(3, 0xa) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short lines = arguments.get(0);
             if (Debug.screen) {
                 Log.i("Xyzzy", "SPLIT WINDOW: " + lines + " LINES (CURRENT:" + Memory.streams() + ")");
             }
-            int splitScreen = Memory.current().currentScreen + 1;
+            final int splitScreen = Memory.current().currentScreen + 1;
             final ZWindow nextScreen = Memory.current().zwin.get(splitScreen);
             if (nextScreen != null) {
                 nextScreen.reset();
@@ -1164,7 +1164,7 @@ import android.util.Log;
         }
     },
     STORE(2, 0xd) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short variable = arguments.get(0);
             final short value = arguments.get(1);
             if (variable == 0) {
@@ -1176,7 +1176,7 @@ import android.util.Log;
         }
     },
     STOREB(3, 0x2) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final int array = arguments.get(0) & 0xffff;
             final int byteIndex = arguments.get(1) & 0xffff;
             final byte value = arguments.get(2).byteValue();
@@ -1184,7 +1184,7 @@ import android.util.Log;
         }
     },
     STOREW(3, 0x1) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final int array = arguments.get(0) & 0xffff;
             final int wordIndex = arguments.get(1) & 0xffff;
             final short value = arguments.get(2);
@@ -1193,21 +1193,21 @@ import android.util.Log;
         }
     },
     SUB(2, 21) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);
             final short b = arguments.get(1);
             readDestinationAndStoreResult(a - b);
         }
     },
     TEST(2, 0x7) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short bitmap = arguments.get(0);
             final short flags = arguments.get(1);
             branchOnTest((bitmap & flags) == flags);
         }
     },
     TEST_ATTR(2, 0xa) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final short attribute = arguments.get(1);
             if (object == 0) {
@@ -1221,7 +1221,7 @@ import android.util.Log;
         }
     },
     THROW(2, 0x1c) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final short value = arguments.get(0);
             final short stackFrame = arguments.get(1);
             Log.w("Xyzzy", "Throw:" + value + " stackFrame:" + stackFrame);
@@ -1230,7 +1230,7 @@ import android.util.Log;
         }
     },
     TOKENISE(3, 0x1b) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             final int text = arguments.get(0) & 0xffff;
             final int parse = arguments.get(1) & 0xffff;
             if (arguments.size() != 2) {
@@ -1246,13 +1246,13 @@ import android.util.Log;
         }
     },
     VERIFY(0, 0xd) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             //TODO verify
             branchOnTest(true);
         }
     },
     WINDOW_SIZE(4, 0x11) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             // TODO window-size
             final short window = arguments.get(0);
             final short y = arguments.get(1);
@@ -1260,7 +1260,7 @@ import android.util.Log;
         }
     },
     WINDOW_STYLE(4, 0x12) {
-        @Override public void invoke(ZStack<Short> arguments) {
+        @Override public void invoke(final ZStack<Short> arguments) {
             // TODO window-style
             final short window = arguments.get(0);
             final short flags = arguments.get(1);
@@ -1277,7 +1277,7 @@ import android.util.Log;
         }
     }
 
-    protected static void branchOnTest(boolean test) {
+    protected static void branchOnTest(final boolean test) {
         final int lobit = Memory.current().callStack.peek().getProgramByte();
         final boolean branchCondition = Bit.bit7(lobit);
         final int offset = calculateOffset(lobit);
@@ -1301,14 +1301,14 @@ import android.util.Log;
         return offset;
     }
 
-    static void callAndDiscard(ZStack<Short> arguments) {
+    static void callAndDiscard(final ZStack<Short> arguments) {
         final int routine = arguments.get(0) & 0xffff;
         if (routine != 0) {
             CallStack.call(routine, arguments, new StackDiscard());
         }
     }
 
-    static void callAndStore(ZStack<Short> arguments) {
+    static void callAndStore(final ZStack<Short> arguments) {
         final int routine = arguments.get(0) & 0xffff;
         final int result = Memory.current().callStack.peek().getProgramByte();
         if (routine == 0) {
@@ -1323,7 +1323,7 @@ import android.util.Log;
     }
 
     static void logCallStack() {
-        for (CallStack cs : Memory.current().callStack) {
+        for (final CallStack cs : Memory.current().callStack) {
             Log.d("Xyzzy", cs.toString());
         }
     }
@@ -1338,6 +1338,7 @@ import android.util.Log;
             try {
                 return Memory.current().callStack.peek().pop();
             } catch (final EmptyStackException ese) {
+                Log.e("Xyzzy", "Opcode.readValue:", ese);
                 Error.STK_UNDF.invoke(); // fatal
                 return 0;
             }
@@ -1362,8 +1363,8 @@ import android.util.Log;
     }
 
     static String saveGameName() {
-        File story = new File(Memory.current().storyPath);
-        String namepart = story.getName();
+        final File story = new File(Memory.current().storyPath);
+        final String namepart = story.getName();
         return namepart + ".save";
     }
 
@@ -1386,8 +1387,8 @@ import android.util.Log;
     public final int operands;
 
     private Opcode() { // constructor for pre-V5 opcodes
-        this.operands = 0;
-        this.hex = 0x0;
+        operands = 0;
+        hex = 0x0;
     }
 
     private Opcode(final int operands, final int hex) {

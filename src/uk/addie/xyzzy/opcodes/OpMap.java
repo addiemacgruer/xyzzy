@@ -19,7 +19,7 @@ public class OpMap {
         opmap[4] = new Opcode[0x20];
     }
 
-    public static void adjustForVersion(int version) {
+    public static void adjustForVersion(final int version) {
         if (version <= 4) {
             opmap[1][0xf] = Opcode.NOT;
             opmap[0][0x9] = Opcode.POP;
@@ -33,7 +33,7 @@ public class OpMap {
         }
     }
 
-    public static void invoke(final int operands, final int hex, ZStack<Short> arguments) {
+    public static void invoke(final int operands, final int hex, final ZStack<Short> arguments) {
         final Opcode z = opmap[operands][hex];
         if (z == null) {
             Log.e("Xyzzy",
@@ -51,7 +51,7 @@ public class OpMap {
     public static void logAllOpcodes() {
         for (int j = 0; j < opmap.length; j++) {
             for (int i = 0; i < opmap[j].length; i++) {
-                Opcode z = opmap[j][i];
+                final Opcode z = opmap[j][i];
                 if (z != null) {
                     Log.d("Xyzzy", j + ":" + Integer.toHexString(i) + " " + z);
                 } else {

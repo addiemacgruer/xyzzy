@@ -9,10 +9,11 @@ import android.view.View;
 import android.widget.ScrollView;
 
 public class ZScrollView extends ScrollView {
-    private final static int scrollUpdate = 10;
     private final static int scrollSpeed  = 3;
+    private final static int scrollUpdate = 10;
+    int                      destinationX;
+    int                      destinationY;
     final Handler            handler      = new Handler();
-    boolean                  running      = false;
     private final Runnable   runnable     = new Runnable() {
                                               @Override public void run() {
                                                   int currentX = getScrollX();
@@ -40,26 +41,25 @@ public class ZScrollView extends ScrollView {
                                                   }
                                               }
                                           };
-    int                      destinationX;
-    int                      destinationY;
+    boolean                  running      = false;
 
-    public ZScrollView(Context context) {
+    public ZScrollView(final Context context) {
         super(context);
         setOverScrollMode(View.OVER_SCROLL_ALWAYS);
     }
 
-    public ZScrollView(Context context, AttributeSet attrs) {
+    public ZScrollView(final Context context, final AttributeSet attrs) {
         super(context, attrs);
         setOverScrollMode(View.OVER_SCROLL_ALWAYS);
     }
 
-    public ZScrollView(Context context, AttributeSet attrs, int defStyle) {
+    public ZScrollView(final Context context, final AttributeSet attrs, final int defStyle) {
         super(context, attrs, defStyle);
         setOverScrollMode(View.OVER_SCROLL_ALWAYS);
     }
 
-    @Override protected int computeScrollDeltaToGetChildRectOnScreen(Rect rect) {
-        int rval = super.computeScrollDeltaToGetChildRectOnScreen(rect);
+    @Override protected int computeScrollDeltaToGetChildRectOnScreen(final Rect rect) {
+        final int rval = super.computeScrollDeltaToGetChildRectOnScreen(rect);
         destinationX = getScrollX();
         destinationY = getScrollY() + rval;
         if (!running) {

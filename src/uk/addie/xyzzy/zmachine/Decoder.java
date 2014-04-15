@@ -14,8 +14,8 @@ import uk.addie.xyzzy.zobjects.ZWindow;
 import android.util.Log;
 
 public class Decoder {
-    private static boolean             finished  = false;
     private static final ZStack<Short> arguments = new ZStack<Short>((short) 0);
+    private static boolean             finished  = false;
     private static int                 opcount   = 1;
 
     public static ZStack<Short> arguments() {
@@ -40,13 +40,13 @@ public class Decoder {
             opcount++;
             try {
                 interpretOpcode(opcode);
-            } catch (XyzzyException xe) { //oops
+            } catch (final XyzzyException xe) { //oops
                 Memory.streams().append("\n\nFatal error in story file\n");
                 Log.e("Xyzzy", "Interpreter:" + xe.toString());
                 xe.printStackTrace();
                 flushTraceToScreen0(xe);
                 finished = true;
-            } catch (Exception e) { // double oops
+            } catch (final Exception e) { // double oops
                 Memory.streams().append("\n\nFatal error in interpreter\n");
                 Log.e("Xyzzy", "Runtime:" + e.toString());
                 e.printStackTrace();
@@ -56,14 +56,14 @@ public class Decoder {
         } while (!finished);
     }
 
-    private static void flushTraceToScreen0(Exception xe) {
+    private static void flushTraceToScreen0(final Exception xe) {
         if (!finished) {
             Memory.streams().append(xe.toString() + "\n\n");
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintWriter pw = new PrintWriter(baos);
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            final PrintWriter pw = new PrintWriter(baos);
             xe.printStackTrace(pw);
             pw.flush();
-            String printLog = new String(baos.toByteArray());
+            final String printLog = new String(baos.toByteArray());
             Memory.streams().append(printLog);
             ZWindow.printAllScreens();
         }

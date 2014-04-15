@@ -4,6 +4,7 @@ package uk.addie.xyzzy.zobjects;
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.state.Memory;
 import uk.addie.xyzzy.util.Bit;
+import android.util.Log;
 
 public class ZProperty {
     public static int calcProplenSize(final int prop) {
@@ -14,6 +15,7 @@ public class ZProperty {
         try {
             sn = Memory.current().buff().get(prop) & 0xff;
         } catch (final IndexOutOfBoundsException ioobe) {
+            Log.e("Xyzzy", "ZProperty.calcProplenSize:", ioobe);
             return 0;
         }
         int size;

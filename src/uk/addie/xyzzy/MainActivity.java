@@ -31,11 +31,11 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
     public static MainActivity      activity;
-    static final List<View>         textBoxes       = new ArrayList<View>();
-    private static Thread           logicThread     = null;
     public final static InputSync   inputSyncObject = new InputSync();
-    public static int               width, height;
+    private static Thread           logicThread     = null;
     final static View.OnKeyListener okl;
+    static final List<View>         textBoxes       = new ArrayList<View>();
+    public static int               width, height;
     static {
         okl = new View.OnKeyListener() {
             private void delayDisable(final EditText et) {
@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
                     @Override public void run() {
                         try {
                             Thread.sleep(1000);
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
                             throw new RuntimeException(e);
                         }
                         MainActivity.activity.runOnUiThread(new Runnable() {
@@ -52,11 +52,11 @@ public class MainActivity extends Activity {
                             }
                         });
                     }
-                }).start();
+                }, "Disable old EditText").start();
             }
 
             @Override public boolean onKey(final View v, final int keyCode, final KeyEvent event) {
-                EditText et = (EditText) v;
+                final EditText et = (EditText) v;
                 if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
                     synchronized (MainActivity.inputSyncObject) {
                         MainActivity.inputSyncObject.string = et.getText().toString();
@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
         tv.requestFocus();
     }
 
-    static EditText formattedEditText(int foreground, int background) {
+    static EditText formattedEditText(final int foreground, final int background) {
         // TODO called from wrong thread exception?
         final EditText et = new EditText(MainActivity.activity.getApplicationContext());
         et.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
@@ -94,7 +94,7 @@ public class MainActivity extends Activity {
         return et;
     }
 
-    static TextView textView(int foreground, int background) {
+    static TextView textView(final int foreground, final int background) {
         final TextView ett = new TextView(MainActivity.activity.getApplicationContext());
         ett.setTextColor(foreground);
         ett.setBackgroundColor(background);
@@ -102,13 +102,13 @@ public class MainActivity extends Activity {
         return ett;
     }
 
-    public static int waitOnKey() {
+    public static int waitOnKey() { // returns 0 if interrupted or shutting down.
         synchronized (inputSyncObject) {
             inputSyncObject.character = 0;
             try {
                 inputSyncObject.wait();
-            } catch (InterruptedException e) {
-                // do nothing
+            } catch (final InterruptedException e) {
+                Log.e("Xyzzy", "Wait on key interrupted:", e);
             }
             return inputSyncObject.character;
         }
@@ -144,12 +144,12 @@ public class MainActivity extends Activity {
         final int maximumScroll = (Integer) Preferences.SCROLL_BACK.getValue(this);
         runOnUiThread(new Runnable() {
             @Override public void run() {
-                LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
+                final LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
                 if (tv instanceof TextView) {
                     ((TextView) tv).setTextSize(textSize);
                 }
                 while (ll.getChildCount() > maximumScroll) {
-                    View view = ll.getChildAt(0);
+                    final View view = ll.getChildAt(0);
                     ll.removeViewAt(0);
                     synchronized (textBoxes) {
                         textBoxes.remove(view);
@@ -173,7 +173,7 @@ public class MainActivity extends Activity {
         }
         Decoder.terminate();
         logicThread = null;
-        synchronized (inputSyncObject) {
+        synchronized (inputSyncObject) { // release background thread if it's waiting on input.
             inputSyncObject.notifyAll();
         }
         this.finish();
@@ -191,18 +191,18 @@ public class MainActivity extends Activity {
     }
 
     @SuppressWarnings("deprecation") private void getScreenSize() {
-        Display display = getWindowManager().getDefaultDisplay();
+        final Display display = getWindowManager().getDefaultDisplay();
         width = display.getWidth();
         height = display.getHeight();
     }
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(final Bundle savedInstanceState) {
         Log.d("Xyzzy", "MainActivity onCreate");
         getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         activity = this;
         getScreenSize();
-        Intent intent = getIntent();
-        String message = intent.getStringExtra(SelectionActivity.EXTRA_MESSAGE);
+        final Intent intent = getIntent();
+        final String message = intent.getStringExtra(SelectionActivity.EXTRA_MESSAGE);
         Xyzzy.story = message;
         super.onCreate(savedInstanceState);
         //        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -215,7 +215,7 @@ public class MainActivity extends Activity {
             }
         }
         synchronized (textBoxes) {
-            for (View v : textBoxes) {
+            for (final View v : textBoxes) {
                 final LinearLayout oldLinearLayout = (LinearLayout) v.getParent();
                 if (oldLinearLayout != null) {
                     oldLinearLayout.removeView(v);
@@ -226,11 +226,11 @@ public class MainActivity extends Activity {
         }
     }
 
-    @SuppressLint("NewApi") @Override public boolean onCreateOptionsMenu(Menu menu) {
+    @SuppressLint("NewApi") @Override public boolean onCreateOptionsMenu(final Menu menu) {
         Log.d("Control", "OCOM");
         mis = new MenuItem[MenuButtons.values().length];
         int i = 0;
-        for (MenuButtons mb : MenuButtons.values()) {
+        for (final MenuButtons mb : MenuButtons.values()) {
             final MenuItem nextMenu = menu.add(mb.toString());
             if (mb.menuButtonIcon() != -1) {
                 nextMenu.setIcon(mb.menuButtonIcon());
@@ -241,7 +241,7 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
+    @Override public boolean onKeyDown(final int keyCode, final KeyEvent event) {
         Log.d("Xyzzy", "onKeyDown:" + keyCode + " :" + event);
         if (event == null) { // ie. it's synthetic
             synchronized (inputSyncObject) {
@@ -267,7 +267,7 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
+    @Override public boolean onOptionsItemSelected(final MenuItem item) {
         int selected = -1;
         if (mis == null) { // then we've not initialised?
             Log.e("Xyzzy", "Android onOptionsItemSelected before onCreateOptionsMenu?");
@@ -286,7 +286,7 @@ public class MainActivity extends Activity {
         super.onResume();
         textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
         synchronized (textBoxes) {
-            for (View v : textBoxes) {
+            for (final View v : textBoxes) {
                 if (v instanceof TextView) {
                     ((TextView) v).setTextSize(textSize);
                 }
@@ -297,8 +297,8 @@ public class MainActivity extends Activity {
     public void removeChild(final View view) {
         runOnUiThread(new Runnable() {
             @Override public void run() {
-                int viewId = (Integer) view.getTag();
-                LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
+                final int viewId = (Integer) view.getTag();
+                final LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
                 ll.removeView(view);
                 synchronized (textBoxes) {
                     textBoxes.remove(view);
@@ -310,11 +310,11 @@ public class MainActivity extends Activity {
     public void removeChildren(final int viewId) {
         runOnUiThread(new Runnable() {
             @Override public void run() {
-                LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
+                final LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
                 ll.removeAllViews();
                 synchronized (textBoxes) {
-                    List<View> tbCopy = new ArrayList<View>(textBoxes);
-                    for (View v : tbCopy) {
+                    final List<View> tbCopy = new ArrayList<View>(textBoxes);
+                    for (final View v : tbCopy) {
                         if ((Integer) v.getTag() == viewId) {
                             textBoxes.remove(v);
                         }
@@ -327,7 +327,7 @@ public class MainActivity extends Activity {
     public void setBackgroundColour(final int colour) {
         runOnUiThread(new Runnable() {
             @Override public void run() {
-                RelativeLayout ll = (RelativeLayout) MainActivity.activity.findViewById(R.id.screen);
+                final RelativeLayout ll = (RelativeLayout) MainActivity.activity.findViewById(R.id.screen);
                 ll.setBackgroundColor(colour);
             }
         });
@@ -337,8 +337,8 @@ public class MainActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override public void run() {
                 Log.i("Xyzzy", "Showing keyboard");
-                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                RelativeLayout ll = (RelativeLayout) MainActivity.activity.findViewById(R.id.screen);
+                final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                final RelativeLayout ll = (RelativeLayout) MainActivity.activity.findViewById(R.id.screen);
                 inputMethodManager.toggleSoftInputFromWindow(ll.getApplicationWindowToken(),
                         InputMethodManager.SHOW_FORCED, 0);
             }

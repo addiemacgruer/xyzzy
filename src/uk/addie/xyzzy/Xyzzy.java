@@ -17,7 +17,8 @@ class Xyzzy implements Runnable {
         Log.i("Xyzzy", "Starting background logic thread");
         try {
             Memory.current().storyPath = story;
-        } catch (XyzzyException xe) {
+        } catch (final XyzzyException xe) {
+            Log.e("Xyzzy", "Xyzzy.run:", xe);
             return;
         }
         Header.reset();

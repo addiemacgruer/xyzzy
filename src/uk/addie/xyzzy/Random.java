@@ -10,8 +10,8 @@ public class Random implements Serializable {
      * 
      */
     private static final long serialVersionUID = 1L;
-    private int               interval         = 0;
     private int               counter          = 0;
+    private int               interval         = 0;
 
     public int random(final int range) {
         if (range <= 0) { /* set random seed */
@@ -28,7 +28,7 @@ public class Random implements Serializable {
         } else { /* ...in standard mode */
             result = (int) System.currentTimeMillis();
         }
-        final int randomResult = (result % range) + 1;
+        final int randomResult = result % range + 1;
         Log.d("Xyzzy", "Random result:" + randomResult + "/" + range);
         return randomResult;
     }

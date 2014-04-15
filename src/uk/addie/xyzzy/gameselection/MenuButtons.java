@@ -10,7 +10,7 @@ import android.content.Intent;
 enum MenuButtons implements MenuButton {
     ABOUT {
         @Override public void invoke() {
-            Intent intent = new Intent(SelectionActivity.activity, HtmlViewActivity.class);
+            final Intent intent = new Intent(SelectionActivity.activity, HtmlViewActivity.class);
             SelectionActivity.activity.startActivity(intent);
         }
 
@@ -24,7 +24,7 @@ enum MenuButtons implements MenuButton {
     },
     SETTINGS {
         @Override public void invoke() {
-            Intent intent = new Intent(SelectionActivity.activity, PreferencesActivity.class);
+            final Intent intent = new Intent(SelectionActivity.activity, PreferencesActivity.class);
             SelectionActivity.activity.startActivity(intent);
         }
 

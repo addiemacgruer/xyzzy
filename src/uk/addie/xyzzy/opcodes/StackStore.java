@@ -1,4 +1,6 @@
+
 package uk.addie.xyzzy.opcodes;
+
 import java.io.Serializable;
 
 import uk.addie.xyzzy.Invokeable;

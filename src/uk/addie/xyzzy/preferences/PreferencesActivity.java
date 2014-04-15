@@ -14,15 +14,15 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 public class PreferencesActivity extends Activity implements OnClickListener, OnTouchListener {
-    private SeekBar          seekBar;
-    private CheckBox         enableSound;
-    private static final int minTextSize = 6;
     private static final int maxTextSize = 48;
+    private static final int minTextSize = 6;
+    private CheckBox         enableSound;
     private CheckBox         reportMinor;
+    private SeekBar          seekBar;
     private CheckBox         useColour;
 
-    private CheckBox initialiseCheckbox(int viewId, Preferences pref) {
-        CheckBox rval = (CheckBox) findViewById(viewId);
+    private CheckBox initialiseCheckbox(final int viewId, final Preferences pref) {
+        final CheckBox rval = (CheckBox) findViewById(viewId);
         rval.setOnClickListener(this);
         rval.setChecked((Boolean) pref.getValue(this));
         return rval;
@@ -32,12 +32,12 @@ public class PreferencesActivity extends Activity implements OnClickListener, On
         seekBar = (SeekBar) findViewById(R.id.fontsizeSeekbar);
         seekBar.setOnTouchListener(this);
         seekBar.setMax(maxTextSize - minTextSize);
-        int textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
+        final int textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
         seekBar.setProgress(textSize - minTextSize);
         updateTextSize(textSize);
     }
 
-    @Override public void onClick(View view) {
+    @Override public void onClick(final View view) {
         if (view == enableSound) {
             Preferences.SOUND_ON.setValue(this, enableSound.isChecked());
         } else if (view == reportMinor) {
@@ -47,7 +47,7 @@ public class PreferencesActivity extends Activity implements OnClickListener, On
         }
     }
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.preferences);
         enableSound = initialiseCheckbox(R.id.enableSound, Preferences.SOUND_ON);
@@ -56,9 +56,9 @@ public class PreferencesActivity extends Activity implements OnClickListener, On
         initialiseFontSizeBar();
     }
 
-    @Override public boolean onTouch(View v, MotionEvent event) {
+    @Override public boolean onTouch(final View v, final MotionEvent event) {
         if (v == seekBar) {
-            int newTextSize = seekBar.getProgress() + minTextSize;
+            final int newTextSize = seekBar.getProgress() + minTextSize;
             updateTextSize(newTextSize);
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 Preferences.TEXT_SIZE.setValue(this, newTextSize);
@@ -69,8 +69,8 @@ public class PreferencesActivity extends Activity implements OnClickListener, On
         return false;
     }
 
-    void updateTextSize(int textSize) {
-        TextView textSizeView = (TextView) findViewById(R.id.fontsizeTextbox);
+    void updateTextSize(final int textSize) {
+        final TextView textSizeView = (TextView) findViewById(R.id.fontsizeTextbox);
         textSizeView.setText("Font size: " + textSize);
     }
 }

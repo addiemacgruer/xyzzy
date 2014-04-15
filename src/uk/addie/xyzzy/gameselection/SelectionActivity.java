@@ -34,40 +34,41 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class SelectionActivity extends Activity implements ListAdapter { // NO_UCD (use default)
-    static int                         selected      = -1;
     protected static SelectionActivity activity;
+    public final static String  EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
+    private static final int    FILE_SELECT_CODE = 0;
+
     final static int                   INTERSTITIALS = 3;
 
-    private static String getPath(Context context, Uri uri) {
+    static int                         selected      = -1;
+    private static String getPath(final Context context, final Uri uri) {
         Log.d("Xyzzy", "getPath:" + context + " uri:" + uri);
         Cursor cursor = null;
         Log.i("Xyzzy", "Uri path:" + uri.getPath());
         try {
             cursor = context.getContentResolver().query(uri, null, null, null, null);
-            int nameIndex = cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);
+            final int nameIndex = cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);
             if (cursor.moveToFirst()) {
-                String rval = cursor.getString(nameIndex);
+                final String rval = cursor.getString(nameIndex);
                 cursor.close();
                 return rval;
             }
             cursor.close();
-        } catch (Exception e) {
+        } catch (final Exception e) {
+            Log.e("Xyzzy", "SelectionActivity.getPath:", e);
             if (cursor != null) {
                 cursor.close();
             }
         }
         return null;
     }
-
-    private final List<String>  games            = new ArrayList<String>();
     final Map<String, String>   all              = new HashMap<String, String>();
-    private int                 textSize;
-    final List<DataSetObserver> observer         = new ArrayList<DataSetObserver>();
-    public final static String  EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
-    private static final int    FILE_SELECT_CODE = 0;
+    private final List<String>  games            = new ArrayList<String>();
     private MenuItem[]          mis;
+    final List<DataSetObserver> observer         = new ArrayList<DataSetObserver>();
+    private int                 textSize;
 
-    private void addPathToGamesList(String path) {
+    private void addPathToGamesList(final String path) {
         Log.d("Xyzzy", "Adding path:" + path);
         getGameNameDialogue(path);
     }
@@ -77,7 +78,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     }
 
     TextView gameNameAtListPosition(final int position) {
-        TextView tv = selectionPageTextView();
+        final TextView tv = selectionPageTextView();
         final String name = games.get(position);
         tv.setText(name);
         if (selected == position) {
@@ -87,19 +88,19 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
             tv.setTextColor(0xff000000);
             tv.setBackgroundColor(0xffffffff);
         }
-        if (!name.startsWith("+")) {
+        if (name.charAt(0) != '+') {
             tv.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
+                @Override public void onClick(final View v) {
                     //                    startGame(all.get(name)); TODO this is startgame
                     selected = position;
-                    for (DataSetObserver dso : observer) {
+                    for (final DataSetObserver dso : observer) {
                         dso.onChanged();
                     }
                 }
             });
         } else {
             tv.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
+                @Override public void onClick(final View v) {
                     showFileChooser();
                 }
             });
@@ -117,31 +118,31 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         input.setTextColor(0xff000000);
         new AlertDialog.Builder(this).setTitle("Please name this file").setView(input)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override public void onClick(DialogInterface dialog, int whichButton) {
-                        SharedPreferences.Editor sp = getSharedPreferences("XyzzyGames", 0).edit();
+                    @Override public void onClick(final DialogInterface dialog, final int whichButton) {
+                        final SharedPreferences.Editor sp = getSharedPreferences("XyzzyGames", 0).edit();
                         sp.putString(input.getText().toString(), pathToGame);
                         sp.commit();
                         regenerateData();
-                        for (DataSetObserver dso : observer) {
+                        for (final DataSetObserver dso : observer) {
                             dso.onChanged();
                         }
                     }
                 }).show();
     }
 
-    @Override public Object getItem(int position) {
+    @Override public Object getItem(final int position) {
         return games.get(position);
     }
 
-    @Override public long getItemId(int position) {
+    @Override public long getItemId(final int position) {
         return position;
     }
 
-    @Override public int getItemViewType(int position) {
+    @Override public int getItemViewType(final int position) {
         return 0;
     }
 
-    @Override public View getView(final int listViewPosition, View convertView, ViewGroup parent) {
+    @Override public View getView(final int listViewPosition, final View convertView, final ViewGroup parent) {
         final int position;
         if (selected == -1) {
             position = listViewPosition;
@@ -165,7 +166,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
             tv = selectionPageTextView();
             tv.setText("Play " + games.get(selected));
             tv.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
+                @Override public void onClick(final View v) {
                     startGame(all.get(games.get(selected)));
                 }
             });
@@ -195,21 +196,21 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         return getCount() == 0;
     }
 
-    @Override public boolean isEnabled(int position) {
+    @Override public boolean isEnabled(final int position) {
         return true;
     }
 
-    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    @Override protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         Log.d("Xyzzy", "onActivityResult requestCode:" + requestCode + " resultCode:" + resultCode + " data:" + data);
         switch (requestCode) {
         case FILE_SELECT_CODE:
         default:
             if (resultCode == RESULT_OK) {
                 // Get the Uri of the selected file 
-                Uri uri = data.getData();
+                final Uri uri = data.getData();
                 Log.d("Xyzzy", "File Uri: " + uri.toString());
                 // Get the path
-                String path = uri.toString();
+                final String path = uri.toString();
                 //                path = getPath(this, uri);
                 Log.d("Xyzzy", "File Path: " + path);
                 if (path != null) {
@@ -221,21 +222,21 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(final Bundle savedInstanceState) {
         Log.d("Xyzzy", "SelectionActivity onCreate");
         super.onCreate(savedInstanceState);
         activity = this;
         setupGames();
         setContentView(R.layout.selector);
-        ListView lv = (ListView) findViewById(R.id.selector);
+        final ListView lv = (ListView) findViewById(R.id.selector);
         lv.setAdapter(this);
     }
 
-    @SuppressLint("NewApi") @Override public boolean onCreateOptionsMenu(Menu menu) {
+    @SuppressLint("NewApi") @Override public boolean onCreateOptionsMenu(final Menu menu) {
         Log.d("Control", "OCOM");
         mis = new MenuItem[MenuButtons.values().length];
         int i = 0;
-        for (MenuButtons mb : MenuButtons.values()) {
+        for (final MenuButtons mb : MenuButtons.values()) {
             final MenuItem nextMenu = menu.add(mb.toString());
             if (mb.menuButtonIcon() != -1) {
                 Log.d("Xyzzy", "Menu icon:" + mb.menuButtonIcon());
@@ -247,7 +248,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         return true;
     }
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
+    @Override public boolean onOptionsItemSelected(final MenuItem item) {
         int selected = -1;
         if (mis == null) { // then we've not initialised?
             Log.e("Xyzzy", "Android onOptionsItemSelected before onCreateOptionsMenu?");
@@ -264,9 +265,9 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
 
     @Override protected void onResume() {
         super.onResume();
-        this.textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
+        textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
         Log.d("Xyzzy", "SelectionActivity onResume");
-        for (DataSetObserver dso : observer) {
+        for (final DataSetObserver dso : observer) {
             dso.onChanged();
         }
     }
@@ -275,13 +276,13 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         Log.d("Xyzzy", "Regenerating data");
         all.clear();
         games.clear();
-        SharedPreferences sp = getSharedPreferences("XyzzyGames", 0);
+        final SharedPreferences sp = getSharedPreferences("XyzzyGames", 0);
         all.put("Czech", "@czech.z5");
-        Map<String, ?> stored = sp.getAll();
-        for (String s : stored.keySet()) {
+        final Map<String, ?> stored = sp.getAll();
+        for (final String s : stored.keySet()) {
             all.put(s, sp.getString(s, ""));
         }
-        for (String s : all.keySet()) {
+        for (final String s : all.keySet()) {
             if (s != null) {
                 games.add(s);
             }
@@ -290,13 +291,13 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         games.add("+ Add another...");
     }
 
-    @Override public void registerDataSetObserver(DataSetObserver dso) {
+    @Override public void registerDataSetObserver(final DataSetObserver dso) {
         Log.d("Xyzzy", "Registering observer:" + dso);
-        this.observer.add(dso);
+        observer.add(dso);
     }
 
     TextView selectionPageTextView() {
-        TextView tv = new TextView(getApplicationContext());
+        final TextView tv = new TextView(getApplicationContext());
         tv.setTextSize(textSize * 2);
         tv.setPadding(textSize * 2, textSize * 2, textSize * 2, textSize * 2);
         return tv;
@@ -307,23 +308,24 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     }
 
     void showFileChooser() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {
             startActivityForResult(Intent.createChooser(intent, "Select a File to Upload"), FILE_SELECT_CODE);
-        } catch (android.content.ActivityNotFoundException ex) {
+        } catch (final android.content.ActivityNotFoundException ex) {
+            Log.e("Xyzzy", "SelectionActivity.showFileChooser:", ex);
             Toast.makeText(this, "Please install a File Manager.", Toast.LENGTH_SHORT).show();
         }
     }
 
-    void startGame(String name) {
-        Intent intent = new Intent(this, MainActivity.class);
+    void startGame(final String name) {
+        final Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(EXTRA_MESSAGE, name);
         startActivity(intent);
     }
 
-    @Override public void unregisterDataSetObserver(DataSetObserver dso) {
-        this.observer.remove(dso);
+    @Override public void unregisterDataSetObserver(final DataSetObserver dso) {
+        observer.remove(dso);
     }
 }

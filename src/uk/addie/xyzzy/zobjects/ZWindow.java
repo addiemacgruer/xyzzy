@@ -23,16 +23,17 @@ import android.util.SparseIntArray;
 
 public class ZWindow implements Serializable {
     private enum DisplayState {
-        EMPTY, FLUSH_UNSETCURSOR, FLUSH_SETCURSOR, DRAWN_ON;
+        DRAWN_ON, EMPTY, FLUSH_SETCURSOR, FLUSH_UNSETCURSOR;
     }
 
+    private final static double         amiAndroidRatio  = 255.0 / 31.0;        // ratio 0xff to 0x1f
     public static int                   background;
     private final static SparseIntArray colours          = new SparseIntArray();
     public static int                   foreground;
+    private static long                 latency          = 0;
     private static final long           serialVersionUID = 1L;
     private static int[]                windowMap        = { R.id.screen0, R.id.screen1, R.id.screen2, R.id.screen3,
             R.id.screen4, R.id.screen5, R.id.screen6, R.id.screen7 };
-    private static long                 latency          = 0;
     static {
         final int[] amigaColours = { 0x0, 0x7fff, 0x0, 0x1d, 0x340, 0x3bd, 0x59a0, 0x7c1f, 0x77a0, 0x7fff, 0x5ad6,
             0x4631, 0x2d6b };
@@ -41,13 +42,12 @@ public class ZWindow implements Serializable {
             colours.put(i, amigaColourToAndroid(amigaColours[i]));
         }
     }
-    private final static double         amiAndroidRatio  = 255.0 / 31.0;        // ratio 0xff to 0x1f
 
-    private static int amigaColourToAndroid(int amiga) {
-        int red = (int) ((0x1f & amiga) * amiAndroidRatio); // bottom five bits, scaled from 0x1f to 0xff
-        int green = (int) (((0x3e0 & amiga) >> 5) * amiAndroidRatio);
-        int blue = (int) (((0x7c00 & amiga) >> 10) * amiAndroidRatio);
-        int androidValue = 0xff000000 | (red << 16) | (green << 8) | blue;
+    private static int amigaColourToAndroid(final int amiga) {
+        final int red = (int) ((0x1f & amiga) * amiAndroidRatio); // bottom five bits, scaled from 0x1f to 0xff
+        final int green = (int) (((0x3e0 & amiga) >> 5) * amiAndroidRatio);
+        final int blue = (int) (((0x7c00 & amiga) >> 10) * amiAndroidRatio);
+        final int androidValue = 0xff000000 | red << 16 | green << 8 | blue;
         return androidValue;
     }
 
@@ -57,7 +57,7 @@ public class ZWindow implements Serializable {
     }
 
     public static void printAllScreens() {
-        int zwc = Memory.current().zwin.size();
+        final int zwc = Memory.current().zwin.size();
         for (int i = 0; i < zwc; i++) {
             Memory.current().zwin.get(Memory.current().zwin.keyAt(i)).flush();
         }
@@ -69,7 +69,7 @@ public class ZWindow implements Serializable {
         MainActivity.activity.setBackgroundColour(background);
     }
 
-    public static void setTrueColour(int foreground2, int background2) {
+    public static void setTrueColour(final int foreground2, final int background2) {
         Log.i("Xyzzy", "Set true colour:" + Integer.toHexString(foreground2) + " :" + Integer.toHexString(background2));
         if (foreground2 > 0) {
             foreground = amigaColourToAndroid(foreground2);
@@ -88,10 +88,10 @@ public class ZWindow implements Serializable {
     private transient List<SpannableStringBuilder> buffer           = new ArrayList<SpannableStringBuilder>();
     private boolean                                buffered         = true;
     private final Map<TextStyle, Integer>          currentTextStyle = new EnumMap<TextStyle, Integer>(TextStyle.class);
-    private final int                              windowCount;
-    private int                                    row, column;
     private DisplayState                           displayState     = DisplayState.EMPTY;
     private int                                    naturalHeight    = 0;
+    private int                                    row, column;
+    private final int                              windowCount;
 
     public ZWindow(final int window) {
         windowCount = window;
@@ -111,7 +111,7 @@ public class ZWindow implements Serializable {
             buffer.add(new SpannableStringBuilder());
         }
         if (buffer.get(row).length() > column) { // aargh!  but status lines (and Anchorhead) require this.
-            SpannableStringBuilder oldString = buffer.get(row);
+            final SpannableStringBuilder oldString = buffer.get(row);
             buffer.set(row, new SpannableStringBuilder(oldString.subSequence(0, column)));
             buffer.get(row).append(s);
             column += s.length();
@@ -159,7 +159,7 @@ public class ZWindow implements Serializable {
         return new Point(column, row);
     }
 
-    public void eraseLine(int line) {
+    public void eraseLine(final int line) {
         if (line == 1) { // erase line from current cursor to end of row.
             final SpannableStringBuilder currentRow = buffer.get(row);
             final int currentRowLength = currentRow.length();
@@ -174,8 +174,8 @@ public class ZWindow implements Serializable {
 
     public void flush() {
         clearStyles();
-        SpannableStringBuilder ssb = new SpannableStringBuilder();
-        int bufferlength = buffer.size();
+        final SpannableStringBuilder ssb = new SpannableStringBuilder();
+        final int bufferlength = buffer.size();
         for (int i = 0; i < bufferlength; i++) {
             if (i != 0) {
                 ssb.append('\n');
@@ -207,9 +207,10 @@ public class ZWindow implements Serializable {
             try {
                 Log.i("Xyzzy", "Waiting for input..."
                         + (latency != 0 ? "(" + (System.currentTimeMillis() - latency) + " ms since last)" : ""));
+                MainActivity.inputSyncObject.string = null;
                 MainActivity.inputSyncObject.wait();
             } catch (final InterruptedException e) {
-                // don't care if interrupted; you'll get a "what?" from the story file.
+                Log.e("Xyzzy", "Wait on string interrupted:", e);
             }
             command = MainActivity.inputSyncObject.string + "\n";
         }
@@ -233,7 +234,7 @@ public class ZWindow implements Serializable {
         this.buffered = buffered;
     }
 
-    public void setCursor(short column, short line) {
+    public void setCursor(final short column, final short line) {
         Log.d("Xyzzy", "Window:" + windowCount + " setCursor " + column + "," + line);
         if (displayState == DisplayState.FLUSH_UNSETCURSOR) {
             displayState = DisplayState.FLUSH_SETCURSOR;
@@ -243,11 +244,11 @@ public class ZWindow implements Serializable {
         }
         // games will occasionally request negative indexes, especially if the screen is too narrow
         this.column = Math.max(column, 1) - 1;
-        this.row = Math.max(line, 1) - 1;
+        row = Math.max(line, 1) - 1;
     }
 
-    public void setNaturalHeight(int lines) {
-        this.naturalHeight = lines;
+    public void setNaturalHeight(final int lines) {
+        naturalHeight = lines;
     }
 
     @Override public String toString() {

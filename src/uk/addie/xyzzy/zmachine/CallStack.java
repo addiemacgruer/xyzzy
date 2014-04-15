@@ -52,19 +52,19 @@ public class CallStack implements Serializable {
     private final ZStack<Short>     stack    = new ZStack<Short>((short) 0);
 
     public CallStack() {
-        this.calledWithCount = 0;
-        this.returnFunction = null;
-        this.localsCount = 0;
+        calledWithCount = 0;
+        returnFunction = null;
+        localsCount = 0;
     }
 
     private CallStack(final int programCounter, final int calledWithCount, final Invokeable returnFunction) {
         this.setProgramCounter(programCounter);
         this.calledWithCount = calledWithCount;
         this.returnFunction = returnFunction;
-        this.localsCount = calculateLocalsCount(programCounter);
+        localsCount = calculateLocalsCount(programCounter);
     }
 
-    public void adjustProgramCounter(int offset) {
+    public void adjustProgramCounter(final int offset) {
         programCounter += offset;
     }
 
