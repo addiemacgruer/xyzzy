@@ -1,0 +1,96 @@
+<!html>
+<title>Xyzzy About and Help</title>
+<style>
+span.opcode {color: purple;}
+</style>
+<body>
+<h1>Xyzzy</h1>
+
+<p>ZCode interpreter for Android &copy; 2014 Addie MacGruer.
+
+<p><small>This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.</small>
+
+ <p><small>This program is distributed in the hope that it will be useful,
+    but <strong>without any warranty</strong>; without even the implied warranty of
+    <strong>merchantability</strong> or <strong>fitness for a particular purpose</strong>.  See the
+    GNU General Public License for more details</small>.
+
+<h2>Contents</h2>
+<p><a href="#about">About</a>
+<p><a href="#preferences">Preferences</a>
+<p><a href="#notes">Technical notes</a>
+<p><a href="#complete">Games that have been tested to completion</a>
+<p><a href="#todo">To-do list</a>
+<p><a href="#contact">Contact me</a>
+
+<h2 id="about">About</h2>
+<p>I've always been a big fan of interactive fiction (or text adventures, as they were called back in my ZX Spectrum days) and think that
+smartphones should be ideal for playing them on the move.  However, the existing interpreters on the Android store all had some feature
+that rendered them less than suitable, in my opinion.  Dreadful input (<em>ie.</em> not the Android default on-screen keyboard),
+ugly text, inexplicable slowness, a tendency to crash, or some combination of the above, seemed to be common features.  So I set out to write
+my own, ensuring that it would crash quickly, at least...
+
+<h2 id="preferences">Preferences</h2>
+<ul>
+<li><p><strong>Display text size</strong> Changes the size of text in the game selection menu and in games.  Screen width is set at the 
+start of each game, and the game is told that the screen is at least 80 columns by 24 rows -- some games won't start with smaller screens,
+and it's annoying to have to squint to be even able to play.   If you've set a large font, you might have to do some scrolling to see
+everything, some things won't be centered, and <q>quote boxes</q> will look quite ugly.  But at least you'll be able to read it.
+
+<li><p><strong>Enable sound effects</strong> Currently only the two basic beeps are implemented, high and low pitched.
+These usually provide feedback on scoring or unrecognised input.
+
+<li><p><strong>Enable colour</strong> Most colour games (<em>eg.</em> Adam Cadre's works) are polite enough to ask before you start,
+but it's possible to disable colour entirely, here.
+
+<li><p><strong>Report minor errors in story files</strong> A number of non-fatal errors can be present in story files, which can
+usually be ignored without affecting play.  Usually only useful for story authors while debugging.
+
+<li><p><strong>Length of scroll back</strong> The bottom screen has scrollback enabled.  This number shown is the number of screen
+updates which are preserved.  Having too many items eventually slows down the phone, and would eventually lead to memory problems.
+50 is about appropriate on my S5, but you might want to increase or decrease this depending on how puissant your device is.
+
+<li><p><strong>Speed of automatic scrolling</strong> I've implemented automatic scroll-forward for when large amounts of text is
+displayed.  A setting of about 3 gives the right reading speed for me; might depend on the speed of your device, too.
+
+<li><p><strong>Run pirated story files</strong> There is a <span class="opcode">@piracy</span> opcode on the Z-Machine, which causes different story file execution
+if the game is detected to have been obtained by copyright infringement.  This checkbox is the detection mechanism.  <em>nb.</em> this
+is completely useless, and essentially unused in all but demonstration story files.
+</ul>
+
+<h2 id="notes">Technical notes</h2>
+<p>Some games (eg. Anchorhead while reading books) require cursor key input, which isn't present on (my) Android phone.  There are some
+keyboard shortcuts present on the action bar (cursor up/down/left/right, delete, return) that simulate the desired keys.
+<p>The z-spec suggests that it would be beneficial to implement the Quetzal save file format, to allow save game exchange between devices
+and interpreters.  The spec is biased towards a C-style implementation of callstacks and frame pointers; this implementation uses Java
+serialisation for save (and undo) which would make this a pain.  Also, because Xyzzy saves games in its private use area (and thus doesn't
+require write privileges), you'd need a rooted device to get to your saves, anyway.
+
+<h2 id="complete">Games That Have Been Tested To Completion</h2>
+<ul>
+<li><p>A Change In The Weather</p>
+<li><p>Photopia</p>
+</ul>
+
+<h2 id="todo">To-do list</h2>
+<p>The following opcodes are unsupported</p>
+<ul>
+<li><p><span class="opcode">@throw</span> and <span class="opcode">@catch</span>: using these opcodes will cause a crash.
+Unfortunately, the z-code specification doesn't make sense to me. If anyone can drop me a line clearing up (exactly) what these should do,
+I'll be happy to work them in.
+<li><p><span class="opcode">@sound_effect</span> only implements the standard beeps.  Enjoy the extra feedback scoring points in Trinity.
+<li><p><span class="opcode">@input_stream</span> does nothing.
+<li><p>The V6 opcodes (drawing pictures, moving windows, detecting the mouse, etc) all do nothing.
+</ul>
+
+<h2 id="contact">Contact me</h2>
+<p>My email contact is <a href="mailto:addiemacgruer@googlemail.com">addiemacgruer@googlemail.com</a> for feedback or queries.
+<p>The code is kept at <a href="https://code.google.com/p/xyzzy/">https://code.google.com/p/xyzzy/</a>.  There's a bug tracker on
+there, and if you can find where my code is wrong, that would be even more helpful.
+<p>If you've managed to play another story to completion, then that would be handy to add to the list.
+<p>If the interpreter has crashed, or is displaying peculiar behaviour, then it would be helpful to know what game you were playing
+(and what you were doing) when it did.  If a stack trace has displayed, then the name of the exception and the top line which starts with
+<q>at uk.addie.xyzzy....</q> (including the line number) would be very helpful.
