@@ -34,7 +34,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.util.Log;
 
-@SuppressWarnings({ "unused", "ucd" }) public enum Opcode {
+@SuppressWarnings({ "unused" }) public enum Opcode {
     ADD(2, 0x14) {
         @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);

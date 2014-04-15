@@ -1,7 +1,7 @@
 
 package uk.addie.xyzzy.util;
 
-@SuppressWarnings("ucd") public class Bit {
+public class Bit {
     public static boolean bit0(final int b) {
         return (b & 0x1) != 0;
     }

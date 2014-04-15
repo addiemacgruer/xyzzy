@@ -18,7 +18,7 @@ import android.webkit.WebViewClient;
  */
 public class HtmlViewActivity extends Activity { // NO_UCD (instantiated by
                                                  // Android Runtime)
-    private class HelpClient extends WebViewClient {
+    class HelpClient extends WebViewClient {
         @Override public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
             fillContent();
             return true;
@@ -27,7 +27,7 @@ public class HtmlViewActivity extends Activity { // NO_UCD (instantiated by
 
     private WebView mWebView;
 
-    private void fillContent() {
+    void fillContent() {
         Scanner ins;
         final StringBuilder output = new StringBuilder();
         try {

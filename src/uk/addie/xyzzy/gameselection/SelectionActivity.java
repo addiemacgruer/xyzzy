@@ -13,15 +13,12 @@ import uk.addie.xyzzy.preferences.Preferences;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,38 +32,36 @@ import android.widget.Toast;
 
 public class SelectionActivity extends Activity implements ListAdapter { // NO_UCD (use default)
     protected static SelectionActivity activity;
-    public final static String  EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
-    private static final int    FILE_SELECT_CODE = 0;
-
-    final static int                   INTERSTITIALS = 3;
-
-    static int                         selected      = -1;
-    private static String getPath(final Context context, final Uri uri) {
-        Log.d("Xyzzy", "getPath:" + context + " uri:" + uri);
-        Cursor cursor = null;
-        Log.i("Xyzzy", "Uri path:" + uri.getPath());
-        try {
-            cursor = context.getContentResolver().query(uri, null, null, null, null);
-            final int nameIndex = cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);
-            if (cursor.moveToFirst()) {
-                final String rval = cursor.getString(nameIndex);
-                cursor.close();
-                return rval;
-            }
-            cursor.close();
-        } catch (final Exception e) {
-            Log.e("Xyzzy", "SelectionActivity.getPath:", e);
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-        return null;
-    }
-    final Map<String, String>   all              = new HashMap<String, String>();
-    private final List<String>  games            = new ArrayList<String>();
-    private MenuItem[]          mis;
-    final List<DataSetObserver> observer         = new ArrayList<DataSetObserver>();
-    private int                 textSize;
+    public final static String         EXTRA_MESSAGE    = "uk.addie.xyzzy.MESSAGE";
+    private static final int           FILE_SELECT_CODE = 0;
+    final static int                   INTERSTITIALS    = 3;
+    static int                         selected         = -1;
+    //    private static String getPath(final Context context, final Uri uri) {
+    //        Log.d("Xyzzy", "getPath:" + context + " uri:" + uri);
+    //        Cursor cursor = null;
+    //        Log.i("Xyzzy", "Uri path:" + uri.getPath());
+    //        try {
+    //            cursor = context.getContentResolver().query(uri, null, null, null, null);
+    //            final int nameIndex = cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);
+    //            if (cursor.moveToFirst()) {
+    //                final String rval = cursor.getString(nameIndex);
+    //                cursor.close();
+    //                return rval;
+    //            }
+    //            cursor.close();
+    //        } catch (final Exception e) {
+    //            Log.e("Xyzzy", "SelectionActivity.getPath:", e);
+    //            if (cursor != null) {
+    //                cursor.close();
+    //            }
+    //        }
+    //        return null;
+    //    }
+    final Map<String, String>          all              = new HashMap<String, String>();
+    final List<String>                 games            = new ArrayList<String>();
+    private MenuItem[]                 mis;
+    final List<DataSetObserver>        observer         = new ArrayList<DataSetObserver>();
+    private int                        textSize;
 
     private void addPathToGamesList(final String path) {
         Log.d("Xyzzy", "Adding path:" + path);
@@ -249,17 +244,17 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     }
 
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        int selected = -1;
+        int selectedMenu = -1;
         if (mis == null) { // then we've not initialised?
             Log.e("Xyzzy", "Android onOptionsItemSelected before onCreateOptionsMenu?");
             return false;
         }
         for (int i = 0; i < mis.length; ++i) {
             if (item == mis[i]) {
-                selected = i;
+                selectedMenu = i;
             }
         }
-        MenuButtons.values()[selected].invoke();
+        MenuButtons.values()[selectedMenu].invoke();
         return true;
     }
 

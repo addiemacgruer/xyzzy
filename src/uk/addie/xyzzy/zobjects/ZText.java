@@ -91,7 +91,7 @@ public class ZText {
 
     public static long encodeString(final String string) {
         final int wordLength = Header.VERSION.value() <= 3 ? 6 : 9;
-        final byte chars[] = new byte[9];
+        final byte chars[] = new byte[wordLength];
         int position = 0;
         for (int i = 0; i < string.length(); i++) {
             final char character = string.charAt(i);

@@ -123,12 +123,12 @@ enum MenuButtons implements MenuButton {
             return "Toggle keyboard";
         }
     };
-    @Override public int menuButtonIcon() {
-        return -1;
-    }
-
-    protected void pressZKey(final int keyCode) {
+    protected static void pressZKey(final int keyCode) {
         Log.d("Xyzzy", "Synthetic Z Key:" + keyCode);
         MainActivity.activity.onKeyDown(keyCode, null);
+    }
+
+    @Override public int menuButtonIcon() {
+        return -1;
     }
 }

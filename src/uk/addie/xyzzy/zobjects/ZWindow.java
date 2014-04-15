@@ -86,7 +86,6 @@ public class ZWindow implements Serializable {
     }
 
     private transient List<SpannableStringBuilder> buffer           = new ArrayList<SpannableStringBuilder>();
-    private boolean                                buffered         = true;
     private final Map<TextStyle, Integer>          currentTextStyle = new EnumMap<TextStyle, Integer>(TextStyle.class);
     private DisplayState                           displayState     = DisplayState.EMPTY;
     private int                                    naturalHeight    = 0;
@@ -231,7 +230,6 @@ public class ZWindow implements Serializable {
 
     public void setBuffered(final boolean buffered) {
         Log.i("Xyzzy", "Set buffered:" + this + "=" + buffered);
-        this.buffered = buffered;
     }
 
     public void setCursor(final short column, final short line) {
