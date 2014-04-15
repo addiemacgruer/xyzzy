@@ -1,76 +1,75 @@
 
 package uk.addie.xyzzy.preferences;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import uk.addie.xyzzy.R;
+import uk.addie.xyzzy.Utility;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MotionEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
-import android.widget.CheckBox;
-import android.widget.SeekBar;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 
-public class PreferencesActivity extends Activity implements OnClickListener, OnTouchListener {
-    private static final int maxTextSize = 48;
-    private static final int minTextSize = 6;
-    private CheckBox         enableSound;
-    private CheckBox         reportMinor;
-    private SeekBar          seekBar;
-    private CheckBox         useColour;
-
-    private CheckBox initialiseCheckbox(final int viewId, final Preferences pref) {
-        final CheckBox rval = (CheckBox) findViewById(viewId);
-        rval.setOnClickListener(this);
-        rval.setChecked((Boolean) pref.getValue(this));
-        return rval;
-    }
-
-    private void initialiseFontSizeBar() {
-        seekBar = (SeekBar) findViewById(R.id.fontsizeSeekbar);
-        seekBar.setOnTouchListener(this);
-        seekBar.setMax(maxTextSize - minTextSize);
-        final int textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
-        seekBar.setProgress(textSize - minTextSize);
-        updateTextSize(textSize);
-    }
-
-    @Override public void onClick(final View view) {
-        if (view == enableSound) {
-            Preferences.SOUND_ON.setValue(this, enableSound.isChecked());
-        } else if (view == reportMinor) {
-            Preferences.REPORT_MINOR.setValue(this, reportMinor.isChecked());
-        } else if (view == useColour) {
-            Preferences.USE_COLOUR.setValue(this, useColour.isChecked());
-        }
-    }
+public class PreferencesActivity extends Activity {
+    public int                        textSize     = 16;
+    public static PreferencesActivity activity;
+    private MenuItem[]                mis;
+    final Map<Preferences, View>      selectionMap = new HashMap<Preferences, View>();
 
     @Override protected void onCreate(final Bundle savedInstanceState) {
+        activity = this;
+        textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.preferences);
-        enableSound = initialiseCheckbox(R.id.enableSound, Preferences.SOUND_ON);
-        reportMinor = initialiseCheckbox(R.id.reportMinor, Preferences.REPORT_MINOR);
-        useColour = initialiseCheckbox(R.id.useColour, Preferences.USE_COLOUR);
-        initialiseFontSizeBar();
-    }
-
-    @Override public boolean onTouch(final View v, final MotionEvent event) {
-        if (v == seekBar) {
-            final int newTextSize = seekBar.getProgress() + minTextSize;
-            updateTextSize(newTextSize);
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                Preferences.TEXT_SIZE.setValue(this, newTextSize);
+        setTitle("Xyzzy Preferences");
+        LinearLayout ll = (LinearLayout) findViewById(R.id.preferences);
+        for (Preferences p : Preferences.values()) {
+            View view = null;
+            Log.d("Xyzzy", "Preference:" + p);
+            switch (p.type) {
+            case BOOLEAN:
+                view = new BooleanValueView(this, p);
+                break;
+            case INTEGER:
+                ScrollValueView svv = new ScrollValueView(this, p);
+                view = svv;
+                break;
+            default:
+                continue;
             }
-        } else {
-            Log.i("Xyzzy", "Touched:" + v + " :" + event);
+            ll.addView(view);
+            selectionMap.put(p, view);
         }
-        return false;
     }
 
-    void updateTextSize(final int textSize) {
-        final TextView textSizeView = (TextView) findViewById(R.id.fontsizeTextbox);
-        textSizeView.setText("Font size: " + textSize);
+    @SuppressLint("NewApi") @Override public boolean onCreateOptionsMenu(final Menu menu) {
+        Log.d("Control", "OCOM");
+        mis = new MenuItem[MenuButtons.values().length];
+        int i = 0;
+        for (final MenuButtons mb : MenuButtons.values()) {
+            final MenuItem nextMenu = menu.add(mb.toString());
+            if (mb.menuButtonIcon() != -1) {
+                Log.d("Xyzzy", "Menu icon:" + mb.menuButtonIcon());
+                nextMenu.setIcon(mb.menuButtonIcon());
+                nextMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            }
+            mis[i++] = nextMenu;
+        }
+        return true;
+    }
+
+    @Override public boolean onOptionsItemSelected(final MenuItem item) {
+        if (mis == null) { // then we've not initialised?
+            Log.e("Xyzzy", "Android onOptionsItemSelected before onCreateOptionsMenu?");
+            return false;
+        }
+        int selectedMenu = Utility.arrayOffsetOf(item, mis);
+        MenuButtons.values()[selectedMenu].invoke();
+        return true;
     }
 }

@@ -96,6 +96,14 @@ public class MainActivity extends Activity {
         return et;
     }
 
+    private static void startBackgroundLogicThread(final String message) {
+        if (logicThread == null) {
+            Log.i("Xyzzy", "Starting new thread");
+            logicThread = new Thread(new Xyzzy(message), "XyzzyInterpreter");
+            logicThread.start();
+        }
+    }
+
     static TextView textView(final int foreground, final int background) {
         final TextView ett = new TextView(MainActivity.activity.getApplicationContext());
         ett.setTextColor(foreground);
@@ -213,6 +221,7 @@ public class MainActivity extends Activity {
         getScreenSize();
         final String story = getStorySelection();
         super.onCreate(savedInstanceState);
+        //        setTitle(story);
         setContentView(R.layout.activity_main);
         synchronized (this) {
             startBackgroundLogicThread(story);
@@ -249,7 +258,7 @@ public class MainActivity extends Activity {
         switch (keyCode) {
         case KeyEvent.KEYCODE_BACK:
         case KeyEvent.KEYCODE_MENU:
-        case KeyEvent.KEYCODE_DEL: // TODO bad idea while editing text
+        case KeyEvent.KEYCODE_DEL:
         case KeyEvent.KEYCODE_ENTER:
             return false;
         default:
@@ -273,6 +282,7 @@ public class MainActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
+        ZScrollView.updateScrollingSpeed();
         textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
         synchronized (textBoxes) {
             for (final View v : textBoxes) {
@@ -345,13 +355,5 @@ public class MainActivity extends Activity {
                         InputMethodManager.SHOW_FORCED, 0);
             }
         });
-    }
-
-    private void startBackgroundLogicThread(final String message) {
-        if (logicThread == null) {
-            Log.i("Xyzzy", "Starting new thread");
-            logicThread = new Thread(new Xyzzy(message), "XyzzyInterpreter");
-            logicThread.start();
-        }
     }
 }

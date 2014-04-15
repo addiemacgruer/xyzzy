@@ -1,100 +1,113 @@
 
 package uk.addie.xyzzy.preferences;
 
+import static uk.addie.xyzzy.preferences.PreferenceType.*;
 import android.app.Activity;
-import android.content.SharedPreferences;
 
 public enum Preferences {
-    REPORT_MINOR {
-        @Override Object defaultValue() {
-            return false;
-        }
-
-        @Override public Object getValue(final Activity activity) {
-            return getBooleanType(activity);
-        }
-
-        @Override public void setValue(final Activity activity, final Object value) {
-            setBooleanType(activity, value);
-        }
-    },
-    SCROLL_BACK {
-        @Override Object defaultValue() {
-            return 50;
-        }
-
-        @Override public Object getValue(final Activity activity) {
-            return getIntType(activity);
-        }
-
-        @Override public void setValue(final Activity activity, final Object value) {
-            setIntType(activity, value);
-        }
-    },
-    SOUND_ON {
-        @Override Object defaultValue() {
-            return true;
-        }
-
-        @Override public Object getValue(final Activity activity) {
-            return getBooleanType(activity);
-        }
-
-        @Override public void setValue(final Activity activity, final Object value) {
-            setBooleanType(activity, value);
-        }
-    },
-    TEXT_SIZE {
+    TEXT_SIZE(INTEGER) {
         @Override Object defaultValue() {
             return 16;
         }
 
-        @Override public Object getValue(final Activity activity) {
-            return getIntType(activity);
+        @Override int max() {
+            return 48;
         }
 
-        @Override public void setValue(final Activity activity, final Object value) {
-            setIntType(activity, value);
+        @Override int min() {
+            return 6;
+        }
+
+        @Override String prefDescription() {
+            return "Display text size (pt)";
         }
     },
-    USE_COLOUR {
+    SOUND_ON(BOOLEAN) {
         @Override Object defaultValue() {
             return true;
         }
 
-        @Override public Object getValue(final Activity activity) {
-            return getBooleanType(activity);
+        @Override String prefDescription() {
+            return "Enable sound effects";
+        }
+    },
+    USE_COLOUR(BOOLEAN) {
+        @Override Object defaultValue() {
+            return true;
         }
 
-        @Override public void setValue(final Activity activity, final Object value) {
-            setBooleanType(activity, value);
+        @Override String prefDescription() {
+            return "Enable colour";
+        }
+    },
+    REPORT_MINOR(BOOLEAN) {
+        @Override Object defaultValue() {
+            return false;
+        }
+
+        @Override String prefDescription() {
+            return "Report minor errors in story files";
+        }
+    },
+    SCROLL_BACK(INTEGER) {
+        @Override Object defaultValue() {
+            return 50;
+        }
+
+        @Override int max() {
+            return 100;
+        }
+
+        @Override int min() {
+            return 5;
+        }
+
+        @Override String prefDescription() {
+            return "Length of scroll back (screens)";
+        }
+    },
+    AUTOSCROLL_SPEED(INTEGER) {
+        @Override Object defaultValue() {
+            return 3;
+        }
+
+        @Override int max() {
+            return 10;
+        }
+
+        @Override int min() {
+            return 0;
+        }
+
+        @Override String prefDescription() {
+            return "Speed of automatic scrolling";
         }
     };
+    public final PreferenceType type;
+
+    private Preferences(PreferenceType type) {
+        this.type = type;
+    }
+
     abstract Object defaultValue();
 
-    Object getBooleanType(final Activity activity) {
-        final SharedPreferences xyzzyPrefs = activity.getSharedPreferences("Xyzzy", 0);
-        return xyzzyPrefs.getBoolean(toString(), (Boolean) defaultValue());
+    public Object getValue(Activity activity) {
+        return type.getValue(activity, toString(), defaultValue());
     }
 
-    Object getIntType(final Activity activity) {
-        final SharedPreferences xyzzyPrefs = activity.getSharedPreferences("Xyzzy", 0);
-        return xyzzyPrefs.getInt(toString(), (Integer) defaultValue());
+    int max() {
+        return 100;
     }
 
-    public abstract Object getValue(Activity activity);
-
-    void setBooleanType(final Activity activity, final Object value) {
-        final SharedPreferences.Editor sp = activity.getSharedPreferences("Xyzzy", 0).edit();
-        sp.putBoolean(toString(), (Boolean) value);
-        sp.commit();
+    int min() {
+        return 0;
     }
 
-    void setIntType(final Activity activity, final Object value) {
-        final SharedPreferences.Editor sp = activity.getSharedPreferences("Xyzzy", 0).edit();
-        sp.putInt(toString(), (Integer) value);
-        sp.commit();
+    String prefDescription() {
+        return toString();
     }
 
-    public abstract void setValue(Activity activity, Object value);
+    public void setValue(Activity activity, Object value) {
+        type.setValue(activity, toString(), value);
+    }
 }

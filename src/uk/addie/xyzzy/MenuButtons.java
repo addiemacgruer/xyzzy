@@ -26,6 +26,19 @@ enum MenuButtons implements IMenuButton {
             return "About Xyzzy";
         }
     },
+    SHOW_KEYBOARD {
+        @Override public void invoke() {
+            MainActivity.activity.showKeyboard();
+        }
+
+        @Override public int menuButtonIcon() {
+            return R.drawable.ic_action_keyboard;
+        }
+
+        @Override public String toString() {
+            return "Toggle keyboard";
+        }
+    },
     SETTINGS {
         @Override public void invoke() {
             final Intent intent = new Intent(MainActivity.activity, PreferencesActivity.class);
@@ -38,19 +51,6 @@ enum MenuButtons implements IMenuButton {
 
         @Override public String toString() {
             return "Settings";
-        }
-    },
-    SHOW_KEYBOARD {
-        @Override public void invoke() {
-            MainActivity.activity.showKeyboard();
-        }
-
-        @Override public int menuButtonIcon() {
-            return R.drawable.ic_action_keyboard;
-        }
-
-        @Override public String toString() {
-            return "Toggle keyboard";
         }
     },
     LEAVE_GAME {

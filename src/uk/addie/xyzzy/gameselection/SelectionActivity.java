@@ -9,6 +9,7 @@ import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.R;
+import uk.addie.xyzzy.Utility;
 import uk.addie.xyzzy.preferences.Preferences;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -32,7 +33,7 @@ import android.widget.Toast;
 
 public class SelectionActivity extends Activity implements ListAdapter { // NO_UCD (use default)
     protected static SelectionActivity activity;
-    public final static String         STORY_NAME    = "uk.addie.xyzzy.MESSAGE";
+    public final static String         STORY_NAME       = "uk.addie.xyzzy.MESSAGE";
     private static final int           FILE_SELECT_CODE = 0;
     final static int                   INTERSTITIALS    = 3;
     static int                         selected         = -1;
@@ -244,16 +245,11 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     }
 
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        int selectedMenu = -1;
         if (mis == null) { // then we've not initialised?
             Log.e("Xyzzy", "Android onOptionsItemSelected before onCreateOptionsMenu?");
             return false;
         }
-        for (int i = 0; i < mis.length; ++i) {
-            if (item == mis[i]) {
-                selectedMenu = i;
-            }
-        }
+        int selectedMenu = Utility.arrayOffsetOf(item, mis);
         MenuButtons.values()[selectedMenu].invoke();
         return true;
     }

@@ -5,43 +5,11 @@
     android:orientation="vertical" >
 
     <LinearLayout
+            android:id="@+id/preferences"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Xyzzy preferences"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <TextView
-            android:id="@+id/fontsizeTextbox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Font size: " />
-
-        <SeekBar
-            android:id="@+id/fontsizeSeekbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <CheckBox
-            android:id="@+id/enableSound"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Enable sound" />
-                <CheckBox
-            android:id="@+id/useColour"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Use colour" />
-        <CheckBox
-            android:id="@+id/reportMinor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Report minor errors in story files" />
 
     </LinearLayout>
 
