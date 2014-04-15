@@ -620,7 +620,7 @@ import android.util.Log;
     },
     PIRACY(0, 0xf) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            branchOnTest(true);
+            branchOnTest(!(Boolean) Preferences.PIRACY.getValue(MainActivity.activity));
         }
     },
     POP {

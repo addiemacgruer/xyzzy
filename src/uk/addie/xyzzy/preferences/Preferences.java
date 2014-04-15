@@ -82,6 +82,15 @@ public enum Preferences {
         @Override String prefDescription() {
             return "Speed of automatic scrolling";
         }
+    },
+    PIRACY(BOOLEAN) {
+        @Override Object defaultValue() {
+            return false;
+        }
+
+        @Override String prefDescription() {
+            return "Run pirated story files (yarr!)";
+        }
     };
     public final PreferenceType type;
 

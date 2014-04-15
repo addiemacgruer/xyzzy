@@ -42,14 +42,14 @@ public class Decoder {
                 interpretOpcode(opcode);
             } catch (final XyzzyException xe) { //oops
                 Memory.streams().append("\n\nFatal error in story file\n");
-                Log.e("Xyzzy", "Interpreter:" + xe.toString());
-                xe.printStackTrace();
+                Log.e("Xyzzy", "Interpreter:", xe);
+                //                xe.printStackTrace();
                 flushTraceToScreen0(xe);
                 finished = true;
             } catch (final Exception e) { // double oops
                 Memory.streams().append("\n\nFatal error in interpreter\n");
-                Log.e("Xyzzy", "Runtime:" + e.toString());
-                e.printStackTrace();
+                Log.e("Xyzzy", "Runtime:", e);
+                //                e.printStackTrace();
                 flushTraceToScreen0(e);
                 finished = true;
             }
