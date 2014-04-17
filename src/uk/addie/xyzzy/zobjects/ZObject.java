@@ -154,9 +154,9 @@ public class ZObject {
 
     int properties() {
         if (Header.VERSION.value() <= 3) {
-            return Memory.current().buff().getShort(offset + 7) & 0xffff;
+            return Memory.current().buff().getShort(offset + 7);
         }
-        return Memory.current().buff().getShort(offset + 12) & 0xffff;
+        return Memory.current().buff().getShort(offset + 12);
     }
 
     public void setAttribute(final int count) {
