@@ -160,13 +160,15 @@ public class ZWindow implements Serializable {
 
     public void eraseLine(final int line) {
         if (line == 1) { // erase line from current cursor to end of row.
+            if (row >= buffer.size()) {
+                return;
+            }
             final SpannableStringBuilder currentRow = buffer.get(row);
             final int currentRowLength = currentRow.length();
             if (currentRowLength <= column) {
                 return;
             }
-            final SpannableStringBuilder replacementRow = new SpannableStringBuilder(currentRow.subSequence(column,
-                    currentRowLength));
+            final SpannableStringBuilder replacementRow = new SpannableStringBuilder(currentRow.subSequence(0, column));
             buffer.set(row, replacementRow);
         } // otherwise, do nothing.
     }
@@ -232,7 +234,7 @@ public class ZWindow implements Serializable {
         Log.i("Xyzzy", "Set buffered:" + this + "=" + buffered);
     }
 
-    public void setCursor(final short column, final short line) {
+    public void setCursor(final int column, final int line) {
         Log.d("Xyzzy", "Window:" + windowCount + " setCursor " + column + "," + line);
         if (displayState == DisplayState.FLUSH_UNSETCURSOR) {
             displayState = DisplayState.FLUSH_SETCURSOR;

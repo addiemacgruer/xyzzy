@@ -35,5 +35,18 @@ public enum MenuButtons implements IMenuButton {
         @Override public String toString() {
             return "Settings";
         }
-    };
+    },
+    ADD_ANOTHER {
+        @Override public void invoke() {
+            SelectionActivity.activity.showFileChooser();
+        }
+
+        @Override public int menuButtonIcon() {
+            return 0;
+        }
+
+        @Override public String toString() {
+            return "Add another";
+        }
+    }
 }

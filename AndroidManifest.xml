@@ -27,6 +27,7 @@
         </activity>
         <activity android:name="uk.addie.xyzzy.preferences.PreferencesActivity"></activity>
         <activity android:name="uk.addie.xyzzy.htmlview.HtmlViewActivity"></activity>
+        <activity android:name="uk.addie.xyzzy.gameselection.FileChooserActivity"></activity>
     </application>
 
 </manifest>

@@ -1,9 +1,6 @@
 
 package uk.addie.xyzzy.gameselection;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,7 +18,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -29,11 +25,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class SelectionActivity extends Activity implements ListAdapter { // NO_UCD (use default)
     protected static SelectionActivity activity;
@@ -69,15 +63,6 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     final List<DataSetObserver>        observer         = new ArrayList<DataSetObserver>();
     private int                        textSize;
 
-    private void addPathToGamesList(final String path) {
-        Log.d("Xyzzy", "Adding path:" + path);
-        try {
-            getGameNameDialogue(URLDecoder.decode(path, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            Log.e("Xyzzy", "SelectionActivity.addPathToGamesList", e);
-        }
-    }
-
     @Override public boolean areAllItemsEnabled() {
         return true;
     }
@@ -93,55 +78,20 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
             tv.setTextColor(0xff000000);
             tv.setBackgroundColor(0xffffffff);
         }
-        if (name.charAt(0) != '+') {
-            tv.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(final View v) {
-                    //                    startGame(all.get(name)); TODO this is startgame
-                    selected = position;
-                    for (final DataSetObserver dso : observer) {
-                        dso.onChanged();
-                    }
+        tv.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(final View v) {
+                //                    startGame(all.get(name)); TODO this is startgame
+                selected = position;
+                for (final DataSetObserver dso : observer) {
+                    dso.onChanged();
                 }
-            });
-        } else {
-            tv.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(final View v) {
-                    showFileChooser();
-                }
-            });
-        }
+            }
+        });
         return tv;
     }
 
     @Override public int getCount() {
         return games.size() + (selected == -1 ? 0 : INTERSTITIALS);
-    }
-
-    private void getGameNameDialogue(final String pathToGame) {
-        final EditText input = new EditText(getApplicationContext());
-        Log.d("Xyzyy", "Path:" + pathToGame);
-        File f = new File(pathToGame);
-        Log.d("Xyzzy", "File:" + f);
-        String name = f.getName();
-        Log.d("Xyzzy", "Name:" + name);
-        if (name.indexOf('.') != -1) {
-            name = name.substring(0, name.indexOf('.'));
-        }
-        Log.d("Xyzzy", "Shortened:" + name);
-        input.setText(name);
-        input.setTextColor(0xff000000);
-        new AlertDialog.Builder(this).setTitle("Please name this file").setView(input)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override public void onClick(final DialogInterface dialog, final int whichButton) {
-                        final SharedPreferences.Editor sp = getSharedPreferences("XyzzyGames", 0).edit();
-                        sp.putString(input.getText().toString(), pathToGame);
-                        sp.commit();
-                        regenerateData();
-                        for (final DataSetObserver dso : observer) {
-                            dso.onChanged();
-                        }
-                    }
-                }).show();
     }
 
     @Override public Object getItem(final int position) {
@@ -231,28 +181,6 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         return true;
     }
 
-    @Override protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        Log.d("Xyzzy", "onActivityResult requestCode:" + requestCode + " resultCode:" + resultCode + " data:" + data);
-        switch (requestCode) {
-        case FILE_SELECT_CODE:
-        default:
-            if (resultCode == RESULT_OK) {
-                // Get the Uri of the selected file 
-                final Uri uri = data.getData();
-                Log.d("Xyzzy", "File Uri: " + uri.toString());
-                // Get the path
-                final String path = uri.toString();
-                //                path = getPath(this, uri);
-                Log.d("Xyzzy", "File Path: " + path);
-                if (path != null) {
-                    addPathToGamesList(path);
-                }
-            }
-            break;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     @Override protected void onCreate(final Bundle savedInstanceState) {
         Log.d("Xyzzy", "SelectionActivity onCreate");
         super.onCreate(savedInstanceState);
@@ -292,7 +220,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     @Override protected void onResume() {
         super.onResume();
         textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
-        Log.d("Xyzzy", "SelectionActivity onResume");
+        regenerateData();
         for (final DataSetObserver dso : observer) {
             dso.onChanged();
         }
@@ -314,7 +242,6 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
             }
         }
         Collections.sort(games);
-        games.add("+ Add another...");
     }
 
     @Override public void registerDataSetObserver(final DataSetObserver dso) {
@@ -334,15 +261,8 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     }
 
     void showFileChooser() {
-        final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        try {
-            startActivityForResult(Intent.createChooser(intent, "Select a File to Upload"), FILE_SELECT_CODE);
-        } catch (final android.content.ActivityNotFoundException ex) {
-            Log.e("Xyzzy", "SelectionActivity.showFileChooser:", ex);
-            Toast.makeText(this, "Please install a File Manager.", Toast.LENGTH_SHORT).show();
-        }
+        final Intent intent = new Intent(this, FileChooserActivity.class);
+        startActivity(intent);
     }
 
     void startGame(final String name) {

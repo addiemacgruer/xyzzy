@@ -796,6 +796,9 @@ import android.util.Log;
     },
     READ(3, 0x4) {
         @Override public void invoke(final ZStack<Short> arguments) {
+            if (Header.VERSION.value() <= 3) {
+                SHOW_STATUS.invoke(arguments);
+            }
             ZWindow.printAllScreens();
             int text = 0, parse = 0, time = 0, routine = 0;
             switch (arguments.size()) {
@@ -872,7 +875,7 @@ import android.util.Log;
             Memory.current().callStack.peek().clearStack();
             Main.frame_count = 0;
             final int pc = Header.START_PC.value();
-            if (Header.VERSION.value() != 6) {
+            if (Header.VERSION.value() != 6 || true) {
                 Memory.current().callStack.peek().setProgramCounter(pc);
             } else {
                 CallStack.call(pc, arguments, new StackDiscard());
@@ -1132,11 +1135,45 @@ import android.util.Log;
     },
     SHOW_STATUS(0, 0xc) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            if (Header.VERSION.value() != 3) {
+            if (Header.VERSION.value() > 3) {
                 NOP.invoke(arguments);
             } else {
                 //TODO show-status
-                Log.e("Xyzzy", "Not implemented: @show_status");
+                final int flags = Header.CONFIG.value();
+                Log.d("Xyzzy", "Header flags:" + Integer.toBinaryString(flags));
+                boolean scoreGame = Header.VERSION.value() < 2 || !Bit.bit1(flags);
+                StringBuilder sb = new StringBuilder();
+                int firstGlobal = readValue(16);
+                ZObject zo = ZObject.count(firstGlobal);
+                sb.append(zo.zProperty().toString());
+                sb.append("     ");
+                if (scoreGame) {
+                    final int score = readValue(17);
+                    final int turns = readValue(18);
+                    sb.append("Score: ");
+                    sb.append(score);
+                    sb.append(" Turns: ");
+                    sb.append(turns);
+                } else { // timegame
+                    final int hours = readValue(17);
+                    final int minutes = readValue(18);
+                    if ((Boolean) Preferences.TWENTYFOURHOUR.getValue(MainActivity.activity)) {
+                        sb.append(String.format("Time: %d:%02d", hours, minutes));
+                    } else {
+                        int displayHours = hours % 12;
+                        if (displayHours == 0) {
+                            displayHours = 12;
+                        }
+                        sb.append(String.format("Time: %d:%02d %s", displayHours, minutes, hours < 12 ? "am" : "pm"));
+                    }
+                }
+                final ZWindow statusLine = Memory.current().zwin.get(1);
+                statusLine.setNaturalHeight(1);
+                statusLine.setCursor(1, 1);
+                statusLine.eraseLine(1);
+                statusLine.addStyle(TextStyle.REVERSE_VIDEO);
+                statusLine.append(sb.toString());
+                statusLine.clearStyles();
             }
         }
     },

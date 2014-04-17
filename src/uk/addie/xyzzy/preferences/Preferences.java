@@ -83,6 +83,15 @@ public enum Preferences {
             return "Speed of automatic scrolling";
         }
     },
+    TWENTYFOURHOUR(BOOLEAN) {
+        @Override Object defaultValue() {
+            return true;
+        }
+
+        @Override String prefDescription() {
+            return "Use 24-hour clock (in V3 games with time status lines)";
+        }
+    },
     PIRACY(BOOLEAN) {
         @Override Object defaultValue() {
             return false;

@@ -20,7 +20,6 @@ import uk.addie.xyzzy.zmachine.CallStack;
 import uk.addie.xyzzy.zmachine.ZStack;
 import uk.addie.xyzzy.zmachine.ZStream;
 import uk.addie.xyzzy.zobjects.Dictionary;
-import uk.addie.xyzzy.zobjects.ZObject;
 import uk.addie.xyzzy.zobjects.ZWindow;
 import android.util.Log;
 import android.util.SparseArray;
@@ -46,7 +45,7 @@ public class Memory implements Serializable {
         if (storyid() == Story.Game.ZORK_ZERO && Header.RELEASE.value() == 296) {
             Header.FLAGS.put(Header.FLAGS.value() | GameFlag.GRAPHICS);
         }
-        int config = 0;
+        int config = Header.CONFIG.value();
         config |= InterpreterFlag1.CONFIG_COLOUR;
         config |= InterpreterFlag1.CONFIG_BOLDFACE;
         config |= InterpreterFlag1.CONFIG_EMPHASIS;
@@ -72,7 +71,6 @@ public class Memory implements Serializable {
         OpMap.adjustForVersion(Header.VERSION.value());
         //        OpMap.logAllOpcodes();
         Dictionary.initDefault();
-        ZObject.enumerateObjects();
     }
 
     public static void setCurrent(final Memory cURRENT) {

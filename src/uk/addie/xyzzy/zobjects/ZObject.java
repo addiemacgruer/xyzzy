@@ -239,4 +239,8 @@ public class ZObject {
         return "object:" + count + " " + new ZProperty(properties()) + " [p" + parent() + ",s" + sibling() + ",c"
                 + child() + "]";
     }
+
+    public ZProperty zProperty() {
+        return new ZProperty(properties());
+    }
 }

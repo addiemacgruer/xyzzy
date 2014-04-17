@@ -34,7 +34,9 @@ that rendered them less than suitable, in my opinion.  Dreadful input (<em>ie.</
 ugly text, inexplicable slowness, a tendency to crash, or some combination of the above, seemed to be common features.  So I set out to write
 my own, ensuring that it would crash quickly, at least...
 
-<p>(introduce...)
+<p>Text adventures being well suited to the limitations of early computers, there were very many released, with a great
+number of games implemented on a number of engines across every computer system available.  Reimplementation of engines for every
+computer is inefficient, and in order to combat this...
 
 <blockquote><p>The Z-machine was created on a coffee table in Pittsburgh in 1979. It is an imaginary computer
 whose programs are adventure games, and is well-adapted to its task, implementing complex
@@ -55,6 +57,10 @@ been created with the Inform design system.
 
 <p>Thanks for downloading my attempt at implementing this imaginary computer.
 
+<p>There are a very large number of games available to download at the IF archive.  See
+<a href="http://www.ifarchive.org/indexes/if-archiveXgamesXzcode.html">http://www.ifarchive.org/indexes/if-archiveXgamesXzcode.html</a>.
+The ones which end in .z3, .z4, .z5 or .z8 will work.
+
 <h2 id="preferences">Preferences</h2>
 <ul>
 <li><p><strong>Display text size</strong> Changes the size of text in the game selection menu and in games.  Screen width is set at the 
@@ -73,10 +79,13 @@ usually be ignored without affecting play.  Usually only useful for story author
 
 <li><p><strong>Length of scroll back</strong> The bottom screen has scrollback enabled.  This number shown is the number of screen
 updates which are preserved.  Having too many items eventually slows down the phone, and would eventually lead to memory problems.
-50 is about appropriate on my S5, but you might want to increase or decrease this depending on how puissant your device is.
+50 is about appropriate on my S4, but you might want to increase or decrease this depending on how puissant your device is.
 
 <li><p><strong>Speed of automatic scrolling</strong> I've implemented automatic scroll-forward for when large amounts of text is
 displayed.  A setting of about 3 gives the right reading speed for me; might depend on the speed of your device, too.
+
+<li><p><strong>Use 24-hour clock</strong> Version 3 games are either <q>score mode</q> or <q>timed mode</q>.  This chooses whether to
+display the time in V3 games with a 24-hour or a 12-hour clock.
 
 <li><p><strong>Run pirated story files</strong> There is a <span class="opcode">@piracy</span> opcode on the Z-Machine, which causes different story file execution
 if the game is detected to have been obtained by copyright infringement.  This checkbox is the detection mechanism.  <em>nb.</em> this
@@ -84,18 +93,25 @@ is completely useless, and essentially unused in all but demonstration story fil
 </ul>
 
 <h2 id="notes">Technical notes</h2>
+
 <p>Some games (eg. Anchorhead while reading books) require cursor key input, which isn't present on (my) Android phone.  There are some
 keyboard shortcuts present on the action bar (cursor up/down/left/right, delete, return) that simulate the desired keys.
+
 <p>The z-spec suggests that it would be beneficial to implement the Quetzal save file format, to allow save game exchange between devices
 and interpreters.  The spec is biased towards a C-style implementation of callstacks and frame pointers; this implementation uses Java
 serialisation for save (and undo) which would make this a pain.  Also, because Xyzzy saves games in its private use area (and thus doesn't
 require write privileges), you'd need a rooted device to get to your saves, anyway.
+
+<p>The interpreter claims to support <q>timed input</q>, <em>ie.</em> only allowing you a certain amount of time to type your commands.
+It doesn't; that's exceptionally annoying.  Memories of getting killed while playing <em>The Hobbit</em> on the Spectrum aftering
+going to the loo and being done in by a wandering warg while away from keyboard still irk, decades later.
 
 <h2 id="complete">Games That Have Been Tested To Completion</h2>
 <ul>
 <li><p>9:05 (Adam Cadre)
 <li><p>A Change In The Weather (Andrew Plotkin)
 <li><p>Photopia (Adam Cadre)
+<li><p>Zork: The Undiscovered Underground (Marc Blank and Michael Berlyn)
 </ul>
 
 <h2 id="todo">To-do list</h2>
