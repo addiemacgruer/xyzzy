@@ -7,6 +7,7 @@ import java.util.List;
 
 import uk.addie.xyzzy.gameselection.SelectionActivity;
 import uk.addie.xyzzy.preferences.Preferences;
+import uk.addie.xyzzy.util.Utility;
 import uk.addie.xyzzy.zmachine.Decoder;
 import uk.addie.xyzzy.zobjects.ZWindow;
 import android.annotation.SuppressLint;
@@ -210,8 +211,12 @@ public class MainActivity extends Activity {
         height = display.getHeight();
     }
 
-    private String getStorySelection() {
+    private String getStoryName() {
         return getIntent().getStringExtra(SelectionActivity.STORY_NAME);
+    }
+
+    private String getStorySelection() {
+        return getIntent().getStringExtra(SelectionActivity.STORY_FILE);
     }
 
     @Override protected void onCreate(final Bundle savedInstanceState) {
@@ -223,6 +228,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         //        setTitle(story);
         setContentView(R.layout.activity_main);
+        setTitle("Xyzzy: " + getStoryName());
         synchronized (this) {
             startBackgroundLogicThread(story);
         }

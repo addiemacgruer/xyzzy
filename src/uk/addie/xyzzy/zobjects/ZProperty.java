@@ -1,6 +1,7 @@
 
 package uk.addie.xyzzy.zobjects;
 
+import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.state.Memory;
 import uk.addie.xyzzy.util.Bit;
@@ -112,7 +113,8 @@ public class ZProperty {
     public void putProperty(final int number, final int value) {
         final int prop = getPropertyAddress(number);
         if (prop == 0) {
-            throw new UnsupportedOperationException("No such property");
+            Error.PUT_PROP_0.invoke();
+            return;
         }
         final int size = calcSize(prop);
         if (size == 2) {

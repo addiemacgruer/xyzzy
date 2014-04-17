@@ -49,7 +49,8 @@ public enum Error {/* Error codes */
     STR3_NESTING("Nesting stream #3 too deep", true), //
     TEST_ATTR_0("@test_attr called with object 0"), //
     TEXT_BUF_OVF("Text buffer overflow", true), //
-    UNKNOWN_ZCODE_VERSION("Unknown Z-code version", true); /* @get_next_prop called with object 0 */
+    UNKNOWN_ZCODE_VERSION("Unknown Z-code version", true), PRINT_OBJECT_0("Tried to print object zero"), ATTRIBUTE_TOO_HIGH(
+            "Tried to set an attribute higher than the maximum allowed"); /* @get_next_prop called with object 0 */
     public final boolean fatal;
     public final String  string;
 

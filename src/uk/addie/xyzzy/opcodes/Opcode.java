@@ -268,7 +268,7 @@ import android.util.Log;
     },
     GET_CHILD(1, 0x2) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final int object = arguments.get(0);
+            final int object = arguments.get(0) & 0xffff;
             final int value;
             if (object == 0) {
                 Error.GET_CHILD_0.invoke();
@@ -300,7 +300,7 @@ import android.util.Log;
     },
     GET_PARENT(1, 0x3) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final Short object = arguments.get(0);
+            final int object = arguments.get(0) & 0xffff;
             if (object == 0) {
                 Error.GET_PARENT_0.invoke();
                 readDestinationAndStoreResult(0);
@@ -312,8 +312,8 @@ import android.util.Log;
     },
     GET_PROP(2, 0x11) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final short object = arguments.get(0);
-            final short property = arguments.get(1);
+            final int object = arguments.get(0) & 0xffff;
+            final int property = arguments.get(1) & 0xffff;
             if (object == 0) {
                 Error.GET_PROP_0.invoke();
                 readDestinationAndStoreResult(0);
@@ -327,8 +327,8 @@ import android.util.Log;
     },
     GET_PROP_ADDR(2, 0x12) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final short object = arguments.get(0);
-            final short property = arguments.get(1);
+            final int object = arguments.get(0) & 0xffff;
+            final int property = arguments.get(1) & 0xffff;
             if (object == 0) {
                 Error.GET_PROP_ADDR_0.invoke();
                 readDestinationAndStoreResult(0);
@@ -359,7 +359,13 @@ import android.util.Log;
     },
     GET_SIBLING(1, 0x1) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final short object = arguments.get(0);
+            final int object = arguments.get(0) & 0xffff;
+            if (object == 0) {
+                Error.GET_SIBLING_0.invoke();
+                readDestinationAndStoreResult(0);
+                branchOnTest(false);
+                return;
+            }
             final int value = ZObject.count(object).sibling();
             readDestinationAndStoreResult((short) value);
             branchOnTest(value != 0);
@@ -446,8 +452,8 @@ import android.util.Log;
     },
     JIN(2, 0x6) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final short obj1 = arguments.get(0);
-            final short obj2 = arguments.get(1);
+            final int obj1 = arguments.get(0) & 0xffff;
+            final int obj2 = arguments.get(1) & 0xffff;
             if (obj2 == 0) {
                 Error.JIN_0.invoke();
                 branchOnTest(false);
@@ -673,7 +679,11 @@ import android.util.Log;
     },
     PRINT_OBJ(1, 0xa) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final short object = arguments.get(0);
+            final int object = arguments.get(0) & 0xff;
+            if (object == 0) {
+                Error.PRINT_OBJECT_0.invoke();
+                return;
+            }
             final ZObject zo = ZObject.count(object);
             if (Debug.screen) {
                 Log.i("Xyzzy", "PRINT OBJECT: " + zo);
@@ -861,11 +871,11 @@ import android.util.Log;
             Memory.loadDataFromFile();
             Memory.current().callStack.peek().clearStack();
             Main.frame_count = 0;
+            final int pc = Header.START_PC.value();
             if (Header.VERSION.value() != 6) {
-                final int pc = Header.START_PC.value();
                 Memory.current().callStack.peek().setProgramCounter(pc);
             } else {
-                throw new UnsupportedOperationException("@restart (v6)");
+                CallStack.call(pc, arguments, new StackDiscard());
             }
         }
     },
@@ -1126,7 +1136,7 @@ import android.util.Log;
                 NOP.invoke(arguments);
             } else {
                 //TODO show-status
-                throw new UnsupportedOperationException("@show-status");
+                Log.e("Xyzzy", "Not implemented: @show_status");
             }
         }
     },
@@ -1208,8 +1218,8 @@ import android.util.Log;
     },
     TEST_ATTR(2, 0xa) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final short object = arguments.get(0);
-            final short attribute = arguments.get(1);
+            final int object = arguments.get(0) & 0xff;
+            final int attribute = arguments.get(1) & 0xff;
             if (object == 0) {
                 Error.TEST_ATTR_0.invoke();
                 branchOnTest(false);

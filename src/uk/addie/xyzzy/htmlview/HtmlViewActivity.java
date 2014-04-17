@@ -7,8 +7,6 @@ import java.util.Scanner;
 import uk.addie.xyzzy.R;
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.Window;
-import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -44,8 +42,8 @@ public class HtmlViewActivity extends Activity { // NO_UCD (instantiated by
     /** Called by Android when ready to display. */
     @Override protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.web);
         mWebView = (WebView) findViewById(R.id.webview);
         // mWebView.getSettings().setJavaScriptEnabled(true);

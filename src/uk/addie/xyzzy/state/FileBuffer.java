@@ -39,7 +39,7 @@ import android.util.Log;
             return changes.get(i) & 0xff;
         }
         if (i >= zmp.length) {
-            Log.w("Xyzzy", "Array index out-of-bounds");
+            Log.e("Xyzzy", "Array index out-of-bounds (" + i + "/" + zmp.length + ")");
             return 0;
         }
         return zmp[i] & 0xff;

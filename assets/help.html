@@ -1,6 +1,7 @@
 <!html>
 <title>Xyzzy About and Help</title>
 <style>
+body {text-align: justify}
 span.opcode {color: purple;}
 </style>
 <body>
@@ -32,6 +33,27 @@ smartphones should be ideal for playing them on the move.  However, the existing
 that rendered them less than suitable, in my opinion.  Dreadful input (<em>ie.</em> not the Android default on-screen keyboard),
 ugly text, inexplicable slowness, a tendency to crash, or some combination of the above, seemed to be common features.  So I set out to write
 my own, ensuring that it would crash quickly, at least...
+
+<p>(introduce...)
+
+<blockquote><p>The Z-machine was created on a coffee table in Pittsburgh in 1979. It is an imaginary computer
+whose programs are adventure games, and is well-adapted to its task, implementing complex
+games remarkably compactly. They were still perhaps 100K long, too large for the memory of
+the home computers of their day, and the Z-machine seems to have made the first usage of vir-
+tual memory on a microcomputer. Further ahead of its time was the ability to efficiently save and
+restore the entire execution state.
+<p>The design's cardinal principle is that any game is 100% portable to different computers: that is,
+any legal program exactly determines its behaviour. This portability is largely made possible by
+a willingness to constrain maximum as well as minimum levels of performance (for instance,
+dynamic memory allocation is impossible).
+<p>Infocom's catalogue continues to be sold and to be played under interpreter programs, either
+original Infocom ones or more recent and generally better freeware ones. About 130 story files
+compiled by Infocom's compiler Zilch survive and since 1993 very many more story files have
+been created with the Inform design system.
+<p style="text-align:right">--The Z-Machine Standards Document (Graham Nelson)</p>
+</blockquote>
+
+<p>Thanks for downloading my attempt at implementing this imaginary computer.
 
 <h2 id="preferences">Preferences</h2>
 <ul>
@@ -71,8 +93,9 @@ require write privileges), you'd need a rooted device to get to your saves, anyw
 
 <h2 id="complete">Games That Have Been Tested To Completion</h2>
 <ul>
-<li><p>A Change In The Weather</p>
-<li><p>Photopia</p>
+<li><p>9:05 (Adam Cadre)
+<li><p>A Change In The Weather (Andrew Plotkin)
+<li><p>Photopia (Adam Cadre)
 </ul>
 
 <h2 id="todo">To-do list</h2>
@@ -84,13 +107,17 @@ I'll be happy to work them in.
 <li><p><span class="opcode">@sound_effect</span> only implements the standard beeps.  Enjoy the extra feedback scoring points in Trinity.
 <li><p><span class="opcode">@input_stream</span> does nothing.
 <li><p>The V6 opcodes (drawing pictures, moving windows, detecting the mouse, etc) all do nothing.
+<li><p>I was planning to implement multiple slots for saves, but that's ongoing.
 </ul>
 
 <h2 id="contact">Contact me</h2>
 <p>My email contact is <a href="mailto:addiemacgruer@googlemail.com">addiemacgruer@googlemail.com</a> for feedback or queries.
+
 <p>The code is kept at <a href="https://code.google.com/p/xyzzy/">https://code.google.com/p/xyzzy/</a>.  There's a bug tracker on
-there, and if you can find where my code is wrong, that would be even more helpful.
+there, and if you can find where my code is wrong, that would be great.
+
 <p>If you've managed to play another story to completion, then that would be handy to add to the list.
+
 <p>If the interpreter has crashed, or is displaying peculiar behaviour, then it would be helpful to know what game you were playing
 (and what you were doing) when it did.  If a stack trace has displayed, then the name of the exception and the top line which starts with
 <q>at uk.addie.xyzzy....</q> (including the line number) would be very helpful.

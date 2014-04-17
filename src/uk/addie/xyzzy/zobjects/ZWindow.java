@@ -133,7 +133,7 @@ public class ZWindow implements Serializable {
     }
 
     public void clearStyles() {
-        Log.d("Xyzzy", "clearStyles:" + windowCount);
+        //        Log.d("Xyzzy", "clearStyles:" + windowCount);
         if (row >= buffer.size()) {
             currentTextStyle.clear();
             return;
@@ -144,7 +144,7 @@ public class ZWindow implements Serializable {
             Log.i("Xyzzy", "Window:" + windowCount + " -- Styling " + ts + " from " + start + " to " + end);
             if (ts != TextStyle.REVERSE_VIDEO) {
                 buffer.get(row).setSpan(ts.characterStyle(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            } else {
+            } else if (start < end) {
                 buffer.get(row).setSpan(new BackgroundColorSpan(foreground), start, end,
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 buffer.get(row).setSpan(new ForegroundColorSpan(background), start, end,

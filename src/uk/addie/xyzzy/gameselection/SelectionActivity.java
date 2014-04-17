@@ -1,6 +1,9 @@
 
 package uk.addie.xyzzy.gameselection;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,8 +12,8 @@ import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.R;
-import uk.addie.xyzzy.Utility;
 import uk.addie.xyzzy.preferences.Preferences;
+import uk.addie.xyzzy.util.Utility;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -24,6 +27,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ListAdapter;
@@ -33,7 +37,8 @@ import android.widget.Toast;
 
 public class SelectionActivity extends Activity implements ListAdapter { // NO_UCD (use default)
     protected static SelectionActivity activity;
-    public final static String         STORY_NAME       = "uk.addie.xyzzy.MESSAGE";
+    public final static String         STORY_FILE       = "uk.addie.xyzzy.STORY_FILE";
+    public final static String         STORY_NAME       = "uk.addie.xyzzy.STORY_NAME";
     private static final int           FILE_SELECT_CODE = 0;
     final static int                   INTERSTITIALS    = 3;
     static int                         selected         = -1;
@@ -66,7 +71,11 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
 
     private void addPathToGamesList(final String path) {
         Log.d("Xyzzy", "Adding path:" + path);
-        getGameNameDialogue(path);
+        try {
+            getGameNameDialogue(URLDecoder.decode(path, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            Log.e("Xyzzy", "SelectionActivity.addPathToGamesList", e);
+        }
     }
 
     @Override public boolean areAllItemsEnabled() {
@@ -110,7 +119,16 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
 
     private void getGameNameDialogue(final String pathToGame) {
         final EditText input = new EditText(getApplicationContext());
-        input.setText("New game");
+        Log.d("Xyzyy", "Path:" + pathToGame);
+        File f = new File(pathToGame);
+        Log.d("Xyzzy", "File:" + f);
+        String name = f.getName();
+        Log.d("Xyzzy", "Name:" + name);
+        if (name.indexOf('.') != -1) {
+            name = name.substring(0, name.indexOf('.'));
+        }
+        Log.d("Xyzzy", "Shortened:" + name);
+        input.setText(name);
         input.setTextColor(0xff000000);
         new AlertDialog.Builder(this).setTitle("Please name this file").setView(input)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -163,7 +181,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
             tv.setText("Play " + games.get(selected));
             tv.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(final View v) {
-                    startGame(all.get(games.get(selected)));
+                    startGame(games.get(selected));
                 }
             });
             tv.setTextColor(0xff000000);
@@ -173,6 +191,23 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
             tv.setText("Remove from list");
             tv.setTextColor(0xff000000);
             tv.setBackgroundColor(0xffffce4e);
+            tv.setOnClickListener(new OnClickListener() {
+                @Override public void onClick(View v) {
+                    new AlertDialog.Builder(SelectionActivity.activity)
+                            .setMessage("Are you sure you want to remove " + games.get(selected) + " from list?")
+                            .setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override public void onClick(final DialogInterface dialog, final int id) {
+                                    final SharedPreferences.Editor sp = getSharedPreferences("XyzzyGames", 0).edit();
+                                    sp.remove(games.get(selected));
+                                    sp.commit();
+                                    regenerateData();
+                                    for (final DataSetObserver dso : observer) {
+                                        dso.onChanged();
+                                    }
+                                }
+                            }).setNegativeButton("No", null).show();
+                }
+            });
         } else {
             tv = selectionPageTextView();
             tv.setText("????");
@@ -268,7 +303,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         all.clear();
         games.clear();
         final SharedPreferences sp = getSharedPreferences("XyzzyGames", 0);
-        all.put("Czech", "@czech.z5");
+        //        all.put("Czech", "@czech.z5");
         final Map<String, ?> stored = sp.getAll();
         for (final String s : stored.keySet()) {
             all.put(s, sp.getString(s, ""));
@@ -312,6 +347,8 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
 
     void startGame(final String name) {
         final Intent intent = new Intent(this, MainActivity.class);
+        String path = all.get(name);
+        intent.putExtra(STORY_FILE, path);
         intent.putExtra(STORY_NAME, name);
         startActivity(intent);
     }

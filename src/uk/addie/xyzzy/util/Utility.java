@@ -1,5 +1,5 @@
 
-package uk.addie.xyzzy;
+package uk.addie.xyzzy.util;
 
 
 public class Utility {

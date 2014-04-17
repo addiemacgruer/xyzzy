@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import uk.addie.xyzzy.R;
-import uk.addie.xyzzy.Utility;
+import uk.addie.xyzzy.util.Utility;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;

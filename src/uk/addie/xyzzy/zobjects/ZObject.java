@@ -13,19 +13,19 @@ import android.util.SparseArray;
 
 public class ZObject {
     private final static SparseArray<Set<Integer>> reverseChildren = new SparseArray<Set<Integer>>();
-
     private final static SparseArray<Set<Integer>> reverseParents  = new SparseArray<Set<Integer>>();
-
     private final static SparseArray<Set<Integer>> reverseSiblings = new SparseArray<Set<Integer>>();
 
     private static void addToReverseMap(final SparseArray<Set<Integer>> map, final int object, final int linked) {
         final Set<Integer> target = getReverse(map, linked);
         target.add(object);
     }
+
     private static void clearFromReverseMap(final SparseArray<Set<Integer>> map, final int object, final int linked) {
         final Set<Integer> target = getReverse(map, linked);
         target.remove(object);
     }
+
     public static ZObject count(final int oCount) {
         final int count = oCount;
         if (count == 0) {
@@ -36,7 +36,8 @@ public class ZObject {
             Log.e("Xyzzy", "Negative object count");
             Error.ILL_OBJ.invoke();
         } else if (count > Memory.current().objectCount) {
-            Log.e("Xyzzy", "Object count " + oCount + " > " + Memory.current().objectCount);
+            Log.w("Xyzzy", "Object count " + oCount + " > " + Memory.current().objectCount);
+            enumerateUpTo(count);
         }
         final ZObject rval = new ZObject();
         if (Header.VERSION.value() <= 3) {
@@ -47,6 +48,7 @@ public class ZObject {
         rval.count = count;
         return rval;
     }
+
     public static void detachFromTree(final short object) {
         if (Debug.moves) {
             Log.i("Xyzzy", "Detaching " + count(object) + " from tree");
@@ -65,6 +67,7 @@ public class ZObject {
         zo.setSibling(0);
         zo.setParent(0);
     }
+
     public static void enumerateObjects() {
         Memory.current().objectCount = 0xffff; // suppress warnings for now
         reverseParents.clear();
@@ -86,6 +89,20 @@ public class ZObject {
             objectCount++;
         }
         Memory.current().objectCount = objectCount;
+        Log.d("Xyzzy", "Found " + objectCount + " objects");
+    }
+
+    public static void enumerateUpTo(int newHigh) {
+        final int oldObjectCount = Memory.current().objectCount;
+        Memory.current().objectCount = 0xffff;
+        for (int i = oldObjectCount; i < newHigh; i++) {
+            final ZObject zo = ZObject.count(i);
+            addToReverseMap(reverseParents, i, zo.parent());
+            addToReverseMap(reverseSiblings, i, zo.sibling());
+            addToReverseMap(reverseChildren, i, zo.child());
+        }
+        Log.d("Xyzzy", "Found " + (newHigh - oldObjectCount) + " more objects");
+        Memory.current().objectCount = newHigh;
     }
 
     private static Set<Integer> getReverse(final SparseArray<Set<Integer>> map, final int linked) {
@@ -97,9 +114,8 @@ public class ZObject {
         return target;
     }
 
-    private int                                    count;
-
-    private int                                    offset;
+    private int count;
+    private int offset;
 
     private int[] attrcalc(final int myCount) {
         int localCount = myCount;
@@ -114,7 +130,7 @@ public class ZObject {
 
     public int child() {
         if (Header.VERSION.value() <= 3) {
-            return Memory.current().buff().getShort(offset + 8);
+            return Memory.current().buff().get(offset + 6);
         }
         return Memory.current().buff().getShort(offset + 10);
     }
@@ -131,19 +147,23 @@ public class ZObject {
 
     public int parent() {
         if (Header.VERSION.value() <= 3) {
-            return Memory.current().buff().getShort(offset + 4);
+            return Memory.current().buff().get(offset + 4);
         }
         return Memory.current().buff().getShort(offset + 6);
     }
 
     int properties() {
         if (Header.VERSION.value() <= 3) {
-            return Memory.current().buff().getShort(offset + 10) & 0xffff;
+            return Memory.current().buff().getShort(offset + 7) & 0xffff;
         }
         return Memory.current().buff().getShort(offset + 12) & 0xffff;
     }
 
     public void setAttribute(final int count) {
+        if (count > (Header.VERSION.value() <= 3 ? 32 : 48)) {
+            Error.ATTRIBUTE_TOO_HIGH.invoke();
+            return;
+        }
         final int[] attrcalc = attrcalc(count);
         byte b = (byte) Memory.current().buff().get(attrcalc[0]);
         b |= attrcalc[1];
@@ -157,7 +177,7 @@ public class ZObject {
         clearFromReverseMap(reverseChildren, count, child());
         addToReverseMap(reverseChildren, count, object);
         if (Header.VERSION.value() <= 3) {
-            Memory.current().buff().putShort(offset + 8, (short) object);
+            Memory.current().buff().put(offset + 6, (byte) object);
         } else {
             Memory.current().buff().putShort(offset + 10, (short) object);
         }
@@ -173,7 +193,7 @@ public class ZObject {
         clearFromReverseMap(reverseParents, count, parent());
         addToReverseMap(reverseParents, count, object);
         if (Header.VERSION.value() <= 3) {
-            Memory.current().buff().putShort(offset + 4, (short) object);
+            Memory.current().buff().put(offset + 4, (byte) object);
         } else {
             Memory.current().buff().putShort(offset + 6, (short) object);
         }
@@ -189,7 +209,7 @@ public class ZObject {
         clearFromReverseMap(reverseSiblings, count, sibling());
         addToReverseMap(reverseSiblings, count, object);
         if (Header.VERSION.value() <= 3) {
-            Memory.current().buff().putShort(offset + 6, (short) object);
+            Memory.current().buff().put(offset + 5, (byte) object);
         } else {
             Memory.current().buff().putShort(offset + 8, (short) object);
         }
@@ -200,12 +220,16 @@ public class ZObject {
 
     public int sibling() {
         if (Header.VERSION.value() <= 3) {
-            return Memory.current().buff().getShort(offset + 6);
+            return Memory.current().buff().get(offset + 5);
         }
         return Memory.current().buff().getShort(offset + 8);
     }
 
     public boolean testAttribute(final int aCount) {
+        if (aCount > (Header.VERSION.value() <= 3 ? 32 : 48)) {
+            Error.ATTRIBUTE_TOO_HIGH.invoke();
+            return false;
+        }
         final int[] attrcalc = attrcalc(aCount);
         final byte b = (byte) Memory.current().buff().get(attrcalc[0]);
         return (b & attrcalc[1]) != 0;
