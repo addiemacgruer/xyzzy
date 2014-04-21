@@ -681,7 +681,7 @@ import android.util.Log;
     },
     PRINT_OBJ(1, 0xa) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final int object = arguments.get(0) & 0xff;
+            final int object = arguments.get(0) & 0xffff;
             if (object == 0) {
                 Error.PRINT_OBJECT_0.invoke();
                 return;
@@ -1259,8 +1259,8 @@ import android.util.Log;
     },
     TEST_ATTR(2, 0xa) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final int object = arguments.get(0) & 0xff;
-            final int attribute = arguments.get(1) & 0xff;
+            final int object = arguments.get(0) & 0xffff;
+            final int attribute = arguments.get(1) & 0xffff;
             if (object == 0) {
                 Error.TEST_ATTR_0.invoke();
                 branchOnTest(false);
@@ -1287,7 +1287,7 @@ import android.util.Log;
             if (arguments.size() != 2) {
                 throw new UnsupportedOperationException("@tokenise (long arguments)");
             }
-            final int length = Memory.current().buff().get(text + 1) & 0xff;
+            final int length = Memory.current().buff().get(text + 1);
             final StringBuilder sb = new StringBuilder();
             for (int i = 0; i < length; i++) {
                 sb.append((char) Memory.current().buff().get(text + i + 2));
