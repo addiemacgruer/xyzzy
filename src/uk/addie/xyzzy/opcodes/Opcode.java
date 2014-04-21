@@ -18,7 +18,6 @@ import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.interfaces.IInvokeable;
 import uk.addie.xyzzy.os.Debug;
-import uk.addie.xyzzy.os.Main;
 import uk.addie.xyzzy.preferences.Preferences;
 import uk.addie.xyzzy.state.Memory;
 import uk.addie.xyzzy.util.Bit;
@@ -37,7 +36,7 @@ import android.graphics.Point;
 import android.text.format.Time;
 import android.util.Log;
 
-@SuppressWarnings({ "unused" }) public enum Opcode {
+@SuppressWarnings({ "unused", "ucd" }) public enum Opcode {
     ADD(2, 0x14) {
         @Override public void invoke(final ZStack<Short> arguments) {
             final short a = arguments.get(0);
@@ -876,7 +875,6 @@ import android.util.Log;
             Memory.current().random.seed_random(0);
             Memory.loadDataFromFile();
             Memory.current().callStack.peek().clearStack();
-            Main.frame_count = 0;
             final int pc = Header.START_PC.value();
             if (Header.VERSION.value() != 6 || true) {
                 Memory.current().callStack.peek().setProgramCounter(pc);
@@ -1421,6 +1419,20 @@ import android.util.Log;
         return namepart;
     }
 
+    protected static String selectSaveGame() {
+        SaveChooserActivity.gameName = saveGameName();
+        final Intent intent = new Intent(MainActivity.activity, SaveChooserActivity.class);
+        MainActivity.activity.startActivity(intent);
+        synchronized (SaveChooserActivity.syncObject) {
+            try {
+                SaveChooserActivity.syncObject.wait();
+            } catch (InterruptedException e) {
+                Log.e("Xyzzy", "Opcode.selectSaveGame interrupted", e);
+            }
+            return SaveChooserActivity.syncObject.toString();
+        }
+    }
+
     public static void storeValue(final int destination, final int value) {
         final int ldestination = destination & 0xff;
         if (Debug.stores) {
@@ -1451,20 +1463,6 @@ import android.util.Log;
     }
 
     abstract public void invoke(ZStack<Short> arguments);
-
-    protected String selectSaveGame() {
-        SaveChooserActivity.gameName = saveGameName();
-        final Intent intent = new Intent(MainActivity.activity, SaveChooserActivity.class);
-        MainActivity.activity.startActivity(intent);
-        synchronized (SaveChooserActivity.syncObject) {
-            try {
-                SaveChooserActivity.syncObject.wait();
-            } catch (InterruptedException e) {
-                Log.e("Xyzzy", "Opcode.selectSaveGame interrupted", e);
-            }
-            return SaveChooserActivity.syncObject.toString();
-        }
-    }
 
     @Override public String toString() {
         return "(" + operands + "," + Integer.toHexString(hex) + ") " + super.toString().toLowerCase(Locale.UK);

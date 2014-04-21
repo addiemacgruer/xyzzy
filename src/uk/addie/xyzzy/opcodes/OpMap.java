@@ -48,20 +48,7 @@ public class OpMap {
         z.invoke(arguments);
     }
 
-    public static void logAllOpcodes() {
-        for (int j = 0; j < opmap.length; j++) {
-            for (int i = 0; i < opmap[j].length; i++) {
-                final Opcode z = opmap[j][i];
-                if (z != null) {
-                    Log.d("Xyzzy", j + ":" + Integer.toHexString(i) + " " + z);
-                } else {
-                    Log.d("Xyzzy", j + ":" + Integer.toHexString(i) + " illegal");
-                }
-            }
-        }
-    }
-
-    public static void map(final Opcode z) {
+    static void map(final Opcode z) {
         if (opmap[z.operands][z.hex] != null) {
             Log.w("Xyzzy", "Duplicate zcode:" + z + " (was " + opmap[z.operands][z.hex] + ")");
         }

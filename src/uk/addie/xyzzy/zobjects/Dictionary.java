@@ -38,7 +38,7 @@ public class Dictionary {
         final int moffset = offset + numberOfInputCodes() + 4;
         for (int wordCount = 0, total = numberOfEntries(); wordCount < total; wordCount++) {
             final int wordByte = moffset + wordCount * entryLength;
-            // TODO
+            // TODO $signs &c.
             final String word = ZText.encodedAtOffset(wordByte);
             long value = 0;
             for (int i = 0; i < bytesPerWord; i++) {

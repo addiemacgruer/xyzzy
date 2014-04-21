@@ -31,37 +31,20 @@ import android.widget.TextView;
 
 public class SelectionActivity extends Activity implements ListAdapter { // NO_UCD (use default)
     protected static SelectionActivity activity;
-    public final static String         STORY_FILE       = "uk.addie.xyzzy.STORY_FILE";
-    public final static String         STORY_NAME       = "uk.addie.xyzzy.STORY_NAME";
-    private static final int           FILE_SELECT_CODE = 0;
-    final static int                   INTERSTITIALS    = 3;
-    static int                         selected         = -1;
-    //    private static String getPath(final Context context, final Uri uri) {
-    //        Log.d("Xyzzy", "getPath:" + context + " uri:" + uri);
-    //        Cursor cursor = null;
-    //        Log.i("Xyzzy", "Uri path:" + uri.getPath());
-    //        try {
-    //            cursor = context.getContentResolver().query(uri, null, null, null, null);
-    //            final int nameIndex = cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);
-    //            if (cursor.moveToFirst()) {
-    //                final String rval = cursor.getString(nameIndex);
-    //                cursor.close();
-    //                return rval;
-    //            }
-    //            cursor.close();
-    //        } catch (final Exception e) {
-    //            Log.e("Xyzzy", "SelectionActivity.getPath:", e);
-    //            if (cursor != null) {
-    //                cursor.close();
-    //            }
-    //        }
-    //        return null;
-    //    }
-    final Map<String, String>          all              = new HashMap<String, String>();
-    final List<String>                 games            = new ArrayList<String>();
-    private MenuItem[]                 mis;
-    final List<DataSetObserver>        observer         = new ArrayList<DataSetObserver>();
-    private int                        textSize;
+    public final static String         STORY_FILE    = "uk.addie.xyzzy.STORY_FILE";
+    public final static String         STORY_NAME    = "uk.addie.xyzzy.STORY_NAME";
+    static int                         INTERSTITIALS = 3;
+    static int                         selected      = -1;
+
+    static boolean isBuiltin(final String selectedGamePath) {
+        return selectedGamePath.charAt(0) == '@';
+    }
+
+    final Map<String, String>   all      = new HashMap<String, String>();
+    final List<String>          games    = new ArrayList<String>();
+    private MenuItem[]          mis;
+    final List<DataSetObserver> observer = new ArrayList<DataSetObserver>();
+    private int                 textSize;
 
     @Override public boolean areAllItemsEnabled() {
         return true;
@@ -80,11 +63,14 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         }
         tv.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(final View v) {
-                //                    startGame(all.get(name)); TODO this is startgame
                 selected = position;
-                for (final DataSetObserver dso : observer) {
-                    dso.onChanged();
+                final String selectedGamePath = all.get(games.get(selected));
+                if (isBuiltin(selectedGamePath)) {
+                    INTERSTITIALS = 2;
+                } else {
+                    INTERSTITIALS = 3;
                 }
+                updateObservers();
             }
         });
         return tv;
@@ -125,7 +111,12 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
             tv = gameNameAtListPosition(position);
         } else if (position == -1) {
             tv = selectionPageTextView();
-            tv.setText(all.get(games.get(selected)));
+            final String selectedGamePath = all.get(games.get(selected));
+            if (isBuiltin(selectedGamePath)) {
+                tv.setText("Built-in: " + selectedGamePath.substring(1));
+            } else {
+                tv.setText(selectedGamePath);
+            }
             tv.setTextSize(textSize);
             tv.setTextColor(0x88000000);
             tv.setBackgroundColor(0xffffce4e);
@@ -274,5 +265,11 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
 
     @Override public void unregisterDataSetObserver(final DataSetObserver dso) {
         observer.remove(dso);
+    }
+
+    void updateObservers() {
+        for (final DataSetObserver dso : observer) {
+            dso.onChanged();
+        }
     }
 }

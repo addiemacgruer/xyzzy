@@ -6,10 +6,7 @@ import java.io.Serializable;
 import uk.addie.xyzzy.interfaces.IInvokeable;
 import uk.addie.xyzzy.state.Memory;
 
-public class StackStore implements IInvokeable, Serializable {
-    /**
-     * 
-     */
+class StackStore implements IInvokeable, Serializable {
     private static final long serialVersionUID = 1L;
     private final int         destination;
 

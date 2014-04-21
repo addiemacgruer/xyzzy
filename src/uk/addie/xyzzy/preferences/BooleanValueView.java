@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 
-public class BooleanValueView extends CheckBox implements OnClickListener {
+class BooleanValueView extends CheckBox implements OnClickListener {
     private final Preferences preferences;
 
     BooleanValueView(Context context, Preferences p) {

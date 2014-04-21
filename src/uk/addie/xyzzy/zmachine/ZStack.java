@@ -32,7 +32,7 @@ public class ZStack<T> implements Serializable, Iterable<T> {
     }
 
     public T get(final int i) {
-        if (i < 0 || i >= list.size()) {
+        if (i < 0 || i > size) {
             Log.w("Xyzzy", "Stack index out of range.");
             return nullValue;
         }
@@ -53,9 +53,9 @@ public class ZStack<T> implements Serializable, Iterable<T> {
     public T pop() {
         final T rval = peek();
         last = null;
-        if (size > 1) {
-            list.remove(size - 1);
-        }
+        //        if (size > 1) {
+        list.remove(size - 1);
+        //        }
         size--;
         return rval;
     }

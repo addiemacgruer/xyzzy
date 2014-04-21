@@ -23,9 +23,9 @@ public class Random implements Serializable {
                 counter = 1;
             }
         } else { /* ...in standard mode */
-            result = (int) System.currentTimeMillis();
+            result = Math.abs((int) System.currentTimeMillis());
         }
-        final int randomResult = result % range + 1;
+        final int randomResult = (result % range) + 1;
         Log.d("Xyzzy", "Random result:" + randomResult + "/" + range);
         return randomResult;
     }

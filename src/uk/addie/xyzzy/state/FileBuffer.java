@@ -13,7 +13,6 @@ import java.util.Map;
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.header.Header;
 import android.annotation.SuppressLint;
-import android.net.Uri;
 import android.util.Log;
 
 @SuppressLint("UseSparseArrays") public class FileBuffer implements Serializable {
@@ -54,10 +53,6 @@ import android.util.Log;
         try {
             if (path.charAt(0) == '@') {
                 fis = MainActivity.activity.getAssets().open(path.substring(1));
-            } else if (path.startsWith("content:")) {
-                fis = MainActivity.activity.getContentResolver().openInputStream(Uri.parse(path));
-            } else if (path.startsWith("file:")) {
-                fis = new FileInputStream(path.substring(5));
             } else {
                 fis = new FileInputStream(path);
             }

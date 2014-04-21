@@ -36,7 +36,6 @@ public class MainActivity extends Activity {
     private static Thread           logicThread     = null;
     final static View.OnKeyListener okl;
     static final List<View>         textBoxes       = new ArrayList<View>();
-    public static int               width, height;
     static {
         okl = new View.OnKeyListener() {
             private void delayDisable(final EditText et) {
@@ -77,6 +76,7 @@ public class MainActivity extends Activity {
             }
         };
     }
+    public static int               width;
 
     static void focusTextView(final View tv) {
         tv.setFocusableInTouchMode(true);
@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
         return et;
     }
 
-    private static void startBackgroundLogicThread(final String message) {
+    private synchronized static void startBackgroundLogicThread(final String message) {
         if (logicThread == null) {
             logicThread = new Thread(new Xyzzy(message), "XyzzyInterpreter");
             logicThread.start();
@@ -150,7 +150,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    public void addView(final View tv, final int viewId) {
+    void addView(final View tv, final int viewId) {
         final int maximumScroll = (Integer) Preferences.SCROLL_BACK.getValue(this);
         runOnUiThread(new Runnable() {
             private void removeSurplusScrollback(final LinearLayout ll) {
@@ -190,24 +190,12 @@ public class MainActivity extends Activity {
         synchronized (inputSyncObject) { // release background thread if it's waiting on input.
             inputSyncObject.notifyAll();
         }
-        this.finish();
-    }
-
-    public void finishEditing(final EditText et, final int foreground, final int background) {
-        runOnUiThread(new Runnable() {
-            @Override public void run() {
-                et.setGravity(Gravity.RIGHT);
-                et.setBackgroundColor(background);
-                et.setTextColor(foreground);
-                et.setOnKeyListener(null);
-            }
-        });
+        finish();
     }
 
     @SuppressWarnings("deprecation") private void getScreenSize() {
         final Display display = getWindowManager().getDefaultDisplay();
         width = display.getWidth();
-        height = display.getHeight();
     }
 
     private String getStoryName() {
@@ -228,9 +216,7 @@ public class MainActivity extends Activity {
         //        setTitle(story);
         setContentView(R.layout.activity_main);
         setTitle("Xyzzy: " + getStoryName());
-        synchronized (this) {
-            startBackgroundLogicThread(story);
-        }
+        startBackgroundLogicThread(story);
         redisplayScreen();
     }
 
@@ -279,7 +265,7 @@ public class MainActivity extends Activity {
             Log.e("Xyzzy", "Android onOptionsItemSelected before onCreateOptionsMenu?");
             return false;
         }
-        int selected = Utility.arrayOffsetOf(item, mis);
+        final int selected = Utility.arrayOffsetOf(item, mis);
         MenuButtons.values()[selected].invoke();
         return true;
     }
@@ -310,27 +296,14 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void removeChild(final View view) {
-        runOnUiThread(new Runnable() {
-            @Override public void run() {
-                final int viewId = (Integer) view.getTag();
-                final LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
-                ll.removeView(view);
-                synchronized (textBoxes) {
-                    textBoxes.remove(view);
-                }
-            }
-        });
-    }
-
     public void removeChildren(final int viewId) {
         runOnUiThread(new Runnable() {
             @Override public void run() {
                 final LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
                 ll.removeAllViews();
                 synchronized (textBoxes) {
-                    for (Iterator<View> it = textBoxes.iterator(); it.hasNext();) {
-                        View v = it.next();
+                    for (final Iterator<View> it = textBoxes.iterator(); it.hasNext();) {
+                        final View v = it.next();
                         if ((Integer) v.getTag() == viewId) {
                             it.remove();
                         }

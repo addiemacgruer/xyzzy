@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.ScrollView;
 
 public class ZScrollView extends ScrollView {
-    private static int       scrollSpeed  = 3;
+    static int               scrollSpeed  = 3;
     private final static int scrollUpdate = 10;
 
     static void updateScrollingSpeed() {
@@ -49,7 +49,7 @@ public class ZScrollView extends ScrollView {
                                     };
     boolean                running  = false;
 
-    public ZScrollView(final Context context) {
+    private ZScrollView(final Context context) {
         super(context);
         setOverScrollMode(View.OVER_SCROLL_ALWAYS);
     }
@@ -73,13 +73,5 @@ public class ZScrollView extends ScrollView {
             handler.postDelayed(runnable, scrollUpdate);
         }
         return 0;
-    }
-
-    public void smoothScrollToBottom() {
-        destinationY = this.getBottom();
-        if (!running) {
-            running = true;
-            handler.postDelayed(runnable, scrollUpdate);
-        }
     }
 }

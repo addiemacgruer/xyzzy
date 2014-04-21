@@ -19,6 +19,7 @@ import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 public class ZWindow implements Serializable {
@@ -57,9 +58,10 @@ public class ZWindow implements Serializable {
     }
 
     public static void printAllScreens() {
-        final int zwc = Memory.current().zwin.size();
+        final SparseArray<ZWindow> zwindows = Memory.current().zwin;
+        final int zwc = zwindows.size();
         for (int i = 0; i < zwc; i++) {
-            Memory.current().zwin.get(Memory.current().zwin.keyAt(i)).flush();
+            zwindows.get(zwindows.keyAt(i)).flush();
         }
     }
 
@@ -80,7 +82,7 @@ public class ZWindow implements Serializable {
         } else if (background2 == -1) {
             background = colours.get(1);
         }
-        Log.i("Xyzzy", "Set as:" + Integer.toHexString(foreground) + " :" + Integer.toHexString(background));
+        //        Log.i("Xyzzy", "Set as:" + Integer.toHexString(foreground) + " :" + Integer.toHexString(background));
         MainActivity.activity.setBackgroundColour(background);
     }
 
@@ -138,7 +140,7 @@ public class ZWindow implements Serializable {
         for (final TextStyle ts : currentTextStyle.keySet()) {
             final Integer start = currentTextStyle.get(ts);
             final int end = buffer.get(row).length();
-            Log.i("Xyzzy", "Window:" + windowCount + " -- Styling " + ts + " from " + start + " to " + end);
+            //            Log.i("Xyzzy", "Window:" + windowCount + " -- Styling " + ts + " from " + start + " to " + end);
             if (ts != TextStyle.REVERSE_VIDEO) {
                 buffer.get(row).setSpan(ts.characterStyle(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else if (start < end) {
@@ -171,30 +173,33 @@ public class ZWindow implements Serializable {
     }
 
     public void flush() {
+        //        Log.d("Xyzzy", "Flushing screen:" + windowCount);
         clearStyles();
         final SpannableStringBuilder ssb = new SpannableStringBuilder();
-        final int bufferlength = buffer.size();
-        for (int i = 0; i < bufferlength; i++) {
+        for (int i = 0, bufferlength = buffer.size(); i < bufferlength; i++) {
             if (i != 0) {
                 ssb.append('\n');
             }
             ssb.append(buffer.get(i));
         }
-        if (ssb.length() > 0) {
-            MainActivity.activity.addTextView(ssb, foreground, background, windowMap[windowCount]);
-        }
-        displayState = DisplayState.FLUSH_UNSETCURSOR;
-        if (windowCount > 0 && buffer.size() > naturalHeight) { // purge eg. quoteboxes at the end of each turn
+        if (windowCount > 0) {
+            reset();
+            this.column = this.row = 0;
+            displayState = DisplayState.FLUSH_SETCURSOR;
             while (buffer.size() > naturalHeight) {
                 buffer.remove(naturalHeight);
             }
+        } else {
+            displayState = DisplayState.FLUSH_UNSETCURSOR;
+        }
+        if (ssb.length() > 0) {
+            MainActivity.activity.addTextView(ssb, foreground, background, windowMap[windowCount]);
         }
     }
 
     public void println() {
-        //        clearStyles();
         row++;
-        buffer.add(new SpannableStringBuilder());
+        //        buffer.add(new SpannableStringBuilder());
         column = 0;
     }
 
@@ -232,12 +237,8 @@ public class ZWindow implements Serializable {
     }
 
     public void setCursor(final int column, final int line) {
-        //        Log.d("Xyzzy", "Window:" + windowCount + " setCursor " + column + "," + line);
         if (displayState == DisplayState.FLUSH_UNSETCURSOR) {
             displayState = DisplayState.FLUSH_SETCURSOR;
-        }
-        if (column < this.column) {
-            reset();
         }
         // games will occasionally request negative indexes, especially if the screen is too narrow
         this.column = Math.max(column, 1) - 1;

@@ -12,7 +12,7 @@ import android.webkit.WebView;
 public class HtmlViewActivity extends Activity {
     private WebView mWebView;
 
-    void fillContent() {
+    private void fillContent() {
         Scanner ins;
         final StringBuilder output = new StringBuilder();
         try {

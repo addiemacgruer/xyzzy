@@ -13,10 +13,6 @@ import android.util.Log;
 class Xyzzy implements Runnable {
     private static String story;
 
-    static String story() {
-        return story;
-    }
-
     public Xyzzy(String story) {
         Xyzzy.story = story;
     }

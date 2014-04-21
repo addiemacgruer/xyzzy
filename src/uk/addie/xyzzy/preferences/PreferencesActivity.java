@@ -16,10 +16,10 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 public class PreferencesActivity extends Activity {
-    public int                        textSize     = 16;
-    public static PreferencesActivity activity;
-    private MenuItem[]                mis;
-    final Map<Preferences, View>      selectionMap = new HashMap<Preferences, View>();
+    int                                  textSize     = 16;
+    static PreferencesActivity           activity;
+    private MenuItem[]                   mis;
+    private final Map<Preferences, View> selectionMap = new HashMap<Preferences, View>();
 
     @Override protected void onCreate(final Bundle savedInstanceState) {
         activity = this;

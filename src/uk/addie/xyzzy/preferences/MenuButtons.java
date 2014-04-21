@@ -6,7 +6,7 @@ import uk.addie.xyzzy.htmlview.HtmlViewActivity;
 import uk.addie.xyzzy.interfaces.IMenuButton;
 import android.content.Intent;
 
-public enum MenuButtons implements IMenuButton {
+enum MenuButtons implements IMenuButton {
     ABOUT {
         @Override public void invoke() {
             final Intent intent = new Intent(PreferencesActivity.activity, HtmlViewActivity.class);

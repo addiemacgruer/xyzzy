@@ -25,7 +25,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class FileChooserActivity extends Activity implements ListAdapter, OnClickListener {
-    static File                         path      = Environment.getExternalStorageDirectory();
+    private static File                 path      = Environment.getExternalStorageDirectory();
     private List<String>                pathContents;
     private final List<DataSetObserver> observers = new ArrayList<DataSetObserver>();
     private int                         textSize;
@@ -134,7 +134,7 @@ public class FileChooserActivity extends Activity implements ListAdapter, OnClic
         observers.add(observer);
     }
 
-    TextView selectionPageTextView() {
+    private TextView selectionPageTextView() {
         final TextView tv = new TextView(this);
         tv.setTextSize(textSize * 2);
         tv.setPadding(textSize * 2, textSize * 2, textSize * 2, textSize * 2);
