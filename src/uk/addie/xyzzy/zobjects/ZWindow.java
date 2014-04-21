@@ -70,7 +70,6 @@ public class ZWindow implements Serializable {
     }
 
     public static void setTrueColour(final int foreground2, final int background2) {
-        Log.i("Xyzzy", "Set true colour:" + Integer.toHexString(foreground2) + " :" + Integer.toHexString(background2));
         if (foreground2 > 0) {
             foreground = amigaColourToAndroid(foreground2);
         } else if (foreground2 == -1) {
@@ -88,7 +87,7 @@ public class ZWindow implements Serializable {
     private transient List<SpannableStringBuilder> buffer           = new ArrayList<SpannableStringBuilder>();
     private final Map<TextStyle, Integer>          currentTextStyle = new EnumMap<TextStyle, Integer>(TextStyle.class);
     private DisplayState                           displayState     = DisplayState.EMPTY;
-    private int                                    naturalHeight    = 0;
+    private int                                    naturalHeight    = 1;
     private int                                    row, column;
     private final int                              windowCount;
 
@@ -97,7 +96,6 @@ public class ZWindow implements Serializable {
     }
 
     public void addStyle(final TextStyle ts) {
-        Log.i("Xyzzy", "Window:" + windowCount + " -- Styling " + ts + " from " + column);
         currentTextStyle.put(ts, column);
     }
 
@@ -133,7 +131,6 @@ public class ZWindow implements Serializable {
     }
 
     public void clearStyles() {
-        //        Log.d("Xyzzy", "clearStyles:" + windowCount);
         if (row >= buffer.size()) {
             currentTextStyle.clear();
             return;
@@ -231,11 +228,11 @@ public class ZWindow implements Serializable {
     }
 
     public void setBuffered(final boolean buffered) {
-        Log.i("Xyzzy", "Set buffered:" + this + "=" + buffered);
+        //        Log.i("Xyzzy", "Set buffered:" + this + "=" + buffered);
     }
 
     public void setCursor(final int column, final int line) {
-        Log.d("Xyzzy", "Window:" + windowCount + " setCursor " + column + "," + line);
+        //        Log.d("Xyzzy", "Window:" + windowCount + " setCursor " + column + "," + line);
         if (displayState == DisplayState.FLUSH_UNSETCURSOR) {
             displayState = DisplayState.FLUSH_SETCURSOR;
         }

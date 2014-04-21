@@ -13,6 +13,7 @@ import java.util.EmptyStackException;
 import java.util.Locale;
 
 import uk.addie.xyzzy.MainActivity;
+import uk.addie.xyzzy.SaveChooserActivity;
 import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.interfaces.IInvokeable;
@@ -31,7 +32,9 @@ import uk.addie.xyzzy.zobjects.ZProperty;
 import uk.addie.xyzzy.zobjects.ZText;
 import uk.addie.xyzzy.zobjects.ZWindow;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Point;
+import android.text.format.Time;
 import android.util.Log;
 
 @SuppressWarnings({ "unused" }) public enum Opcode {
@@ -151,9 +154,9 @@ import android.util.Log;
     },
     COPY_TABLE(3, 0x1d) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final short first = arguments.get(0);
-            final short second = arguments.get(1);
-            final short size = arguments.get(2);
+            final int first = arguments.get(0) & 0xffff;
+            final int second = arguments.get(1) & 0xffff;
+            final short size = arguments.get(2); // signed;
             final int length = Math.abs(size);
             if (second == 0) { // zero first
                 for (int i = 0; i < length; i++) {
@@ -886,7 +889,8 @@ import android.util.Log;
         @Override public void invoke(final ZStack<Short> arguments) {
             Memory loaded = null;
             try {
-                final FileInputStream save = MainActivity.activity.openFileInput(saveGameName());
+                final String getSaveGame = selectSaveGame();
+                final FileInputStream save = MainActivity.activity.openFileInput(getSaveGame);
                 final ObjectInputStream ois = new ObjectInputStream(save);
                 loaded = (Memory) ois.readObject();
                 ois.close();
@@ -953,8 +957,11 @@ import android.util.Log;
     SAVE(4, 0x0) {
         @Override public void invoke(final ZStack<Short> arguments) {
             try {
-                final FileOutputStream save = MainActivity.activity
-                        .openFileOutput(saveGameName(), Context.MODE_PRIVATE);
+                String saveGameName = saveGameName();
+                Time now = new Time();
+                now.setToNow();
+                saveGameName = saveGameName + now.format("%H.%M on %d %B %y");
+                final FileOutputStream save = MainActivity.activity.openFileOutput(saveGameName, Context.MODE_PRIVATE);
                 final ObjectOutputStream oos = new ObjectOutputStream(save);
                 oos.writeObject(Memory.current());
                 oos.close();
@@ -1140,7 +1147,6 @@ import android.util.Log;
             } else {
                 //TODO show-status
                 final int flags = Header.CONFIG.value();
-                Log.d("Xyzzy", "Header flags:" + Integer.toBinaryString(flags));
                 boolean scoreGame = Header.VERSION.value() < 2 || !Bit.bit1(flags);
                 StringBuilder sb = new StringBuilder();
                 int firstGlobal = readValue(16);
@@ -1412,7 +1418,7 @@ import android.util.Log;
     static String saveGameName() {
         final File story = new File(Memory.current().storyPath);
         final String namepart = story.getName();
-        return namepart + ".save";
+        return namepart;
     }
 
     public static void storeValue(final int destination, final int value) {
@@ -1445,6 +1451,20 @@ import android.util.Log;
     }
 
     abstract public void invoke(ZStack<Short> arguments);
+
+    protected String selectSaveGame() {
+        SaveChooserActivity.gameName = saveGameName();
+        final Intent intent = new Intent(MainActivity.activity, SaveChooserActivity.class);
+        MainActivity.activity.startActivity(intent);
+        synchronized (SaveChooserActivity.syncObject) {
+            try {
+                SaveChooserActivity.syncObject.wait();
+            } catch (InterruptedException e) {
+                Log.e("Xyzzy", "Opcode.selectSaveGame interrupted", e);
+            }
+            return SaveChooserActivity.syncObject.toString();
+        }
+    }
 
     @Override public String toString() {
         return "(" + operands + "," + Integer.toHexString(hex) + ") " + super.toString().toLowerCase(Locale.UK);

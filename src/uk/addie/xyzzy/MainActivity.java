@@ -99,7 +99,6 @@ public class MainActivity extends Activity {
 
     private static void startBackgroundLogicThread(final String message) {
         if (logicThread == null) {
-            Log.i("Xyzzy", "Starting new thread");
             logicThread = new Thread(new Xyzzy(message), "XyzzyInterpreter");
             logicThread.start();
         }
@@ -236,7 +235,6 @@ public class MainActivity extends Activity {
     }
 
     @SuppressLint("NewApi") @Override public boolean onCreateOptionsMenu(final Menu menu) {
-        Log.d("Control", "OCOM");
         mis = new MenuItem[MenuButtons.values().length];
         int i = 0;
         for (final MenuButtons mb : MenuButtons.values()) {

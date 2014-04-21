@@ -91,6 +91,9 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     }
 
     @Override public int getCount() {
+        if (selected > games.size()) {
+            selected = -1;
+        }
         return games.size() + (selected == -1 ? 0 : INTERSTITIALS);
     }
 
@@ -149,10 +152,11 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
                                 @Override public void onClick(final DialogInterface dialog, final int id) {
                                     final SharedPreferences.Editor sp = getSharedPreferences("XyzzyGames", 0).edit();
                                     sp.remove(games.get(selected));
+                                    selected = -1;
                                     sp.commit();
                                     regenerateData();
                                     for (final DataSetObserver dso : observer) {
-                                        dso.onChanged();
+                                        dso.onInvalidated();
                                     }
                                 }
                             }).setNegativeButton("No", null).show();
@@ -182,7 +186,6 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     }
 
     @Override protected void onCreate(final Bundle savedInstanceState) {
-        Log.d("Xyzzy", "SelectionActivity onCreate");
         super.onCreate(savedInstanceState);
         activity = this;
         setupGames();
@@ -192,13 +195,11 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     }
 
     @SuppressLint("NewApi") @Override public boolean onCreateOptionsMenu(final Menu menu) {
-        Log.d("Control", "OCOM");
         mis = new MenuItem[MenuButtons.values().length];
         int i = 0;
         for (final MenuButtons mb : MenuButtons.values()) {
             final MenuItem nextMenu = menu.add(mb.toString());
             if (mb.menuButtonIcon() != -1) {
-                Log.d("Xyzzy", "Menu icon:" + mb.menuButtonIcon());
                 nextMenu.setIcon(mb.menuButtonIcon());
                 nextMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             }
@@ -222,12 +223,11 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
         regenerateData();
         for (final DataSetObserver dso : observer) {
-            dso.onChanged();
+            dso.onInvalidated();
         }
     }
 
     void regenerateData() {
-        Log.d("Xyzzy", "Regenerating data");
         all.clear();
         games.clear();
         final SharedPreferences sp = getSharedPreferences("XyzzyGames", 0);
@@ -245,7 +245,6 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     }
 
     @Override public void registerDataSetObserver(final DataSetObserver dso) {
-        Log.d("Xyzzy", "Registering observer:" + dso);
         observer.add(dso);
     }
 

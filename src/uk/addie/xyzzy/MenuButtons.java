@@ -56,8 +56,8 @@ enum MenuButtons implements IMenuButton {
     LEAVE_GAME {
         @Override public void invoke() {
             new AlertDialog.Builder(MainActivity.activity)
-                    .setMessage("Are you sure you want to leave?  Progress will not be saved.").setCancelable(false)
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    .setMessage("Are you sure you want to leave?  Progress will not be saved automatically.")
+                    .setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override public void onClick(final DialogInterface dialog, final int id) {
                             final Intent intent = new Intent(MainActivity.activity, SelectionActivity.class);
                             MainActivity.activity.startActivity(intent);

@@ -44,16 +44,18 @@ public class ZStack<T> implements Serializable, Iterable<T> {
     }
 
     public T peek() {
-        if (last == null) {
+        if (last == null && size > 0) {
             last = list.get(size - 1);
         }
-        return last;
+        return last != null ? last : nullValue;
     }
 
     public T pop() {
         final T rval = peek();
         last = null;
-        list.remove(size - 1);
+        if (size > 1) {
+            list.remove(size - 1);
+        }
         size--;
         return rval;
     }
