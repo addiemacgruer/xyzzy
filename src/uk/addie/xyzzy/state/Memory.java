@@ -43,9 +43,9 @@ public class Memory implements Serializable {
         } else {
             textSize = FontWidth.widthOfString(MainActivity.activity, "MMMMMMMMMM");
         }
-        final int numberOfZeroes = (int) (width * 10. / textSize);
+        final int numberOfZeroes = (int) ((width * 10.) / textSize);
         final int columns = Math.min(numberOfZeroes, 254); // some games will complain if they're less than 80 columns, but it has to fit in a byte
-        Log.d("Xyzzy", "Screen width (columns):" + columns + " from " + width + "/" + numberOfZeroes);
+        Log.d("Xyzzy", "Screen width (columns):" + columns + " from " + width + "/" + textSize);
         return columns;
     }
 

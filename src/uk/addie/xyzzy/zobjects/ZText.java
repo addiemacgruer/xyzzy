@@ -100,9 +100,19 @@ public class ZText {
                 chars[position] = a0Value;
                 position++;
             } else {
-                chars[position++] = 5;
-                if (position < chars.length) {
-                    chars[position++] = zvalue(a2, character);
+                byte a2value = zvalue(a2, character);
+                if (a2value != 0) { // it's in A2
+                    chars[position++] = 5;
+                    if (position < chars.length) {
+                        chars[position++] = a2value;
+                    }
+                } else { // need to encode ASCII.  Not efficient.
+                    byte hifive = (byte) (character >> 5);
+                    byte lofive = (byte) (character & 31);
+                    tryInArray(position++, chars, (byte) 5);
+                    tryInArray(position++, chars, (byte) 6);
+                    tryInArray(position++, chars, hifive);
+                    tryInArray(position++, chars, lofive);
                 }
             }
             if (position >= chars.length) {
@@ -148,6 +158,13 @@ public class ZText {
             }
             offset++;
         }
+    }
+
+    private static void tryInArray(int i, byte[] chars, byte j) {
+        if (i > chars.length) {
+            return;
+        }
+        chars[i] = j;
     }
 
     public static String unencodedAtOffset(final int offset) {
