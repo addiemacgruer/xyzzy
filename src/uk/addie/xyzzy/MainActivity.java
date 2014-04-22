@@ -13,6 +13,7 @@ import uk.addie.xyzzy.zobjects.ZWindow;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
@@ -166,6 +167,11 @@ public class MainActivity extends Activity {
             @Override public void run() {
                 if (tv instanceof TextView) {
                     ((TextView) tv).setTextSize(textSize);
+                    if ((Boolean) Preferences.UPPER_SCREENS_ARE_MONOSPACED.getValue(MainActivity.this)) {
+                        if (viewId != R.id.screen0) {
+                            ((TextView) tv).setTypeface(Typeface.MONOSPACE);
+                        }
+                    }
                 }
                 final LinearLayout ll = (LinearLayout) MainActivity.activity.findViewById(viewId);
                 removeSurplusScrollback(ll);

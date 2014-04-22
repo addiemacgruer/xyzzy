@@ -82,7 +82,6 @@ public class ZWindow implements Serializable {
         } else if (background2 == -1) {
             background = colours.get(1);
         }
-        //        Log.i("Xyzzy", "Set as:" + Integer.toHexString(foreground) + " :" + Integer.toHexString(background));
         MainActivity.activity.setBackgroundColour(background);
     }
 
@@ -140,7 +139,6 @@ public class ZWindow implements Serializable {
         for (final TextStyle ts : currentTextStyle.keySet()) {
             final Integer start = currentTextStyle.get(ts);
             final int end = buffer.get(row).length();
-            //            Log.i("Xyzzy", "Window:" + windowCount + " -- Styling " + ts + " from " + start + " to " + end);
             if (ts != TextStyle.REVERSE_VIDEO) {
                 buffer.get(row).setSpan(ts.characterStyle(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else if (start < end) {
@@ -173,7 +171,6 @@ public class ZWindow implements Serializable {
     }
 
     public void flush() {
-        //        Log.d("Xyzzy", "Flushing screen:" + windowCount);
         clearStyles();
         final SpannableStringBuilder ssb = new SpannableStringBuilder();
         for (int i = 0, bufferlength = buffer.size(); i < bufferlength; i++) {
@@ -198,9 +195,10 @@ public class ZWindow implements Serializable {
     }
 
     public void println() {
+        List<TextStyle> stylesInEffect = storeStylesAndClear();
         row++;
-        //        buffer.add(new SpannableStringBuilder());
         column = 0;
+        restoreStyles(stylesInEffect);
     }
 
     public synchronized String promptForInput() {
@@ -232,6 +230,15 @@ public class ZWindow implements Serializable {
         MainActivity.activity.removeChildren(windowMap[windowCount]);
     }
 
+    private void restoreStyles(List<TextStyle> stylesInEffect) {
+        if (stylesInEffect == null) {
+            return;
+        }
+        for (TextStyle ts : stylesInEffect) {
+            addStyle(ts);
+        }
+    }
+
     /**
      * we buffer in all conditions to avoid large-size text from scrolling off the screen
      * 
@@ -245,13 +252,24 @@ public class ZWindow implements Serializable {
         if (displayState == DisplayState.FLUSH_UNSETCURSOR) {
             displayState = DisplayState.FLUSH_SETCURSOR;
         }
+        List<TextStyle> stylesInEffect = storeStylesAndClear();
         // games will occasionally request negative indexes, especially if the screen is too narrow
         this.column = Math.max(column, 1) - 1;
         row = Math.max(line, 1) - 1;
+        restoreStyles(stylesInEffect);
     }
 
     public void setNaturalHeight(final int lines) {
         naturalHeight = lines;
+    }
+
+    private List<TextStyle> storeStylesAndClear() {
+        List<TextStyle> stylesInEffect = null;
+        if (!currentTextStyle.isEmpty()) {
+            stylesInEffect = new ArrayList<TextStyle>(currentTextStyle.keySet());
+            clearStyles();
+        }
+        return stylesInEffect;
     }
 
     @Override public String toString() {

@@ -37,10 +37,15 @@ public class Memory implements Serializable {
 
     static int getScreenColumns() {
         final int width = MainActivity.width;
-        final int textSize = FontWidth.widthOfString("MMMMMMMMMM",
-                (Integer) Preferences.TEXT_SIZE.getValue(MainActivity.activity));
-        final int numberOfZeroes = width * 10 / textSize;
-        final int columns = Math.min(Math.max(numberOfZeroes, 80), 254); // some games will complain if they're less than 80 columns, but it has to fit in a byte
+        final double textSize;
+        if ((Boolean) Preferences.UPPER_SCREENS_ARE_MONOSPACED.getValue(MainActivity.activity)) {
+            textSize = FontWidth.widthOfMonospacedString(MainActivity.activity, "          ");
+        } else {
+            textSize = FontWidth.widthOfString(MainActivity.activity, "MMMMMMMMMM");
+        }
+        final int numberOfZeroes = (int) (width * 10. / textSize);
+        final int columns = Math.min(numberOfZeroes, 254); // some games will complain if they're less than 80 columns, but it has to fit in a byte
+        Log.d("Xyzzy", "Screen width (columns):" + columns + " from " + width + "/" + numberOfZeroes);
         return columns;
     }
 

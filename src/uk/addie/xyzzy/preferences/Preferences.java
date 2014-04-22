@@ -40,6 +40,11 @@ public enum Preferences {
             return "Enable colour";
         }
     },
+    UPPER_SCREENS_ARE_MONOSPACED(BOOLEAN) {
+        @Override Object defaultValue() {
+            return true;
+        }
+    },
     REPORT_MINOR(BOOLEAN) {
         @Override Object defaultValue() {
             return false;
