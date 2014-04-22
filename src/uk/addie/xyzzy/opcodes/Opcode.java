@@ -294,8 +294,7 @@ import android.util.Log;
         @Override public void invoke(final ZStack<Short> arguments) {
             final short object = arguments.get(0);
             final short property = arguments.get(1);
-            final ZObject zo = ZObject.count(object);
-            final ZProperty zp = new ZProperty(zo);
+            final ZProperty zp = ZObject.count(object).zProperty();
             final int value = zp.getNextProperty(property);
             readDestinationAndStoreResult((short) value);
         }
@@ -321,8 +320,7 @@ import android.util.Log;
                 readDestinationAndStoreResult(0);
                 return;
             }
-            final ZObject zo = ZObject.count(object);
-            final ZProperty zp = new ZProperty(zo);
+            final ZProperty zp = ZObject.count(object).zProperty();
             final int value = zp.getProperty(property);
             readDestinationAndStoreResult(value);
         }
@@ -336,7 +334,7 @@ import android.util.Log;
                 readDestinationAndStoreResult(0);
                 return;
             }
-            final ZProperty zp = new ZProperty(ZObject.count(object));
+            final ZProperty zp = ZObject.count(object).zProperty();
             int addr = zp.getPropertyAddress(property);
             if (addr != 0) {
                 if (Header.VERSION.value() >= 4 && (Memory.current().buff().get(addr) & 0x80) != 0) {
@@ -690,7 +688,7 @@ import android.util.Log;
             if (Debug.screen) {
                 Log.i("Xyzzy", "PRINT OBJECT: " + zo);
             }
-            Memory.streams().append(new ZProperty(zo).toString());
+            Memory.streams().append(zo.zProperty().toString());
         }
     },
     PRINT_PADDR(1, 0xd) {
@@ -762,8 +760,7 @@ import android.util.Log;
             final short object = arguments.get(0);
             final short property = arguments.get(1);
             final short value = arguments.get(2);
-            final ZObject zo = ZObject.count(object);
-            final ZProperty zp = new ZProperty(zo);
+            final ZProperty zp = ZObject.count(object).zProperty();
             zp.putProperty(property, value);
         }
     },
