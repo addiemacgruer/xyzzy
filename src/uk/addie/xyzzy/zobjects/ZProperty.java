@@ -8,26 +8,6 @@ import uk.addie.xyzzy.util.Bit;
 import android.util.Log;
 
 public class ZProperty {
-    public static int calcProplenSize(final int prop) {
-        if (prop == 0) {
-            return 0;
-        }
-        final int sn;
-        try {
-            sn = Memory.current().buff().get(prop);
-        } catch (final IndexOutOfBoundsException ioobe) {
-            Log.e("Xyzzy", "ZProperty.calcProplenSize:", ioobe);
-            return 0;
-        }
-        final int size;
-        if (Header.VERSION.value() >= 4) {
-            size = calculateV4Size(prop, sn);
-        } else {
-            size = calculateV3Size(prop, sn);
-        }
-        return size;
-    }
-
     private static int calcSize(final int prop) {
         final int sn = Memory.current().buff().get(prop) & 0xff;
         int size;
@@ -44,7 +24,7 @@ public class ZProperty {
         return size;
     }
 
-    private static int calculateV3Size(int prop, int sn) {
+    private static int calculateV3Size(int sn) {
         return (sn / 32) + 1;
     }
 
@@ -63,13 +43,77 @@ public class ZProperty {
         return size;
     }
 
+    public static int getPropLen(final int prop) {
+        if (prop == 0) {
+            return 0;
+        }
+        final int sn;
+        try {
+            sn = Memory.current().buff().get(prop);
+        } catch (final IndexOutOfBoundsException ioobe) {
+            Log.e("Xyzzy", "ZProperty.calcProplenSize:", ioobe);
+            return 0;
+        }
+        final int size;
+        if (Header.VERSION.value() >= 4) {
+            size = calculateV4Size(prop, sn);
+        } else {
+            size = calculateV3Size(sn);
+        }
+        return size;
+    }
+
+    private static void putV3property(final int value, final int prop) {
+        final int size = Memory.current().buffer.get(prop) / 32 + 1;
+        if (size == 2) {
+            Memory.current().buff().putShort(prop + 1, (short) value);
+        } else if (size == 1) {
+            Memory.current().buff().put(prop + 1, (byte) value);
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static void putV4property(final int value, final int prop) {
+        final int size = calcSize(prop);
+        if (size == 2) {
+            Memory.current().buff().putShort(prop + 1, (short) value);
+        } else if (size == 1) {
+            Memory.current().buff().put(prop + 1, (byte) value);
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static int returnV3property(final int prop) {
+        final int size = (Memory.current().buffer.get(prop) / 0x20) + 1;
+        if (size == 2) {
+            return Memory.current().buff().getShort(prop + 1);
+        } else if (size == 1) {
+            return Memory.current().buff().get(prop + 1);
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static int returnV4property(final int prop) {
+        final int size = calcSize(prop);
+        if (size == 2) {
+            return Memory.current().buff().getShort(prop + 1);
+        } else if (size == 1) {
+            return Memory.current().buff().get(prop + 1);
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     private final int offset;
 
     ZProperty(final int offset) {
         this.offset = offset;
     }
 
-    public ZProperty(final ZObject zo) {
+    ZProperty(final ZObject zo) {
         offset = zo.properties();
     }
 
@@ -82,24 +126,22 @@ public class ZProperty {
                 return sizeByte & 0x3f;
             }
             return sizeByte & 31;
-        } else {
-            propOffset = getPropertyAddress(property);
-            if (Header.VERSION.value() > 3) {
-                final int size;
-                size = calcSize(propOffset);
-                if (size <= 2) {
-                    propOffset += size + 1;
-                } else {
-                    propOffset += size + 2;
-                }
-                final int sizeByte = Memory.current().buff().get(propOffset);
-                return sizeByte & 0x3f;
-            } else {
-                final int sizeByte = Memory.current().buff().get(propOffset);
-                propOffset += (sizeByte / 32) + 2;
-                return Memory.current().buffer.get(propOffset) & 31;
-            }
         }
+        propOffset = getPropertyAddress(property);
+        if (Header.VERSION.value() > 3) {
+            final int size;
+            size = calcSize(propOffset);
+            if (size <= 2) {
+                propOffset += size + 1;
+            } else {
+                propOffset += size + 2;
+            }
+            final int sizeByte = Memory.current().buff().get(propOffset);
+            return sizeByte & 0x3f;
+        }
+        final int sizeByte = Memory.current().buff().get(propOffset);
+        propOffset += (sizeByte / 32) + 2;
+        return Memory.current().buffer.get(propOffset) & 31;
     }
 
     public int getProperty(final int number) {
@@ -155,52 +197,7 @@ public class ZProperty {
         }
     }
 
-    private void putV3property(final int value, final int prop) {
-        final int size = Memory.current().buffer.get(prop) / 32 + 1;
-        if (size == 2) {
-            Memory.current().buff().putShort(prop + 1, (short) value);
-        } else if (size == 1) {
-            Memory.current().buff().put(prop + 1, (byte) value);
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    private void putV4property(final int value, final int prop) {
-        final int size = calcSize(prop);
-        if (size == 2) {
-            Memory.current().buff().putShort(prop + 1, (short) value);
-        } else if (size == 1) {
-            Memory.current().buff().put(prop + 1, (byte) value);
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    private int returnV3property(final int prop) {
-        final int size = (Memory.current().buffer.get(prop) / 0x20) + 1;
-        if (size == 2) {
-            return Memory.current().buff().getShort(prop + 1);
-        } else if (size == 1) {
-            return Memory.current().buff().get(prop + 1);
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    private int returnV4property(final int prop) {
-        final int size = calcSize(prop);
-        if (size == 2) {
-            return Memory.current().buff().getShort(prop + 1);
-        } else if (size == 1) {
-            return Memory.current().buff().get(prop + 1);
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
     @Override public String toString() {
-        //        int length = (FastMem.CURRENT.zmp.get(offset) & 0xff) * 2;
         return ZText.encodedAtOffset(offset + 1);
     }
 }

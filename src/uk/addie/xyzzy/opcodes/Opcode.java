@@ -348,12 +348,12 @@ import android.util.Log;
     },
     GET_PROP_LEN(1, 0x4) {
         @Override public void invoke(final ZStack<Short> arguments) {
-            final short propertyAddress = (short) (arguments.get(0) - 1);
+            final int propertyAddress = (arguments.get(0) - 1);
             if (propertyAddress == -1) {
                 readDestinationAndStoreResult(0);
                 return;
             }
-            final short value = (short) ZProperty.calcProplenSize(propertyAddress & 0xffff);
+            final int value = ZProperty.getPropLen(propertyAddress & 0xffff);
             readDestinationAndStoreResult(value);
         }
     },

@@ -232,8 +232,13 @@ public class ZWindow implements Serializable {
         MainActivity.activity.removeChildren(windowMap[windowCount]);
     }
 
+    /**
+     * we buffer in all conditions to avoid large-size text from scrolling off the screen
+     * 
+     * @param buffered
+     */
     public void setBuffered(final boolean buffered) {
-        //        Log.i("Xyzzy", "Set buffered:" + this + "=" + buffered);
+        // NO-OP
     }
 
     public void setCursor(final int column, final int line) {

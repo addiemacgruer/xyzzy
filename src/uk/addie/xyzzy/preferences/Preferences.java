@@ -113,11 +113,11 @@ public enum Preferences {
         return type.getValue(activity, toString(), defaultValue());
     }
 
-    int max() {
+    @SuppressWarnings("static-method") int max() {
         return 100;
     }
 
-    int min() {
+    @SuppressWarnings("static-method") int min() {
         return 0;
     }
 
