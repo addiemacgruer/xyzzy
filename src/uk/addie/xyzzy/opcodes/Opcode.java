@@ -1187,9 +1187,9 @@ import android.util.Log;
                 return;
             }
             final short number = arguments.get(0);
-            final short effect = arguments.get(1);
-            final short volume = arguments.get(2);
-            final short routine = arguments.get(3);
+            //            final short effect = arguments.get(1);
+            //            final short volume = arguments.get(2);
+            //            final short routine = arguments.get(3);
             // TODO sound_effect
             if (number == 1) {
                 Beep.beep1.playSound();

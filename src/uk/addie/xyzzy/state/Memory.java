@@ -16,6 +16,7 @@ import uk.addie.xyzzy.header.InterpreterType;
 import uk.addie.xyzzy.opcodes.OpMap;
 import uk.addie.xyzzy.preferences.Preferences;
 import uk.addie.xyzzy.util.Bit;
+import uk.addie.xyzzy.util.FontWidth;
 import uk.addie.xyzzy.zmachine.CallStack;
 import uk.addie.xyzzy.zmachine.ZStack;
 import uk.addie.xyzzy.zmachine.ZStream;
@@ -32,6 +33,15 @@ public class Memory implements Serializable {
 
     public static Memory current() {
         return CURRENT;
+    }
+
+    static int getScreenColumns() {
+        final int width = MainActivity.width;
+        final int textSize = FontWidth.widthOfString("MMMMMMMMMM",
+                (Integer) Preferences.TEXT_SIZE.getValue(MainActivity.activity));
+        final int numberOfZeroes = width * 10 / textSize;
+        final int columns = Math.min(Math.max(numberOfZeroes, 80), 254); // some games will complain if they're less than 80 columns, but it has to fit in a byte
+        return columns;
     }
 
     public static void loadDataFromFile() {
@@ -53,9 +63,7 @@ public class Memory implements Serializable {
         config |= InterpreterFlag1.CONFIG_FIXED;
         config |= InterpreterFlag1.CONFIG_TIMEDINPUT; // we don't, it's exceptionally annoying
         Header.CONFIG.put(config);
-        final int width = MainActivity.width;
-        final int textSize = (Integer) Preferences.TEXT_SIZE.getValue(MainActivity.activity);
-        final int columns = Math.max(width / textSize, 80); // some games will complain if they're less than 80 columns
+        final int columns = getScreenColumns();
         Header.SCREEN_WIDTH.put(columns);
         Header.SCREEN_HEIGHT.put(24); // a lie, but to try and prevent too much buffering required
         Header.SCREEN_COLS.put(columns);

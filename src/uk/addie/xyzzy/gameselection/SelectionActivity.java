@@ -179,7 +179,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     @Override protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = this;
-        setupGames();
+        regenerateData();
         setContentView(R.layout.selector);
         final ListView lv = (ListView) findViewById(R.id.selector);
         lv.setAdapter(this);
@@ -222,7 +222,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         all.clear();
         games.clear();
         final SharedPreferences sp = getSharedPreferences("XyzzyGames", 0);
-        //        all.put("Czech", "@czech.z5");
+        all.put("Curses", "@curses.z5");
         final Map<String, ?> stored = sp.getAll();
         for (final String s : stored.keySet()) {
             all.put(s, sp.getString(s, ""));
@@ -244,10 +244,6 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         tv.setTextSize(textSize * 2);
         tv.setPadding(textSize * 2, textSize * 2, textSize * 2, textSize * 2);
         return tv;
-    }
-
-    private void setupGames() {
-        regenerateData();
     }
 
     void showFileChooser() {
