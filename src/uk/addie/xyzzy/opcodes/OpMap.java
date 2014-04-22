@@ -2,9 +2,7 @@
 package uk.addie.xyzzy.opcodes;
 
 import uk.addie.xyzzy.error.Error;
-import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
-import uk.addie.xyzzy.zmachine.Decoder;
 import uk.addie.xyzzy.zmachine.ZStack;
 import android.util.Log;
 
@@ -41,9 +39,6 @@ public class OpMap {
                             + Integer.toHexString(Memory.current().callStack.peek().programCounter()));
             Error.ILL_OPCODE.invoke();
             return;
-        }
-        if (Debug.opcodes) {
-            Log.i("Xyzzy", z + " " + Decoder.arguments());
         }
         z.invoke(arguments);
     }

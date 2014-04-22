@@ -8,7 +8,6 @@ import java.util.Map;
 import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.interfaces.IInvokeable;
-import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
 import android.util.Log;
 
@@ -48,7 +47,7 @@ public class CallStack implements Serializable {
     private final int               localsCount;
     private int                     programCounter;
     private final Map<Short, Short> register = new HashMap<Short, Short>();
-    private final IInvokeable        returnFunction;
+    private final IInvokeable       returnFunction;
     private final ZStack<Short>     stack    = new ZStack<Short>((short) 0);
 
     public CallStack() {
@@ -61,18 +60,15 @@ public class CallStack implements Serializable {
         this.setProgramCounter(programCounter);
         this.calledWithCount = calledWithCount;
         this.returnFunction = returnFunction;
-        localsCount = calculateLocalsCount(programCounter);
+        localsCount = calculateLocalsCount();
     }
 
     public void adjustProgramCounter(final int offset) {
         programCounter += offset;
     }
 
-    private int calculateLocalsCount(final int rpos) {
+    private int calculateLocalsCount() {
         final int count = getProgramByte();
-        if (Debug.callstack) {
-            Log.i("Xyzzy", "--> 0x" + Integer.toHexString(rpos) + ", " + count + " locals.");
-        }
         if (count > 15) {
             Error.CALL_NON_RTN.invoke();
         }

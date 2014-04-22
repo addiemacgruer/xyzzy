@@ -17,7 +17,6 @@ import uk.addie.xyzzy.SaveChooserActivity;
 import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.interfaces.IInvokeable;
-import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.preferences.Preferences;
 import uk.addie.xyzzy.state.Memory;
 import uk.addie.xyzzy.util.Bit;
@@ -72,7 +71,7 @@ import android.util.Log;
         @Override public void invoke(final ZStack<Short> arguments) {
             final short flag = arguments.get(0);
             Memory.streams().setBuffered(flag == 1);
-            if (Debug.screen) {
+            if (false) {
                 Log.i("Xyzzy", "BUFFER MODE: " + (flag == 1 ? "ON" : "OFF"));
             }
         }
@@ -249,19 +248,19 @@ import android.util.Log;
             final int window = arguments.get(0);
             switch (window) {
             case -2:
-                if (Debug.screen) {
+                if (false) {
                     Log.i("Xyzzy", "CLEARS ALL WINDOWS");
                 }
                 ZWindow.printAllScreens();
                 break;
             case -1:
-                if (Debug.screen) {
+                if (false) {
                     Log.i("Xyzzy", "UNSPLIT SCREEN AND ERASE ALL");
                 }
                 Memory.current().resetZWindows();
                 break;
             default:
-                if (Debug.screen) {
+                if (false) {
                     Log.i("Xyzzy", "CLEAR SCREEN: " + window);
                 }
                 Memory.current().zwin.get(window).flush();
@@ -407,13 +406,13 @@ import android.util.Log;
             final short destination = arguments.get(1);
             final ZObject zo = ZObject.count(object);
             final ZObject zd = ZObject.count(destination);
-            if (Debug.moves) {
+            if (false) {
                 Log.i("Xyzzy", "Moving " + zo + " to " + zd);
             }
             // if the destination parent already has a child, make a note of it.
             final int newSibling = zd.child();
             if (newSibling == object) { //moving an object to where it already is
-                if (Debug.moves) {
+                if (false) {
                     Log.i("Xyzzy", "...but it was already there");
                 }
                 return;
@@ -424,7 +423,7 @@ import android.util.Log;
             if (newSibling != zo.sibling()) {
                 zo.setSibling(newSibling);
             }
-            if (Debug.moves) {
+            if (false) {
                 Log.i("Xyzzy", "Objects now " + zo + " / " + zd);
             }
         }
@@ -685,7 +684,7 @@ import android.util.Log;
                 return;
             }
             final ZObject zo = ZObject.count(object);
-            if (Debug.screen) {
+            if (false) {
                 Log.i("Xyzzy", "PRINT OBJECT: " + zo);
             }
             Memory.streams().append(zo.zProperty().toString());
@@ -1034,7 +1033,7 @@ import android.util.Log;
             final short foreground = arguments.get(0);
             final short background = arguments.get(1);
             ZWindow.setColour(foreground, background);
-            if (Debug.screen) {
+            if (false) {
                 Log.w("Xyzzy", "set_colour " + foreground + " " + background);
             }
         }
@@ -1046,7 +1045,7 @@ import android.util.Log;
             if (arguments.size() >= 2) {
                 column = arguments.get(1);
             }
-            if (Debug.screen) {
+            if (false) {
                 Log.i("Xyzzy", "SET CURSOR: " + line + ", " + column);
             }
             Memory.streams().setCursor(column, line);
@@ -1072,37 +1071,37 @@ import android.util.Log;
             //            if (!Debug.screen) {
             //                return;
             //            }
-            if (Debug.screen) {
+            if (false) {
                 Log.i("Xyzzy", "SET TEXT STYLE: ");
             }
             switch (style) {
             case 0:
             default:
-                if (Debug.screen) {
+                if (false) {
                     Log.i("Xyzzy", "ROMAN");
                 }
                 Memory.streams().clearStyles();
                 break;
             case 1:
-                if (Debug.screen) {
+                if (false) {
                     Log.i("Xyzzy", "REVERSE VIDEO");
                 }
                 Memory.streams().addStyle(TextStyle.REVERSE_VIDEO);
                 break;
             case 2:
-                if (Debug.screen) {
+                if (false) {
                     Log.i("Xyzzy", "BOLD");
                 }
                 Memory.streams().addStyle(TextStyle.BOLD);
                 break;
             case 4:
-                if (Debug.screen) {
+                if (false) {
                     Log.i("Xyzzy", "ITALIC");
                 }
                 Memory.streams().addStyle(TextStyle.ITALIC);
                 break;
             case 8:
-                if (Debug.screen) {
+                if (false) {
                     Log.i("Xyzzy", "FIXED PITCH");
                 }
                 Memory.streams().addStyle(TextStyle.FIXED_PITCH);
@@ -1118,7 +1117,7 @@ import android.util.Log;
             final short foreground = arguments.get(0);
             final short background = arguments.get(1);
             ZWindow.setTrueColour(foreground, background);
-            if (Debug.screen) {
+            if (false) {
                 Log.w("Xyzzy", "set_true_colour " + foreground + " " + background);
             }
         }
@@ -1126,7 +1125,7 @@ import android.util.Log;
     SET_WINDOW(3, 0xb) {
         @Override public void invoke(final ZStack<Short> arguments) {
             final short window = arguments.get(0);
-            if (Debug.screen) {
+            if (false) {
                 Log.i("Xyzzy", "SET WINDOW: " + arguments.get(0));
             }
             Memory.current().currentScreen = window;
@@ -1200,7 +1199,7 @@ import android.util.Log;
     SPLIT_WINDOW(3, 0xa) {
         @Override public void invoke(final ZStack<Short> arguments) {
             final short lines = arguments.get(0);
-            if (Debug.screen) {
+            if (false) {
                 Log.i("Xyzzy", "SPLIT WINDOW: " + lines + " LINES (CURRENT:" + Memory.streams() + ")");
             }
             final int splitScreen = Memory.current().currentScreen + 1;
@@ -1405,7 +1404,7 @@ import android.util.Log;
         Memory.current().callStack.pop();
         Memory.current().callStack.peek().push(value);
         i.invoke();
-        if (Debug.callstack) {
+        if (false) {
             Log.i("Xyzzy", "<--");
         }
     }
@@ -1432,7 +1431,7 @@ import android.util.Log;
 
     public static void storeValue(final int destination, final int value) {
         final int ldestination = destination & 0xff;
-        if (Debug.stores) {
+        if (false) {
             Log.i("Xyzzy", "->" + ldestination + "=" + (value & 0xffff));
         }
         if (ldestination == 0) {

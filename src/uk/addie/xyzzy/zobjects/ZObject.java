@@ -6,7 +6,6 @@ import java.util.Set;
 
 import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.header.Header;
-import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
 import android.util.Log;
 import android.util.SparseArray;
@@ -46,9 +45,6 @@ abstract public class ZObject {
     }
 
     public static void detachFromTree(final short object) {
-        if (Debug.moves) {
-            Log.i("Xyzzy", "Detaching " + count(object) + " from tree");
-        }
         final ZObject zo = count(object);
         // detach from the existing tree
         final int oldSibling = zo.sibling();
@@ -163,9 +159,6 @@ abstract public class ZObject {
         }
         clearFromReverseMap(reverseChildren, count, child());
         addToReverseMap(reverseChildren, count, object);
-        if (Debug.moves) {
-            Log.i("Xyzzy", count + " new child is " + object);
-        }
     }
 
     public void setParent(final int object) {
@@ -174,9 +167,6 @@ abstract public class ZObject {
         }
         clearFromReverseMap(reverseParents, count, parent());
         addToReverseMap(reverseParents, count, object);
-        if (Debug.moves) {
-            Log.i("Xyzzy", count + " new parent is " + object);
-        }
     }
 
     public void setSibling(final int object) {
@@ -185,9 +175,6 @@ abstract public class ZObject {
         }
         clearFromReverseMap(reverseSiblings, count, sibling());
         addToReverseMap(reverseSiblings, count, object);
-        if (Debug.moves) {
-            Log.i("Xyzzy", count + " new sibling is " + object);
-        }
     }
 
     abstract public int sibling();

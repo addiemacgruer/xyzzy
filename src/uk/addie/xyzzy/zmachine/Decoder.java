@@ -7,7 +7,6 @@ import java.io.PrintWriter;
 import uk.addie.xyzzy.error.XyzzyException;
 import uk.addie.xyzzy.opcodes.OpMap;
 import uk.addie.xyzzy.opcodes.Opcode;
-import uk.addie.xyzzy.os.Debug;
 import uk.addie.xyzzy.state.Memory;
 import uk.addie.xyzzy.util.Bit;
 import uk.addie.xyzzy.zobjects.ZWindow;
@@ -16,7 +15,6 @@ import android.util.Log;
 public class Decoder {
     private static final ZStack<Short> arguments = new ZStack<Short>((short) 0);
     private static boolean             finished  = false;
-    private static int                 opcount   = 1;
 
     public static ZStack<Short> arguments() {
         return arguments;
@@ -26,18 +24,8 @@ public class Decoder {
         finished = false;
         do {
             final CallStack callStack = Memory.current().callStack.peek();
-            if (Debug.stack) {
-                Log.i("Xyzzy", callStack.toString());
-            }
-            if (Debug.opcodes) {
-                Log.i("Xyzzy", opcount + ": " + Integer.toHexString(callStack.programCounter()) + ": ");
-            }
             arguments.clear();
             final int opcode = callStack.getProgramByte();
-            if (Debug.copcodes) {
-                printCOpcode(opcode);
-            }
-            opcount++;
             try {
                 interpretOpcode(opcode);
             } catch (final XyzzyException xe) { //oops
@@ -130,18 +118,6 @@ public class Decoder {
 
     private static void load_operand(final int type) {
         int value;
-        if (Debug.stores) {
-            switch (type) {
-            case 0:
-                Log.i("Xyzzy", "..large:");
-                break;
-            case 1:
-                Log.i("Xyzzy", "..small:");
-                break;
-            default:
-                break;
-            }
-        }
         final CallStack callStack = Memory.current().callStack.peek();
         switch (type) {
         case 0: // large constant
@@ -153,15 +129,6 @@ public class Decoder {
             break;
         case 2: // variable
             final int variable = callStack.getProgramByte();
-            if (Debug.stores) {
-                if (variable == 0) {
-                    Log.i("Xyzzy", "..stack:");
-                } else if (variable < 16) {
-                    Log.i("Xyzzy", "..local:" + variable + ":");
-                } else {
-                    Log.i("Xyzzy", "..global:" + variable + ":");
-                }
-            }
             value = Opcode.readValue(variable) & 0xffff;
             break;
         case 3: // omitted
@@ -169,9 +136,6 @@ public class Decoder {
         default:
             Log.e("Xyzzy", "Illegal operand type");
             return;
-        }
-        if (Debug.stores) {
-            Log.i("Xyzzy", "value: " + value);
         }
         arguments.add(Short.valueOf((short) value));
     }
@@ -181,24 +145,6 @@ public class Decoder {
         load_operand((varSpecByte & 0x30) >> 4);
         load_operand((varSpecByte & 0x0c) >> 2);
         load_operand((varSpecByte & 0x03) >> 0);
-    }
-
-    private static void printCOpcode(final int opcode) {
-        Log.i("Xyzzy", opcount + " @" + Integer.toHexString(Memory.current().callStack.peek().programCounter() - 1)
-                + ":(");
-        if (Bit.bit7(opcode) && Bit.bit6(opcode)) { //var, 0b11xxxxxx
-            Log.i("Xyzzy", "3," + Integer.toHexString(opcode & 0x3f) + "):");
-        } else if (opcode == 0xbe) { // extended
-            Log.i("Xyzzy", "extended)");
-        } else if (Bit.bit7(opcode)) { // short, 0b10xxxxxx
-            if ((opcode & 0x30) == 0x30) {
-                Log.i("Xyzzy", "0," + Integer.toHexString(opcode & 0xf) + "):");
-            } else {
-                Log.i("Xyzzy", "1," + Integer.toHexString(opcode & 0xf) + "):");
-            }
-        } else { // long
-            Log.i("Xyzzy", "2," + Integer.toHexString(opcode & 0x1f) + "):");
-        }
     }
 
     public static void terminate() {
