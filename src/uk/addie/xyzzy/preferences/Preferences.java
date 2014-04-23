@@ -44,6 +44,10 @@ public enum Preferences {
         @Override Object defaultValue() {
             return true;
         }
+
+        @Override String prefDescription() {
+            return "Upper screens are monospaced";
+        }
     },
     REPORT_MINOR(BOOLEAN) {
         @Override Object defaultValue() {

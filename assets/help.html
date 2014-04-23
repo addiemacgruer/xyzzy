@@ -3,6 +3,7 @@
 <style>
 body {text-align: justify}
 span.opcode {color: purple;}
+span.mono {font-family: monospace;}
 </style>
 <body>
 <h1>Xyzzy</h1>
@@ -73,6 +74,11 @@ These usually provide feedback on scoring or unrecognised input.
 
 <li><p><strong>Enable colour</strong> Most colour games (<em>eg.</em> Adam Cadre's works) are polite enough to ask before you start,
 but it's possible to disable colour entirely, here.
+
+<li><p><strong>Upper screens are monospaced</strong> A lot of games expect the upper screens to be in a <span class="mono">monospaced
+font</span>, especially for
+printing status lines and quoteboxes, which can appear quite ugly otherwise.  Unfortunately, most of them don't specify the
+monospaced font when they start drawing it.  This forces <span class="mono">monospace</span> on for the top windows, regardless of what's chosen.
 
 <li><p><strong>Report minor errors in story files</strong> A number of non-fatal errors can be present in story files, which can
 usually be ignored without affecting play.  Usually only useful for story authors while debugging.

@@ -46,6 +46,13 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
     final List<DataSetObserver> observer = new ArrayList<DataSetObserver>();
     private int                 textSize;
 
+    private void addBuiltinResources() {
+        String[] s = getResources().getStringArray(R.array.builtins);
+        for (int i = 0; i < s.length; i += 2) {
+            all.put(s[i], s[i + 1]);
+        }
+    }
+
     @Override public boolean areAllItemsEnabled() {
         return true;
     }
@@ -222,7 +229,7 @@ public class SelectionActivity extends Activity implements ListAdapter { // NO_U
         all.clear();
         games.clear();
         final SharedPreferences sp = getSharedPreferences("XyzzyGames", 0);
-        all.put("Curses", "@curses.z5");
+        addBuiltinResources();
         final Map<String, ?> stored = sp.getAll();
         for (final String s : stored.keySet()) {
             all.put(s, sp.getString(s, ""));
