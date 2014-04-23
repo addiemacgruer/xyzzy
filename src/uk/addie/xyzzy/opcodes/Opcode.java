@@ -898,6 +898,7 @@ import android.util.Log;
                 readDestinationAndStoreResult(0);
             } else {
                 Memory.setCurrent(loaded);
+                Memory.setScreenColumns();
                 ZObject.enumerateObjects();
                 readDestinationAndStoreResult(2);
             }

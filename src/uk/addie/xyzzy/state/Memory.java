@@ -35,20 +35,6 @@ public class Memory implements Serializable {
         return CURRENT;
     }
 
-    static int getScreenColumns() {
-        final int width = MainActivity.width;
-        final double textSize;
-        if ((Boolean) Preferences.UPPER_SCREENS_ARE_MONOSPACED.getValue(MainActivity.activity)) {
-            textSize = FontWidth.widthOfMonospacedString(MainActivity.activity, "          ");
-        } else {
-            textSize = FontWidth.widthOfString(MainActivity.activity, "MMMMMMMMMM");
-        }
-        final int numberOfZeroes = (int) ((width * 10.) / textSize);
-        final int columns = Math.min(numberOfZeroes, 254); // some games will complain if they're less than 80 columns, but it has to fit in a byte
-        Log.d("Xyzzy", "Screen width (columns):" + columns + " from " + width + "/" + textSize);
-        return columns;
-    }
-
     public static void loadDataFromFile() {
         CURRENT.buffer = new FileBuffer(Memory.CURRENT.storyPath);
         if (Header.VERSION.value() < 1 || Header.VERSION.value() > 8) {
@@ -68,11 +54,7 @@ public class Memory implements Serializable {
         config |= InterpreterFlag1.CONFIG_FIXED;
         config |= InterpreterFlag1.CONFIG_TIMEDINPUT; // we don't, it's exceptionally annoying
         Header.CONFIG.put(config);
-        final int columns = getScreenColumns();
-        Header.SCREEN_WIDTH.put(columns);
-        Header.SCREEN_HEIGHT.put(24); // a lie, but to try and prevent too much buffering required
-        Header.SCREEN_COLS.put(columns);
-        Header.SCREEN_ROWS.put(24);
+        setScreenColumns();
         Header.FONT_WIDTH.put(1);
         Header.FONT_HEIGHT.put(1);
         Header.INTERPRETER_NUMBER.put(InterpreterType.DEC_20);
@@ -88,6 +70,24 @@ public class Memory implements Serializable {
 
     public static void setCurrent(final Memory cURRENT) {
         CURRENT = cURRENT;
+    }
+
+    public static void setScreenColumns() {
+        final int width = MainActivity.width;
+        final double textSize;
+        if ((Boolean) Preferences.UPPER_SCREENS_ARE_MONOSPACED.getValue(MainActivity.activity)) {
+            textSize = FontWidth.widthOfMonospacedString(MainActivity.activity, "          ");
+        } else {
+            textSize = FontWidth.widthOfString(MainActivity.activity, "MMMMMMMMMM");
+        }
+        final int numberOfZeroes = (int) ((width * 10.) / textSize);
+        final int columns = Math.min(numberOfZeroes, 0xff); // some games will complain if they're less than 80 columns, but it has to fit in a byte
+        final int rows = 24;
+        Log.d("Xyzzy", "Screen set to " + columns + "×" + rows);
+        Header.SCREEN_WIDTH.put(columns);
+        Header.SCREEN_HEIGHT.put(rows); // a lie, but to try and prevent too much buffering required
+        Header.SCREEN_COLS.put(columns);
+        Header.SCREEN_ROWS.put(rows);
     }
 
     public static void storeUndo(final byte[] uNDO) {
