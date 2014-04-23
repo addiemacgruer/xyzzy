@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +28,25 @@ import android.util.Log;
         this.storyPath = storyPath;
         loadUpFile(storyPath);
         staticMemory = Header.DYNAMIC_SIZE.value(this);
+    }
+
+    private int byteInt(byte[] array, int start, int length) {
+        int rval = 0;
+        for (int i = start; i < start + length; i++) {
+            rval <<= 8;
+            final int byteAtI = array[i] & 0xff;
+            rval += byteAtI;
+        }
+        return rval;
+    }
+
+    private String byteText(byte[] array, int start, int length) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = start; i < start + length; i++) {
+            sb.append((char) zmp[i]);
+        }
+        Log.d("Xyzzy", "byteText:" + sb.toString());
+        return sb.toString();
     }
 
     int capacity() {
@@ -64,7 +84,44 @@ import android.util.Log;
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
+        if (byteText(zmp, 0, 4).equals("FORM")) { // then it's a zblorb
+            Log.i("Xyzzy", "Blorb file");
+            performBlorbCrop();
+        }
         changed = new boolean[zmp.length];
+    }
+
+    private void performBlorbCrop() {
+        int offset = 0;
+        long fileSize = byteInt(zmp, offset += 4, 4);
+        if (!byteText(zmp, offset += 4, 4).equals("IFRS")) {
+            throw new UnsupportedOperationException("Not a zblorb file");
+        }
+        if (!byteText(zmp, offset += 4, 4).equals("RIdx")) {
+            throw new UnsupportedOperationException("Missing zblorb resource index");
+        }
+        int rIdxLength = byteInt(zmp, offset += 4, 4);
+        int numResources = byteInt(zmp, offset += 4, 4);
+        int execOffset = 0;
+        for (int i = 0; i < numResources; i++) {
+            String resourceName = byteText(zmp, offset += 4, 4);
+            int resourceNumber = byteInt(zmp, offset += 4, 4);
+            int resourceOffset = byteInt(zmp, offset += 4, 4);
+            Log.d("Xyzzy", "Zblorb resource:" + resourceName + "," + resourceNumber + "," + resourceOffset);
+            if (resourceName.equals("Exec")) {
+                execOffset = resourceOffset;
+            }
+        }
+        if (execOffset == 0) {
+            throw new IllegalArgumentException("No Exec resource in ZBlorb");
+        }
+        String execType = byteText(zmp, execOffset, 4);
+        if (!execType.equals("ZCOD")) {
+            throw new IllegalArgumentException("EXEC type is not ZCOD");
+        }
+        int codeSize = byteInt(zmp, execOffset + 4, 4);
+        byte[] zcode = Arrays.copyOfRange(zmp, execOffset + 8, execOffset + 8 + codeSize);
+        zmp = zcode;
     }
 
     public void put(final int offset, final int s) {
