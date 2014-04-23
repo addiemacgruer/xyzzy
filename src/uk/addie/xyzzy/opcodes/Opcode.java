@@ -213,6 +213,7 @@ import android.util.Log;
     ENCODE_TEXT(3, 0x1c) {
         @Override public void invoke(final ShortStack arguments) {
             // TODO needs testing, few games use it.
+            Log.w("Xyzzy", "Encode Text");
             final short zsciiText = arguments.get(0);
             final short length = arguments.get(1);
             final short from = arguments.get(2);
@@ -566,9 +567,6 @@ import android.util.Log;
     },
     NEW_LINE(0, 0xb) {
         @Override public void invoke(final ShortStack arguments) {
-            //            if (Debug.screen) {
-            //                Log.i("Xyzzy", "NEW LINE");
-            //            }
             Memory.streams().println();
         }
     },
@@ -594,18 +592,9 @@ import android.util.Log;
     },
     OUTPUT_STREAM(3, 0x13) {
         @Override public void invoke(final ShortStack arguments) {
-            int width = 0, table = 0, number = 0;
-            switch (arguments.size()) {
-            case 3: // V6
-                width = arguments.get(2) & 0xffff;
-                //$FALL-THROUGH$
-            case 2:
-                table = arguments.get(1) & 0xffff;
-                //$FALL-THROUGH$
-            case 1:
-            default:
-                number = arguments.get(0); // signed
-            }
+            final int number = arguments.get(0);
+            final int table = arguments.get(1) & 0xffff;
+            final int width = arguments.get(2) & 0xffff;
             Memory.streams().setOutputStream(number, table, width);
         }
     },
@@ -798,22 +787,10 @@ import android.util.Log;
                 SHOW_STATUS.invoke(arguments);
             }
             ZWindow.printAllScreens();
-            int text = 0, parse = 0, time = 0, routine = 0;
-            switch (arguments.size()) {
-            default:
-            case 4:
-                routine = arguments.get(3) & 0xffff;
-                //$FALL-THROUGH$
-            case 3:
-                time = arguments.get(2) & 0xffff;
-                //$FALL-THROUGH$
-            case 2:
-                parse = arguments.get(1) & 0xffff;
-                //$FALL-THROUGH$
-            case 1:
-                text = arguments.get(0) & 0xffff;
-                break;
-            }
+            final int text = arguments.get(0) & 0xffff;
+            final int parse = arguments.get(1) & 0xffff;
+            final int time = arguments.get(2) & 0xffff;
+            final int routine = arguments.get(3) & 0xffff;
             if (routine != 0 || time != 0) {
                 Log.i("Xyzzy", "Read routine should be timed...");
             }
@@ -822,12 +799,9 @@ import android.util.Log;
             Memory.streams().userInput(inputString);
             inputString = inputString.substring(0, Math.min(maxCharacters, inputString.length()));
             Memory.current().buff().put(text + 1, (byte) inputString.length());
-            for (int i = 0, j = inputString.length(); i < j; i++) {
-                Memory.current().buff().put(text + 2 + i, (byte) inputString.codePointAt(i));
-            }
             ZText.tokeniseInputToBuffers(text, parse, inputString);
             if (Header.VERSION.value() >= 5) {
-                readDestinationAndStoreResult((short) 10);
+                readDestinationAndStoreResult((short) 13);
             }
         }
     },
@@ -836,8 +810,8 @@ import android.util.Log;
             ZWindow.printAllScreens();
             int value;
             final short one = arguments.get(0);
-            //            final short time = Process.zargs.get(1);
-            //            final short routine = Process.zargs.get(2);
+            final short time = arguments.get(1);
+            final short routine = arguments.get(2);
             value = MainActivity.waitOnKey();
             Memory.streams().userInput(Character.toString((char) value));
             switch (value) {
@@ -1069,12 +1043,6 @@ import android.util.Log;
     SET_TEXT_STYLE(3, 0x11) {
         @Override public void invoke(final ShortStack arguments) {
             final short style = arguments.get(0);
-            //            if (!Debug.screen) {
-            //                return;
-            //            }
-            if (false) {
-                Log.i("Xyzzy", "SET TEXT STYLE: ");
-            }
             switch (style) {
             case 0:
             default:

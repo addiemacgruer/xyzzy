@@ -48,11 +48,15 @@ public class MainActivity extends Activity {
                         } catch (final InterruptedException e) {
                             Log.e("Xyzzy", "MainActivity.okl.delayDisable interrupted", e);
                         }
-                        MainActivity.activity.runOnUiThread(new Runnable() {
-                            @Override public void run() {
-                                et.setEnabled(false);
+                        synchronized (MainActivity.activity) {
+                            if (MainActivity.activity != null) {
+                                MainActivity.activity.runOnUiThread(new Runnable() {
+                                    @Override public void run() {
+                                        et.setEnabled(false);
+                                    }
+                                });
                             }
-                        });
+                        }
                     }
                 }, "Disable old EditText").start();
             }

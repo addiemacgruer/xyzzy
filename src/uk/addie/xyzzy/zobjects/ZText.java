@@ -158,6 +158,15 @@ public class ZText {
             }
             offset++;
         }
+        if (currentWord.length() != 0) {
+            final String wordFound = currentWord.toString();
+            pt.parse(wordFound, offset - text - wordFound.length());
+        }
+        if (Header.VERSION.value() <= 4) { //NULL terminate
+            Memory.current().buffer.put(offset, 0);
+        } else { // newline terminate
+            Memory.current().buffer.put(offset, '\n');
+        }
     }
 
     private static void tryInArray(int i, byte[] chars, byte j) {

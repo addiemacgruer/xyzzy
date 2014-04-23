@@ -203,7 +203,7 @@ public class ZWindow implements Serializable {
 
     public synchronized String promptForInput() {
         MainActivity.activity.addEditView(foreground, background, windowMap[windowCount]);
-        final String command;
+        String command;
         synchronized (MainActivity.inputSyncObject) {
             try {
                 Log.i("Xyzzy", "Waiting for input..."
@@ -213,7 +213,10 @@ public class ZWindow implements Serializable {
             } catch (final InterruptedException e) {
                 Log.e("Xyzzy", "Wait on string interrupted:", e);
             }
-            command = MainActivity.inputSyncObject.string() + "\n";
+            command = MainActivity.inputSyncObject.string();
+        }
+        if (command == null) {
+            command = "";
         }
         latency = System.currentTimeMillis();
         return command;

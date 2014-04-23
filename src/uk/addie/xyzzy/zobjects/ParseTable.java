@@ -29,6 +29,7 @@ class ParseTable {
         }
         final int location = offset + 2 + 4 * wordCount();
         final int address = dictionary.addressOfWord(wordFound);
+        Log.d("Xyzzy", "Word:" + wordFound + " @" + address);
         Memory.current().buff().putShort(location, (short) address);
         Memory.current().buff().put(location + 2, (byte) wordFound.length());
         Memory.current().buff().put(location + 3, (byte) stringArrayOffset);

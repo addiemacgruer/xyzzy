@@ -94,7 +94,7 @@ public class ZStream implements Serializable {
     public void userInput(final String string) {
         Log.i("Xyzzy", "User input:" + string);
         if (streams[4]) {
-            throw new UnsupportedOperationException("Writing user transcript");
+            //            throw new UnsupportedOperationException("Writing user transcript");
         }
     }
 }
