@@ -22,7 +22,7 @@ public class CallStack implements Serializable {
         return pc;
     }
 
-    public static void call(final int routine, final ZStack<Short> args, final IInvokeable returnFunction) {
+    public static void call(final int routine, final ShortStack args, final IInvokeable returnFunction) {
         final int rpos = routine & 0xffff;
         if (rpos == 0) {
             Log.e("Xyzzy", "Called a routine at 0 (shouldn't have made it to call())");

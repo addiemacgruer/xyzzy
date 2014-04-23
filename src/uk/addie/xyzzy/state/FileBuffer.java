@@ -17,20 +17,9 @@ import android.annotation.SuppressLint;
 import android.util.Log;
 
 @SuppressLint("UseSparseArrays") public class FileBuffer implements Serializable {
-    private static final long            serialVersionUID = 1L;
-    private transient boolean[]          changed;
-    private transient Map<Integer, Byte> changes          = new HashMap<Integer, Byte>();
-    private final int                    staticMemory;
-    private final String                 storyPath;
-    private transient byte[]             zmp;
+    private static final long serialVersionUID = 1L;
 
-    FileBuffer(final String storyPath) {
-        this.storyPath = storyPath;
-        loadUpFile(storyPath);
-        staticMemory = Header.DYNAMIC_SIZE.value(this);
-    }
-
-    private int byteInt(byte[] array, int start, int length) {
+    private static int byteInt(byte[] array, int start, int length) {
         int rval = 0;
         for (int i = start; i < start + length; i++) {
             rval <<= 8;
@@ -40,13 +29,25 @@ import android.util.Log;
         return rval;
     }
 
-    private String byteText(byte[] array, int start, int length) {
+    private static String byteText(byte[] array, int start, int length) {
         StringBuffer sb = new StringBuffer();
         for (int i = start; i < start + length; i++) {
-            sb.append((char) zmp[i]);
+            sb.append((char) array[i]);
         }
         Log.d("Xyzzy", "byteText:" + sb.toString());
         return sb.toString();
+    }
+
+    private transient boolean[]          changed;
+    private transient Map<Integer, Byte> changes = new HashMap<Integer, Byte>();
+    private final int                    staticMemory;
+    private final String                 storyPath;
+    private transient byte[]             zmp;
+
+    FileBuffer(final String storyPath) {
+        this.storyPath = storyPath;
+        loadUpFile(storyPath);
+        staticMemory = Header.DYNAMIC_SIZE.value(this);
     }
 
     int capacity() {

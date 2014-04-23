@@ -3,7 +3,7 @@ package uk.addie.xyzzy.opcodes;
 
 import uk.addie.xyzzy.error.Error;
 import uk.addie.xyzzy.state.Memory;
-import uk.addie.xyzzy.zmachine.ZStack;
+import uk.addie.xyzzy.zmachine.ShortStack;
 import android.util.Log;
 
 public class OpMap {
@@ -31,7 +31,7 @@ public class OpMap {
         }
     }
 
-    public static void invoke(final int operands, final int hex, final ZStack<Short> arguments) {
+    public static void invoke(final int operands, final int hex, final ShortStack arguments) {
         final Opcode z = opmap[operands][hex];
         if (z == null) {
             Log.e("Xyzzy",

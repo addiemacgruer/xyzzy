@@ -7,6 +7,7 @@ import java.util.List;
 
 import uk.addie.xyzzy.gameselection.SelectionActivity;
 import uk.addie.xyzzy.preferences.Preferences;
+import uk.addie.xyzzy.state.Memory;
 import uk.addie.xyzzy.util.Utility;
 import uk.addie.xyzzy.zmachine.Decoder;
 import uk.addie.xyzzy.zobjects.ZWindow;
@@ -43,7 +44,7 @@ public class MainActivity extends Activity {
                 new Thread(new Runnable() {
                     @Override public void run() {
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(5000);
                         } catch (final InterruptedException e) {
                             Log.e("Xyzzy", "MainActivity.okl.delayDisable interrupted", e);
                         }
@@ -276,7 +277,13 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    @Override protected void onRestart() {
+        Log.d("Xyzzy", "MainActivity.onRestart");
+        super.onRestart();
+    }
+
     @Override protected void onResume() {
+        Log.d("Xyzzy", "MainActivity.onRestart");
         super.onResume();
         ZScrollView.updateScrollingSpeed();
         textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
@@ -285,6 +292,11 @@ public class MainActivity extends Activity {
                 if (v instanceof TextView) {
                     ((TextView) v).setTextSize(textSize);
                 }
+            }
+        }
+        synchronized (logicThread) {
+            if (logicThread != null && Memory.current() != null && Memory.current().buffer != null) {
+                Memory.setScreenColumns();
             }
         }
     }

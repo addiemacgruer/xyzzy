@@ -13,10 +13,10 @@ import uk.addie.xyzzy.zobjects.ZWindow;
 import android.util.Log;
 
 public class Decoder {
-    private static final ZStack<Short> arguments = new ZStack<Short>((short) 0);
-    private static boolean             finished  = false;
+    private static final ShortStack arguments = new ShortStack();
+    private static boolean          finished  = false;
 
-    public static ZStack<Short> arguments() {
+    public static ShortStack arguments() {
         return arguments;
     }
 
