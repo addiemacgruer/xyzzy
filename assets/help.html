@@ -60,7 +60,7 @@ been created with the Inform design system.
 
 <p>There are a very large number of games available to download at the IF archive.  See
 <a href="http://www.ifarchive.org/indexes/if-archiveXgamesXzcode.html">http://www.ifarchive.org/indexes/if-archiveXgamesXzcode.html</a>.
-The ones which end in .z3, .z4, .z5 or .z8 will work.
+The ones which end in .z3, .z4, .z5, .z8 or .zblorb will work.  Zip files will need unpacking before play.
 
 <h2 id="preferences">Preferences</h2>
 <ul>
@@ -98,6 +98,12 @@ if the game is detected to have been obtained by copyright infringement.  This c
 is completely useless, and essentially unused in all but demonstration story files.
 </ul>
 
+<li><p><strong>Monitor opcounts and performance</strong> Before text inputs, print a status line showing number of opcodes processed, and
+the amount of time spent processing them.  Mainly useful for story authors who want to do a bit of optimisation, me for optimising of
+code, or perhaps for some benchmarking of your phone.  Some stories will execute 200k opcodes between inputs, which
+is fine on a desktop computer but will lead to a few seconds of lag even on a fast mobile phone -- my S4 can execute about 80k opcodes/s
+on a z8 file once the JIT has kicked in.
+
 <h2 id="notes">Technical notes</h2>
 
 <p>Some games (eg. Anchorhead while reading books) require cursor key input, which isn't present on (my) Android phone.  There are some
@@ -116,8 +122,11 @@ going to the loo and being done in by a wandering warg while away from keyboard 
 <ul>
 <li><p>9:05 (Adam Cadre)
 <li><p>A Change In The Weather (Andrew Plotkin)
+<li><p>CZECh, the comprehensive z-code emulation checker (Evin Robertson and Amir Karger), executes completely and correctly in both z3
+and z5 modes.
 <li><p>The Lurking Horror (Dave Lebling).  No sound, claims <q>restore</q> fails when it works fine.
 <li><p>Photopia (Adam Cadre)
+<li><p>Tangle and Web (Andrew Plotkin)
 <li><p>Zork: The Undiscovered Underground (Marc Blank and Michael Berlyn)
 </ul>
 

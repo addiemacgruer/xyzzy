@@ -15,6 +15,7 @@ import android.util.Log;
 public class Decoder {
     private static final ShortStack arguments = new ShortStack();
     private static boolean          finished  = false;
+    private static int              opcount   = 0;
 
     public static ShortStack arguments() {
         return arguments;
@@ -26,6 +27,7 @@ public class Decoder {
             final CallStack callStack = Memory.current().callStack.peek();
             arguments.clear();
             final int opcode = callStack.getProgramByte();
+            opcount++;
             try {
                 interpretOpcode(opcode);
             } catch (final XyzzyException xe) { //oops
@@ -145,6 +147,14 @@ public class Decoder {
         load_operand((varSpecByte & 0x30) >> 4);
         load_operand((varSpecByte & 0x0c) >> 2);
         load_operand((varSpecByte & 0x03) >> 0);
+    }
+
+    public static int opcount() {
+        return opcount;
+    }
+
+    public static void resetOpcount() {
+        opcount = 0;
     }
 
     public static void terminate() {

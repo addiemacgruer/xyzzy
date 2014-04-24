@@ -119,6 +119,7 @@ public class MainActivity extends Activity {
     }
 
     public static int waitOnKey() { // returns 0 if interrupted or shutting down.
+        long timeBefore = System.currentTimeMillis();
         synchronized (inputSyncObject) {
             inputSyncObject.setCharacter(0);
             try {
@@ -126,6 +127,8 @@ public class MainActivity extends Activity {
             } catch (final InterruptedException e) {
                 Log.e("Xyzzy", "Wait on key interrupted:", e);
             }
+            long timeAfter = System.currentTimeMillis();
+            ZWindow.keyWaitLag(timeAfter - timeBefore);
             return inputSyncObject.character();
         }
     }

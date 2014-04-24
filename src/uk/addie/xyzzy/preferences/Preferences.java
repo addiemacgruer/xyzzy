@@ -109,6 +109,15 @@ public enum Preferences {
         @Override String prefDescription() {
             return "Run pirated story files (yarr!)";
         }
+    },
+    MONITOR_PERFORMANCE(BOOLEAN) {
+        @Override Object defaultValue() {
+            return false;
+        }
+
+        @Override String prefDescription() {
+            return "Monitor opcounts and performance";
+        }
     };
     public final PreferenceType type;
 

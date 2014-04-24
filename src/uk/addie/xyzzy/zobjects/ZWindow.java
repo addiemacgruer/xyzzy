@@ -12,7 +12,9 @@ import java.util.Map;
 
 import uk.addie.xyzzy.MainActivity;
 import uk.addie.xyzzy.R;
+import uk.addie.xyzzy.preferences.Preferences;
 import uk.addie.xyzzy.state.Memory;
+import uk.addie.xyzzy.zmachine.Decoder;
 import android.graphics.Point;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -27,11 +29,11 @@ public class ZWindow implements Serializable {
         DRAWN_ON, EMPTY, FLUSH_SETCURSOR, FLUSH_UNSETCURSOR;
     }
 
-    private final static double         amiAndroidRatio  = 255.0 / 31.0;        // ratio 0xff to 0x1f
+    private final static double         amiAndroidRatio  = 255.0 / 31.0;              // ratio 0xff to 0x1f
     public static int                   background;
     private final static SparseIntArray colours          = new SparseIntArray();
     public static int                   foreground;
-    private static long                 latency          = 0;
+    private static long                 latency          = System.currentTimeMillis();
     private static final long           serialVersionUID = 1L;
     private static int[]                windowMap        = { R.id.screen0, R.id.screen1, R.id.screen2, R.id.screen3,
             R.id.screen4, R.id.screen5, R.id.screen6, R.id.screen7 };
@@ -55,6 +57,10 @@ public class ZWindow implements Serializable {
     public static void defaultColours() {
         foreground = colours.get(0);
         background = colours.get(1);
+    }
+
+    public static void keyWaitLag(long milliseconds) {
+        latency += milliseconds;
     }
 
     public static void printAllScreens() {
@@ -139,6 +145,10 @@ public class ZWindow implements Serializable {
         for (final TextStyle ts : currentTextStyle.keySet()) {
             final Integer start = currentTextStyle.get(ts);
             final int end = buffer.get(row).length();
+            if (end <= start) {
+                Log.e("Xyzzy", "Trying to set bad style spans");
+                continue;
+            }
             if (ts != TextStyle.REVERSE_VIDEO) {
                 buffer.get(row).setSpan(ts.characterStyle(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else if (start < end) {
@@ -201,7 +211,27 @@ public class ZWindow implements Serializable {
         restoreStyles(stylesInEffect);
     }
 
+    private void printPerformanceInformation() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("*** Opcode count:");
+        sb.append(Decoder.opcount());
+        if (latency != 0) {
+            int calctime = (int) (System.currentTimeMillis() - latency);
+            sb.append(" calc time:");
+            sb.append(calctime);
+            sb.append(" ms = ");
+            sb.append(Decoder.opcount() * 1000 / calctime);
+            sb.append(" ops/s");
+        }
+        MainActivity.activity.addTextView(new SpannableStringBuilder(sb.toString()), foreground, background,
+                windowMap[windowCount]);
+        Decoder.resetOpcount();
+    }
+
     public synchronized String promptForInput() {
+        if ((Boolean) Preferences.MONITOR_PERFORMANCE.getValue(MainActivity.activity)) {
+            printPerformanceInformation();
+        }
         MainActivity.activity.addEditView(foreground, background, windowMap[windowCount]);
         String command;
         synchronized (MainActivity.inputSyncObject) {
