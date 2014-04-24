@@ -32,6 +32,7 @@ class Xyzzy implements Runnable {
                 Memory.current().zwin.put(i, new ZWindow(i));
             }
             ZWindow.defaultColours();
+            Memory.current().currentScreen = 0;
             Opcode.RESTART.invoke(null);
             ZObject.enumerateObjects();
             Decoder.beginDecoding();

@@ -66,7 +66,7 @@ public class ZWindow implements Serializable {
     public static void printAllScreens() {
         final SparseArray<ZWindow> zwindows = Memory.current().zwin;
         final int zwc = zwindows.size();
-        for (int i = 0; i < zwc; i++) {
+        for (int i = zwc - 1; i >= 0; i--) {
             zwindows.get(zwindows.keyAt(i)).flush();
         }
     }
@@ -107,10 +107,10 @@ public class ZWindow implements Serializable {
     }
 
     public void append(final String s) {
-        if (displayState == DisplayState.FLUSH_UNSETCURSOR) {
+        if (displayState() == DisplayState.FLUSH_UNSETCURSOR) {
             clearBuffer();
         }
-        displayState = DisplayState.DRAWN_ON;
+        setDisplayState(DisplayState.DRAWN_ON);
         while (buffer.size() <= row) {
             buffer.add(new SpannableStringBuilder());
         }
@@ -132,6 +132,7 @@ public class ZWindow implements Serializable {
     }
 
     private void clearBuffer() {
+        Log.d("Xyzzy", "ZWindow.clearBuffer:" + windowCount);
         buffer.clear();
         row = 0;
         column = 0;
@@ -165,6 +166,10 @@ public class ZWindow implements Serializable {
         return new Point(column, row);
     }
 
+    private DisplayState displayState() {
+        return displayState;
+    }
+
     public void eraseLine(final int line) {
         if (line == 1) { // erase line from current cursor to end of row.
             if (row >= buffer.size()) {
@@ -192,12 +197,14 @@ public class ZWindow implements Serializable {
         if (windowCount > 0) {
             reset();
             this.column = this.row = 0;
-            displayState = DisplayState.FLUSH_SETCURSOR;
-            while (buffer.size() > naturalHeight) {
-                buffer.remove(naturalHeight);
+            setDisplayState(DisplayState.FLUSH_SETCURSOR);
+            if (Memory.current().zwin.get(0).displayState() == DisplayState.DRAWN_ON) { // anchorhead draws books in zwin 1
+                while (buffer.size() > naturalHeight) {
+                    buffer.remove(naturalHeight);
+                }
             }
         } else {
-            displayState = DisplayState.FLUSH_UNSETCURSOR;
+            setDisplayState(DisplayState.FLUSH_UNSETCURSOR);
         }
         if (ssb.length() > 0) {
             MainActivity.activity.addTextView(ssb, foreground, background, windowMap[windowCount]);
@@ -282,14 +289,22 @@ public class ZWindow implements Serializable {
     }
 
     public void setCursor(final int column, final int line) {
-        if (displayState == DisplayState.FLUSH_UNSETCURSOR) {
-            displayState = DisplayState.FLUSH_SETCURSOR;
+        if (displayState() == DisplayState.FLUSH_UNSETCURSOR) {
+            setDisplayState(DisplayState.FLUSH_SETCURSOR);
         }
         List<TextStyle> stylesInEffect = storeStylesAndClear();
         // games will occasionally request negative indexes, especially if the screen is too narrow
         this.column = Math.max(column, 1) - 1;
         row = Math.max(line, 1) - 1;
         restoreStyles(stylesInEffect);
+    }
+
+    private void setDisplayState(DisplayState displayState) {
+        if (this.displayState == displayState) {
+            return;
+        }
+        Log.d("Xyzzy", "Changing " + windowCount + " displayState:" + this.displayState + "->" + displayState);
+        this.displayState = displayState;
     }
 
     public void setNaturalHeight(final int lines) {
