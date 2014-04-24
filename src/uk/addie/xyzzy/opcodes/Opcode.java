@@ -207,13 +207,14 @@ import android.util.Log;
             final short pictureNumber = arguments.get(0);
             final short y = arguments.get(1);
             final short x = arguments.get(2);
+            Log.w("Xyzzy", "@draw_picture:" + arguments);
             // TODO draw_picture
         }
     },
     ENCODE_TEXT(3, 0x1c) {
         @Override public void invoke(final ShortStack arguments) {
             // TODO needs testing, few games use it.
-            Log.w("Xyzzy", "Encode Text");
+            Log.w("Xyzzy", "@encode_text:" + arguments);
             final short zsciiText = arguments.get(0);
             final short length = arguments.get(1);
             final short from = arguments.get(2);
@@ -242,6 +243,7 @@ import android.util.Log;
             final short y = arguments.get(1);
             final short x = arguments.get(2);
             // TODO erase_picture
+            Log.w("Xyzzy", "@erase_picture:" + arguments);
         }
     },
     ERASE_WINDOW(3, 0xd) {
@@ -398,6 +400,7 @@ import android.util.Log;
     INPUT_STREAM(3, 0x14) {
         @Override public void invoke(final ShortStack arguments) {
             final short number = arguments.get(0);
+            Log.w("Xyzzy", "@input_stream:" + arguments);
             // TODO input stream
         }
     },
@@ -527,6 +530,7 @@ import android.util.Log;
     MAKE_MENU(4, 0x1b) {
         @Override public void invoke(final ShortStack arguments) {
             // TODO make-menu
+            Log.w("Xyzzy", "@make_menu:" + arguments);
             final short number = arguments.get(0);
             final short table = arguments.get(1);
             branchOnTest(false);
@@ -546,12 +550,14 @@ import android.util.Log;
     MOUSE_WINDOW(4, 0x17) {
         @Override public void invoke(final ShortStack arguments) {
             // TODO mouse_window
+            Log.w("Xyzzy", "@mouse_window:" + arguments);
             final short window = arguments.get(0);
         }
     },
     MOVE_WINDOW(4, 0x10) {
         @Override public void invoke(final ShortStack arguments) {
             // TODO move_window
+            Log.w("Xyzzy", "@move_window:" + arguments);
             final short window = arguments.get(0);
             final short y = arguments.get(1);
             final short x = arguments.get(2);
@@ -602,6 +608,7 @@ import android.util.Log;
         @Override public void invoke(final ShortStack arguments) {
             final short pictureNumber = arguments.get(0);
             final short array = arguments.get(1);
+            Log.w("Xyzzy", "@picture_data:" + arguments);
             // TODO picture_data
             branchOnTest(false);
         }
@@ -609,6 +616,7 @@ import android.util.Log;
     PICTURE_TABLE(4, 0x1c) {
         @Override public void invoke(final ShortStack arguments) {
             final short table = arguments.get(0);
+            Log.w("Xyzzy", "@picture_table:" + arguments);
             //TODO picture-table.  Should cache the pictures in the table given.
         }
     },
@@ -627,6 +635,7 @@ import android.util.Log;
             final short items = arguments.get(0);
             if (arguments.size() > 1) {
                 final short stack = arguments.get(1);
+                Log.w("Xyzzy", "@pop_stack:" + arguments);
                 //TODO user stacks
             } else {
                 for (int i = 0; i < items; i++) {
@@ -656,6 +665,7 @@ import android.util.Log;
     PRINT_FORM(4, 0x1a) {
         @Override public void invoke(final ShortStack arguments) {
             final short formattedTable = arguments.get(0);
+            Log.w("Xyzzy", "@print_form:" + arguments);
             // TODO print-form
         }
     },
@@ -739,6 +749,7 @@ import android.util.Log;
         @Override public void invoke(final ShortStack arguments) {
             final short value = arguments.get(0);
             final short stack = arguments.get(1);
+            Log.w("Xyzzy", "@push_stack:" + arguments);
             // TODO push-stack
             branchOnTest(false);
         }
@@ -757,6 +768,7 @@ import android.util.Log;
             final short window = arguments.get(0);
             final short propertyNmber = arguments.get(1);
             final short value = arguments.get(2);
+            Log.w("Xyzzy", "@put_wind_prop:" + arguments);
             // TODO put-wind-prop
         }
     },
@@ -799,7 +811,7 @@ import android.util.Log;
             Memory.streams().userInput(inputString);
             inputString = inputString.substring(0, Math.min(maxCharacters, inputString.length()));
             Memory.current().buff().put(text + 1, (byte) inputString.length());
-            ZText.tokeniseInputToBuffers(text, parse, inputString);
+            ZText.tokeniseInputToBuffers(text, parse, inputString, 0, 0);
             if (Header.VERSION.value() >= 5) {
                 readDestinationAndStoreResult((short) 13);
             }
@@ -827,6 +839,7 @@ import android.util.Log;
     READ_MOUSE(4, 0x16) {
         @Override public void invoke(final ShortStack arguments) {
             //TODO read-mouse
+            Log.w("Xyzzy", "@read_mouse:" + arguments);
             final short array = arguments.get(0);
             Memory.current().buffer.put(array + 0, 0); // mouse X
             Memory.current().buffer.put(array + 1, 0); // mouse Y
@@ -988,6 +1001,7 @@ import android.util.Log;
     SCROLL_WINDOW(4, 0x14) {
         @Override public void invoke(final ShortStack arguments) {
             // TODO scroll-window
+            Log.w("Xyzzy", "@scroll_window:" + arguments);
             final short window = arguments.get(0);
             final short pixels = arguments.get(1);
         }
@@ -1029,7 +1043,9 @@ import android.util.Log;
     SET_FONT(4, 0x4) {
         @Override public void invoke(final ShortStack arguments) {
             final short font = arguments.get(0);
+            Log.w("Xyzzy", "@set_font:" + arguments);
             // TODO set_font
+            readDestinationAndStoreResult(0);
         }
     },
     SET_MARGINS(4, 0x8) {
@@ -1037,6 +1053,7 @@ import android.util.Log;
             final short left = arguments.get(0);
             final short right = arguments.get(0);
             final short window = arguments.get(0);
+            Log.w("Xyzzy", "@set_margins:" + arguments);
             // TODO set_margins
         }
     },
@@ -1108,7 +1125,6 @@ import android.util.Log;
             if (Header.VERSION.value() > 3) {
                 NOP.invoke(arguments);
             } else {
-                //TODO show-status
                 final int flags = Header.CONFIG.value();
                 boolean scoreGame = Header.VERSION.value() < 2 || !Bit.bit1(flags);
                 StringBuilder sb = new StringBuilder();
@@ -1161,7 +1177,7 @@ import android.util.Log;
             } else if (number == 2) {
                 Beep.beep2.playSound();
             } else {
-                Log.i("Xyzzy", "Sound effect:" + arguments);
+                Log.w("Xyzzy", "Sound effect:" + arguments);
             }
         }
     },
@@ -1249,8 +1265,10 @@ import android.util.Log;
         @Override public void invoke(final ShortStack arguments) {
             final int text = arguments.get(0) & 0xffff;
             final int parse = arguments.get(1) & 0xffff;
+            final int dictionary = arguments.get(2) & 0xffff;
+            final int flag = arguments.get(3) & 0xffff;
             if (arguments.size() != 2) {
-                throw new UnsupportedOperationException("@tokenise (long arguments)");
+                Log.w("Xyzzy", "@tokenise (long arguments)");
             }
             final int length = Memory.current().buff().get(text + 1);
             final StringBuilder sb = new StringBuilder();
@@ -1258,18 +1276,18 @@ import android.util.Log;
                 sb.append((char) Memory.current().buff().get(text + i + 2));
             }
             final String inputString = sb.toString().toLowerCase(Locale.UK);
-            ZText.tokeniseInputToBuffers(text, parse, inputString);
+            ZText.tokeniseInputToBuffers(text, parse, inputString, dictionary, flag);
         }
     },
     VERIFY(0, 0xd) {
         @Override public void invoke(final ShortStack arguments) {
-            //TODO verify
+            Log.w("Xyzzy", "@verify:" + arguments);
             branchOnTest(true);
         }
     },
     WINDOW_SIZE(4, 0x11) {
         @Override public void invoke(final ShortStack arguments) {
-            // TODO window-size
+            Log.w("Xyzzy", "@window_size:" + arguments);
             final short window = arguments.get(0);
             final short y = arguments.get(1);
             final short x = arguments.get(2);
@@ -1278,6 +1296,7 @@ import android.util.Log;
     WINDOW_STYLE(4, 0x12) {
         @Override public void invoke(final ShortStack arguments) {
             // TODO window-style
+            Log.w("Xyzzy", "@window_style:" + arguments);
             final short window = arguments.get(0);
             final short flags = arguments.get(1);
             final short operation = arguments.get(2);

@@ -19,7 +19,7 @@ public class Dictionary {
     private final Map<Long, Integer> entryMap = new HashMap<Long, Integer>();
     private final int                offset;
 
-    private Dictionary(final int offset) {
+    Dictionary(final int offset) {
         this.offset = offset;
         buildHashMap();
     }

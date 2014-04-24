@@ -132,16 +132,18 @@ public class ZText {
         return rval;
     }
 
-    public static void tokeniseInputToBuffers(final int text, final int parse, final String inputString) {
+    public static void tokeniseInputToBuffers(final int text, final int parse, final String inputString,
+            int dictionary, int flag) {
         int offset = text + 2;
         final StringBuffer currentWord = new StringBuffer();
-        final ParseTable pt = new ParseTable(parse, Dictionary.DEFAULT);
+        Dictionary d = (dictionary == 0 ? Dictionary.DEFAULT : new Dictionary(dictionary));
+        final ParseTable pt = new ParseTable(parse, d);
         for (final char ch : inputString.toCharArray()) {
             Memory.current().buff().put(offset, (byte) ch);
-            final int wordSplit = Dictionary.DEFAULT.wordSplit(ch);
+            final int wordSplit = d.wordSplit(ch);
             if (parse != 0 && (ch == ' ' || ch == '\n' || wordSplit != 0) && currentWord.length() != 0) {
                 final String wordFound = currentWord.toString();
-                pt.parse(wordFound, offset - text - wordFound.length());
+                pt.parse(wordFound, offset - text - wordFound.length(), flag);
                 currentWord.setLength(0);
             }
             if (ch == ' ' || ch == '\n') {
@@ -149,7 +151,7 @@ public class ZText {
                 continue;
             }
             if (wordSplit != 0) {
-                pt.parse(Character.toString(ch), offset - text);
+                pt.parse(Character.toString(ch), offset - text, flag);
                 offset++;
                 continue;
             }
@@ -160,7 +162,7 @@ public class ZText {
         }
         if (currentWord.length() != 0) {
             final String wordFound = currentWord.toString();
-            pt.parse(wordFound, offset - text - wordFound.length());
+            pt.parse(wordFound, offset - text - wordFound.length(), flag);
         }
         if (Header.VERSION.value() <= 4) { //NULL terminate
             Memory.current().buffer.put(offset, 0);

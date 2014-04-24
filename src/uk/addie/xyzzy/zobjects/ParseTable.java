@@ -22,7 +22,7 @@ class ParseTable {
         return Memory.current().buff().get(offset);
     }
 
-    void parse(final String wordFound, final int stringArrayOffset) {
+    void parse(final String wordFound, final int stringArrayOffset, int flag) {
         if (wordCount() == maxWords()) {
             Log.e("Xyzzy", "Too many words to parse");
             return;
@@ -30,9 +30,11 @@ class ParseTable {
         final int location = offset + 2 + 4 * wordCount();
         final int address = dictionary.addressOfWord(wordFound);
         Log.d("Xyzzy", "Word:" + wordFound + " @" + address);
-        Memory.current().buff().putShort(location, (short) address);
-        Memory.current().buff().put(location + 2, (byte) wordFound.length());
-        Memory.current().buff().put(location + 3, (byte) stringArrayOffset);
+        if (address != 0 || flag == 0) {
+            Memory.current().buff().putShort(location, (short) address);
+            Memory.current().buff().put(location + 2, (byte) wordFound.length());
+            Memory.current().buff().put(location + 3, (byte) stringArrayOffset);
+        }
         incWordCount();
     }
 

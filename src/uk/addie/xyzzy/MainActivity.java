@@ -48,14 +48,18 @@ public class MainActivity extends Activity {
                         } catch (final InterruptedException e) {
                             Log.e("Xyzzy", "MainActivity.okl.delayDisable interrupted", e);
                         }
-                        synchronized (MainActivity.activity) {
-                            if (MainActivity.activity != null) {
-                                MainActivity.activity.runOnUiThread(new Runnable() {
-                                    @Override public void run() {
-                                        et.setEnabled(false);
-                                    }
-                                });
+                        try {
+                            synchronized (MainActivity.activity) {
+                                if (MainActivity.activity != null) {
+                                    MainActivity.activity.runOnUiThread(new Runnable() {
+                                        @Override public void run() {
+                                            et.setEnabled(false);
+                                        }
+                                    });
+                                }
                             }
+                        } catch (NullPointerException npe) {
+                            Log.e("Xyzzy", "MainActivity.delayDisable", npe);
                         }
                     }
                 }, "Disable old EditText").start();
