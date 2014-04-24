@@ -34,7 +34,6 @@ import android.util.Log;
         for (int i = start; i < start + length; i++) {
             sb.append((char) array[i]);
         }
-        Log.d("Xyzzy", "byteText:" + sb.toString());
         return sb.toString();
     }
 

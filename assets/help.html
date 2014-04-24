@@ -22,6 +22,7 @@ span.mono {font-family: monospace;}
 
 <h2>Contents</h2>
 <p><a href="#about">About</a>
+<p><a href="#history">Revision History</a>
 <p><a href="#preferences">Preferences</a>
 <p><a href="#notes">Technical notes</a>
 <p><a href="#complete">Games that have been tested to completion</a>
@@ -62,18 +63,21 @@ been created with the Inform design system.
 <a href="http://www.ifarchive.org/indexes/if-archiveXgamesXzcode.html">http://www.ifarchive.org/indexes/if-archiveXgamesXzcode.html</a>.
 The ones which end in .z3, .z4, .z5, .z8 or .zblorb will work.  Zip files will need unpacking before play.
 
+<h2 id="history">Revision history</h2>
+<ol>
+<li>First public release: 24th April 2014.  Probably still full of bugs and surprises, despite my testing.
+</ol>
 <h2 id="preferences">Preferences</h2>
 <ul>
 <li><p><strong>Display text size</strong> Changes the size of text in the game selection menu and in games.  Screen width is set at the 
-start of each game, and the game is told that the screen is at least 80 columns by 24 rows -- some games won't start with smaller screens,
-and it's annoying to have to squint to be even able to play.   If you've set a large font, you might have to do some scrolling to see
+start of each game, on restore, and when you rotate the screen.   If you've set a large font, you might have to do some scrolling to see
 everything, some things won't be centered, and <q>quote boxes</q> will look quite ugly.  But at least you'll be able to read it.
 
 <li><p><strong>Enable sound effects</strong> Currently only the two basic beeps are implemented, high and low pitched.
 These usually provide feedback on scoring or unrecognised input.
 
 <li><p><strong>Enable colour</strong> Most colour games (<em>eg.</em> Adam Cadre's works) are polite enough to ask before you start,
-but it's possible to disable colour entirely, here.
+but it's possible to disable colour entirely, here.  <em>Beyond Zork</em> still looks dreadful, though.
 
 <li><p><strong>Upper screens are monospaced</strong> A lot of games expect the upper screens to be in a <span class="mono">monospaced
 font</span>, especially for
@@ -96,17 +100,16 @@ display the time in V3 games with a 24-hour or a 12-hour clock.
 <li><p><strong>Run pirated story files</strong> There is a <span class="opcode">@piracy</span> opcode on the Z-Machine, which causes different story file execution
 if the game is detected to have been obtained by copyright infringement.  This checkbox is the detection mechanism.  <em>nb.</em> this
 is completely useless, and essentially unused in all but demonstration story files.
-</ul>
 
 <li><p><strong>Monitor opcounts and performance</strong> Before text inputs, print a status line showing number of opcodes processed, and
 the amount of time spent processing them.  Mainly useful for story authors who want to do a bit of optimisation, me for optimising of
 code, or perhaps for some benchmarking of your phone.  Some stories will execute 200k opcodes between inputs, which
-is fine on a desktop computer but will lead to a few seconds of lag even on a fast mobile phone -- my S4 can execute about 80k opcodes/s
-on a z8 file once the JIT has kicked in.
-
+is fine on a desktop computer but will lead to a few seconds of lag even on a fast mobile phone -- my S4 can execute about 80k opcodes per
+second on a z8 file once the JIT has kicked in.
+</ul>
 <h2 id="notes">Technical notes</h2>
 
-<p>Some games (eg. Anchorhead while reading books) require cursor key input, which isn't present on (my) Android phone.  There are some
+<p>Some games (eg. <em>Anchorhead</em> while reading books) require cursor key input, which isn't present on (my) Android phone.  There are some
 keyboard shortcuts present on the action bar (cursor up/down/left/right, delete, return) that simulate the desired keys.
 
 <p>The z-spec suggests that it would be beneficial to implement the Quetzal save file format, to allow save game exchange between devices
@@ -120,14 +123,14 @@ going to the loo and being done in by a wandering warg while away from keyboard 
 
 <h2 id="complete">Games That Have Been Tested To Completion</h2>
 <ul>
-<li><p>9:05 (Adam Cadre)
-<li><p>A Change In The Weather (Andrew Plotkin)
-<li><p>CZECh, the comprehensive z-code emulation checker (Evin Robertson and Amir Karger), executes completely and correctly in both z3
+<li><p><em>9:05</em> (Adam Cadre)
+<li><p><em>A Change In The Weather</em> (Andrew Plotkin)
+<li><p><em>CZECh</em>, the comprehensive z-code emulation checker (Evin Robertson and Amir Karger), executes completely and correctly in both z3
 and z5 modes.
-<li><p>The Lurking Horror (Dave Lebling).  No sound, claims <q>restore</q> fails when it works fine.
-<li><p>Photopia (Adam Cadre)
-<li><p>Tangle and Web (Andrew Plotkin)
-<li><p>Zork: The Undiscovered Underground (Marc Blank and Michael Berlyn)
+<li><p><em>The Lurking Horror</em> (Dave Lebling).  No sound, claims <q>restore</q> fails when it works fine.
+<li><p><em>Photopia</em> (Adam Cadre)
+<li><p><em>Tangle and Web</em> (Andrew Plotkin)
+<li><p><em>Zork: The Undiscovered Underground</em> (Marc Blank and Michael Berlyn)
 </ul>
 
 <h2 id="todo">To-do list</h2>
@@ -136,9 +139,14 @@ and z5 modes.
 <li><p><span class="opcode">@throw</span> and <span class="opcode">@catch</span>: using these opcodes will cause a crash.
 Unfortunately, the z-code specification doesn't make sense to me. If anyone can drop me a line clearing up (exactly) what these should do,
 I'll be happy to work them in.
-<li><p><span class="opcode">@sound_effect</span> only implements the standard beeps.  Enjoy the extra feedback scoring points in Trinity.
+
+<li><p><span class="opcode">@sound_effect</span> only implements the standard beeps.  Enjoy the extra feedback scoring points in <em>Trinity</em>.
+
 <li><p><span class="opcode">@input_stream</span> does nothing.
+
 <li><p>The V6 opcodes (drawing pictures, moving windows, detecting the mouse, etc) all do nothing.
+
+<li><p><em>Beyond Zork</em> is hella ugly.  Mind you, I remember it being hella ugly on the Atari, too.T
 </ul>
 
 <h2 id="contact">Contact me</h2>

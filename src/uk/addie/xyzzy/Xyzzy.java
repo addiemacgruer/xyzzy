@@ -18,22 +18,30 @@ class Xyzzy implements Runnable {
     }
 
     @Override public void run() {
-        Log.i("Xyzzy", "Starting background logic thread");
         try {
-            Memory.current().storyPath = story;
-        } catch (final XyzzyException xe) {
-            Log.e("Xyzzy", "Xyzzy.run:", xe);
-            return;
+            Log.i("Xyzzy", "Starting background logic thread");
+            try {
+                Memory.current().storyPath = story;
+            } catch (final XyzzyException xe) {
+                Log.e("Xyzzy", "Xyzzy.run:", xe);
+                return;
+            }
+            Header.reset();
+            Memory.current().zwin.clear();
+            for (int i = 0; i < 8; i++) {
+                Memory.current().zwin.put(i, new ZWindow(i));
+            }
+            ZWindow.defaultColours();
+            Opcode.RESTART.invoke(null);
+            ZObject.enumerateObjects();
+            Decoder.beginDecoding();
+            Log.i("Xyzzy", "Finishing background logic thread");
+        } catch (Exception e) {
+            final ZWindow window0 = Memory.current().zwin.get(0);
+            window0.append("Problem with story file:");
+            window0.println();
+            window0.append(e.toString());
+            window0.flush();
         }
-        Header.reset();
-        Memory.current().zwin.clear();
-        for (int i = 0; i < 8; i++) {
-            Memory.current().zwin.put(i, new ZWindow(i));
-        }
-        ZWindow.defaultColours();
-        Opcode.RESTART.invoke(null);
-        ZObject.enumerateObjects();
-        Decoder.beginDecoding();
-        Log.i("Xyzzy", "Finishing background logic thread");
     }
 }

@@ -2,6 +2,7 @@
 package uk.addie.xyzzy.gameselection;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +30,8 @@ public class FileChooserActivity extends Activity implements ListAdapter, OnClic
     private List<String>                pathContents;
     private final List<DataSetObserver> observers = new ArrayList<DataSetObserver>();
     private int                         textSize;
+    private static final String[]       SUFFIXES  = { ".dat", ".z1", ".z2", ".z3", ".z4", ".z5", ".z6", ".z8",
+            ".zblorb"                            };
 
     private void addPathToGamesList(final File f) {
         final EditText input = new EditText(this);
@@ -73,8 +76,12 @@ public class FileChooserActivity extends Activity implements ListAdapter, OnClic
 
     @Override public View getView(int position, View convertView, ViewGroup parent) {
         TextView tv = selectionPageTextView();
-        final String itemName = pathContents.get(position);
-        tv.setText(itemName);
+        String itemName = pathContents.get(position);
+        if (itemName.equals("..")) {
+            tv.setText(".. (up to previous directory)");
+        } else {
+            tv.setText(itemName);
+        }
         File subfile = new File(path, itemName);
         if (subfile.isDirectory()) {
             tv.setBackgroundColor(0xff9999ff);
@@ -102,7 +109,16 @@ public class FileChooserActivity extends Activity implements ListAdapter, OnClic
 
     @Override public void onClick(View v) {
         File file = (File) v.getTag();
-        file.getAbsoluteFile(); // remove ".."
+        Log.d("Xyzzy", "Clicked on:" + file.toString());
+        try {
+            file = new File(file.getCanonicalPath());
+        } catch (IOException e) {
+            Log.e("Xyzzy", "FileChooserActivity.onClick", e);
+        } // remove ".."
+        if (file.toString().length() == 0) { // ROOT
+            file = new File("/");
+        }
+        Log.d("Xyzzy", "Canonical:" + file);
         if (file.isDirectory()) {
             path = file;
             setTitle(path.toString());
@@ -159,11 +175,24 @@ public class FileChooserActivity extends Activity implements ListAdapter, OnClic
         if (path.list() != null) {
             for (String s : path.list()) {
                 if (s.charAt(0) != '.') {
-                    pathContents.add(s);
+                    File f = new File(path, s);
+                    if (f.isDirectory()) {
+                        pathContents.add(s);
+                        continue;
+                    }
+                    for (String suffix : SUFFIXES) {
+                        if (s.endsWith(suffix)) {
+                            pathContents.add(s);
+                            break;
+                        }
+                    }
                 }
             }
         }
         Collections.sort(pathContents);
-        pathContents.add(0, "..");
+        Log.d("Xyzzy", "Path ='" + path.toString() + "'");
+        if (!path.toString().equals("/")) {
+            pathContents.add(0, "..");
+        }
     }
 }
