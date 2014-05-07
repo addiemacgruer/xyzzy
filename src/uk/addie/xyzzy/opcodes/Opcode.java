@@ -646,19 +646,24 @@ import android.util.Log;
     },
     PRINT(0, 0x2) {
         @Override public void invoke(final ShortStack arguments) {
-            Memory.streams().append(ZText.encodedAtOffset(Memory.current().callStack.peek().programCounter()));
+            //            Log.i("Xyzzy", "@print:");
+            final int programCounter = Memory.current().callStack.peek().programCounter();
+            final String encodedText = ZText.encodedAtOffset(programCounter);
+            Memory.streams().append(encodedText);
             Memory.current().callStack.peek().setProgramCounter(ZText.bytePosition + 2);
         }
     },
     PRINT_ADDR(1, 0x7) {
         @Override public void invoke(final ShortStack arguments) {
             final short byteAddressOfString = arguments.get(0);
+            //            Log.i("Xyzzy", "@print_addr:" + byteAddressOfString);
             Memory.streams().append(ZText.encodedAtOffset(byteAddressOfString & 0xffff));
         }
     },
     PRINT_CHAR(3, 0x5) {
         @Override public void invoke(final ShortStack arguments) {
             final short outputCharacterCode = arguments.get(0);
+            //            Log.i("Xyzzy", "@print_char:" + outputCharacterCode);
             Memory.streams().append(Character.toString((char) outputCharacterCode));
         }
     },
@@ -672,12 +677,14 @@ import android.util.Log;
     PRINT_NUM(3, 0x6) {
         @Override public void invoke(final ShortStack arguments) {
             final short value = arguments.get(0);
+            //            Log.i("Xyzzy", "@print_num:" + value);
             Memory.streams().append(Short.toString(value));
         }
     },
     PRINT_OBJ(1, 0xa) {
         @Override public void invoke(final ShortStack arguments) {
             final int object = arguments.get(0) & 0xffff;
+            //            Log.i("Xyzzy", "@print_obj:" + object);
             if (object == 0) {
                 Error.PRINT_OBJECT_0.invoke();
                 return;
@@ -693,11 +700,13 @@ import android.util.Log;
         @Override public void invoke(final ShortStack arguments) {
             final int packedAddressOfString = arguments.get(0) & 0xffff;
             final int address = Memory.unpackAddress(packedAddressOfString);
+            //            Log.i("Xyzzy", "@print_paddr:" + packedAddressOfString + " (" + address + ")");
             Memory.streams().append(ZText.encodedAtOffset(address));
         }
     },
     PRINT_RET(0, 0x3) {
         @Override public void invoke(final ShortStack arguments) {
+            //            Log.i("Xyzzy", "@print_ret:");
             PRINT.invoke(arguments);
             NEW_LINE.invoke(arguments);
             RTRUE.invoke(arguments);
@@ -707,18 +716,21 @@ import android.util.Log;
         @Override public void invoke(final ShortStack arguments) {
             final short zsciiText = arguments.get(0);
             final short width = arguments.get(1);
-            final short height = arguments.get(2);
+            final short height = arguments.get(2) != 0 ? arguments.get(2) : 1;
             final short skip = arguments.get(3);
+            Log.i("Xyzzy", "@print_table:" + arguments);
             final String text = ZText.unencodedAtOffset(zsciiText);
             int charcount = 0;
             // TODO get cursor position
             for (int i = 0; i < height; i++) {
+                if (i != 0) {
+                    Memory.streams().append("\n");
+                }
                 for (int j = 0; j < width; j++) {
                     Memory.streams().append(Character.toString(text.charAt(charcount++)));
                 }
                 charcount += skip;
                 // TODO should reset to cursor x position
-                Memory.streams().append("\n");
             }
         }
     },

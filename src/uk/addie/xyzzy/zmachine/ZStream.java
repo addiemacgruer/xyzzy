@@ -21,6 +21,7 @@ public class ZStream implements Serializable {
     }
 
     public void append(final String string) {
+        //        Log.d("Xyzzy", "append" + string);
         if (!streams[3] && streams[1]) {
             Memory.current().zwin.get(Memory.current().currentScreen).append(string);
         }
@@ -71,6 +72,7 @@ public class ZStream implements Serializable {
      *            is justification in v6
      */
     public void setOutputStream(final int number, final int table, final int width) {
+        //        Log.d("Xyzzy", "ZStream.setOutputStream:" + number + "," + table + "," + width);
         if (number == 0) {
             return;
         }
@@ -84,6 +86,7 @@ public class ZStream implements Serializable {
         } else if (number == -3) {//disable stream 3
             final int position = stream3position.pop();
             final StringBuffer output = stream3output.pop();
+            Log.d("Xyzzy", "setOutputStream disable 3:" + position + "," + output);
             Memory.current().buffer.putShort(position, output.length());
             for (int i = 0, j = output.length(); i < j; i++) {
                 Memory.current().buffer.put(position + 2 + i, output.charAt(i));

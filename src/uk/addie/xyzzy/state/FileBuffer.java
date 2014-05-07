@@ -93,14 +93,14 @@ import android.util.Log;
 
     private void performBlorbCrop() {
         int offset = 0;
-        long fileSize = byteInt(zmp, offset += 4, 4);
+        @SuppressWarnings("unused") long fileSize = byteInt(zmp, offset += 4, 4);
         if (!byteText(zmp, offset += 4, 4).equals("IFRS")) {
             throw new UnsupportedOperationException("Not a zblorb file");
         }
         if (!byteText(zmp, offset += 4, 4).equals("RIdx")) {
             throw new UnsupportedOperationException("Missing zblorb resource index");
         }
-        int rIdxLength = byteInt(zmp, offset += 4, 4);
+        @SuppressWarnings("unused") int rIdxLength = byteInt(zmp, offset += 4, 4);
         int numResources = byteInt(zmp, offset += 4, 4);
         int execOffset = 0;
         for (int i = 0; i < numResources; i++) {
