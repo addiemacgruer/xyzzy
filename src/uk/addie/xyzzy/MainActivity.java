@@ -31,13 +31,15 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 public class MainActivity extends Activity {
-    public static MainActivity      activity;
-    public final static InputSync   inputSyncObject = new InputSync();
-    private static Thread           logicThread     = null;
-    final static View.OnKeyListener okl;
-    static final List<View>         textBoxes       = new ArrayList<View>();
+    public static MainActivity          activity;
+    public final static InputSync       inputSyncObject = new InputSync();
+    private static Thread               logicThread     = null;
+    final static View.OnKeyListener     okl;
+    final static OnEditorActionListener oeal;
+    static final List<View>             textBoxes       = new ArrayList<View>();
     static {
         okl = new View.OnKeyListener() {
             private void delayDisable(final EditText et) {
@@ -73,6 +75,7 @@ public class MainActivity extends Activity {
             }
 
             @Override public boolean onKey(final View v, final int keyCode, final KeyEvent event) {
+                Log.d("Xyzzy", "MainActivity.onKey:" + v + "," + keyCode + "," + event);
                 final EditText et = (EditText) v;
                 if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
                     synchronized (MainActivity.inputSyncObject) {
@@ -85,8 +88,52 @@ public class MainActivity extends Activity {
                 return false;
             }
         };
+        oeal = new OnEditorActionListener() {
+            private void delayDisable(final EditText et) {
+                new Thread(new Runnable() {
+                    @Override public void run() {
+                        try {
+                            Thread.sleep(5000);
+                        } catch (final InterruptedException e) {
+                            Log.e("Xyzzy", "MainActivity.okl.delayDisable interrupted", e);
+                        }
+                        try {
+                            synchronized (MainActivity.activity) {
+                                if (MainActivity.activity != null) {
+                                    MainActivity.activity.runOnUiThread(new Runnable() {
+                                        @Override public void run() {
+                                            et.setEnabled(false);
+                                        }
+                                    });
+                                }
+                            }
+                        } catch (NullPointerException npe) {
+                            Log.e("Xyzzy", "MainActivity.delayDisable", npe);
+                        }
+                    }
+                }, "Disable old EditText").start();
+            }
+
+            private void giveDisabledAppearance(final EditText et) {
+                et.setGravity(Gravity.RIGHT);
+                et.setTextColor(ZWindow.foreground);
+                et.setBackgroundColor(ZWindow.background);
+                delayDisable(et);
+            }
+
+            @Override public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                Log.d("Xyzzy", "MainActivity.onEditorAction:" + v + "," + actionId + "," + event);
+                final EditText et = (EditText) v;
+                synchronized (MainActivity.inputSyncObject) {
+                    MainActivity.inputSyncObject.setString(et.getText().toString());
+                    MainActivity.inputSyncObject.notifyAll();
+                }
+                giveDisabledAppearance(et);
+                return true;
+            }
+        };
     }
-    public static int               width;
+    public static int                   width;
 
     static void focusTextView(final View tv) {
         tv.setFocusableInTouchMode(true);
@@ -104,6 +151,7 @@ public class MainActivity extends Activity {
         et.setHorizontallyScrolling(true);
         et.setInputType(InputType.TYPE_CLASS_TEXT);
         et.setOnKeyListener(okl);
+        et.setOnEditorActionListener(oeal);
         return et;
     }
 
