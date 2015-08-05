@@ -1,4 +1,3 @@
-
 package uk.addie.xyzzy;
 
 import java.io.File;
@@ -18,113 +17,117 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class SaveChooserActivity extends Activity implements ListAdapter, OnClickListener {
-    public static final StringBuilder   syncObject   = new StringBuilder();
-    public static String                gameName     = "";
-    private final List<String>          pathContents = new ArrayList<String>();
-    private final List<DataSetObserver> observers    = new ArrayList<DataSetObserver>();
-    private int                         textSize;
+  private final List<String> pathContents = new ArrayList<String>();
 
-    @Override public boolean areAllItemsEnabled() {
-        return true;
-    }
+  private final List<DataSetObserver> observers = new ArrayList<DataSetObserver>();
 
-    @Override public int getCount() {
-        return pathContents.size();
-    }
+  private int textSize;
 
-    @Override public Object getItem(int position) {
-        return null;
-    }
+  @Override public boolean areAllItemsEnabled() {
+    return true;
+  }
 
-    @Override public long getItemId(int position) {
-        return position;
-    }
+  @Override public int getCount() {
+    return pathContents.size();
+  }
 
-    @Override public int getItemViewType(int position) {
-        return 0;
-    }
+  @Override public Object getItem(final int position) {
+    return null;
+  }
 
-    @Override public View getView(int position, View convertView, ViewGroup parent) {
-        TextView tv = selectionPageTextView();
-        final String itemName = pathContents.get(position);
-        tv.setText(itemName.substring(gameName.length()));
-        tv.setTag(itemName);
-        tv.setOnClickListener(this);
-        return tv;
-    }
+  @Override public long getItemId(final int position) {
+    return position;
+  }
 
-    @Override public int getViewTypeCount() {
-        return 1;
-    }
+  @Override public int getItemViewType(final int position) {
+    return 0;
+  }
 
-    @Override public boolean hasStableIds() {
-        return true;
-    }
+  @Override public View getView(final int position, final View convertView, final ViewGroup parent) {
+    final TextView tv = selectionPageTextView();
+    final String itemName = pathContents.get(position);
+    tv.setText(itemName.substring(gameName.length()));
+    tv.setTag(itemName);
+    tv.setOnClickListener(this);
+    return tv;
+  }
 
-    @Override public boolean isEmpty() {
-        return false;
-    }
+  @Override public int getViewTypeCount() {
+    return 1;
+  }
 
-    @Override public boolean isEnabled(int position) {
-        return true;
-    }
+  @Override public boolean hasStableIds() {
+    return true;
+  }
 
-    @Override public void onClick(View v) {
-        String file = (String) v.getTag();
-        synchronized (syncObject) {
-            syncObject.append(file);
-            syncObject.notifyAll();
-        }
-        finish();
-    }
+  @Override public boolean isEmpty() {
+    return false;
+  }
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        updatePathContents();
-        synchronized (syncObject) {
-            syncObject.setLength(0);
-        }
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.filechooser);
-        ListView lv = (ListView) findViewById(R.id.filechooser);
-        setTitle("Xyzzy: select save");
-        lv.setAdapter(this);
-    }
+  @Override public boolean isEnabled(final int position) {
+    return true;
+  }
 
-    @Override protected void onResume() {
-        super.onResume();
-        this.textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
+  @Override public void onClick(final View v) {
+    final String file = (String) v.getTag();
+    synchronized (syncObject) {
+      syncObject.append(file);
+      syncObject.notifyAll();
     }
+    finish();
+  }
 
-    @Override protected void onStop() {
-        super.onStop();
-        synchronized (syncObject) {
-            syncObject.notifyAll();
-        }
-    }
+  @Override public void registerDataSetObserver(final DataSetObserver observer) {
+    observers.add(observer);
+  }
 
-    @Override public void registerDataSetObserver(DataSetObserver observer) {
-        observers.add(observer);
-    }
+  @Override public void unregisterDataSetObserver(final DataSetObserver observer) {
+    observers.remove(observer);
+  }
 
-    private TextView selectionPageTextView() {
-        final TextView tv = new TextView(this);
-        tv.setTextSize(textSize * 2);
-        tv.setPadding(textSize * 2, textSize * 2, textSize * 2, textSize * 2);
-        return tv;
+  @Override protected void onCreate(final Bundle savedInstanceState) {
+    updatePathContents();
+    synchronized (syncObject) {
+      syncObject.setLength(0);
     }
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.filechooser);
+    final ListView lv = (ListView) findViewById(R.id.filechooser);
+    setTitle("Xyzzy: select save");
+    lv.setAdapter(this);
+  }
 
-    @Override public void unregisterDataSetObserver(DataSetObserver observer) {
-        observers.remove(observer);
-    }
+  @Override protected void onResume() {
+    super.onResume();
+    textSize = (Integer) Preferences.TEXT_SIZE.getValue(this);
+  }
 
-    private void updatePathContents() {
-        File privateArea = getFilesDir();
-        pathContents.clear();
-        for (String s : privateArea.list()) {
-            if (s.startsWith(gameName)) {
-                pathContents.add(s);
-            }
-        }
-        Collections.sort(pathContents);
+  @Override protected void onStop() {
+    super.onStop();
+    synchronized (syncObject) {
+      syncObject.notifyAll();
     }
+  }
+
+  private TextView selectionPageTextView() {
+    final TextView tv = new TextView(this);
+    tv.setTextSize(textSize * 2);
+    tv.setPadding(textSize * 2, textSize * 2, textSize * 2, textSize * 2);
+    return tv;
+  }
+
+  private void updatePathContents() {
+    final File privateArea = getFilesDir();
+    pathContents.clear();
+    for (final String s : privateArea.list()) {
+      if (s.startsWith(gameName)) {
+        pathContents.add(s);
+      }
+    }
+    Collections.sort(pathContents);
+  }
+
+  public static final StringBuilder syncObject = new StringBuilder();
+
+  public static String gameName = "";
 }

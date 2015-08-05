@@ -3,5 +3,7 @@
     <string-array name="builtins">
         <item >Curses</item>
         <item >\@curses.z5</item>
+        <item>Zork (Italian)</item>
+        <item>\@ZORK-I-ITA-v631.z5</item>
     </string-array>
 </resources>
