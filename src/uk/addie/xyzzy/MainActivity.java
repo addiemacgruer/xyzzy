@@ -33,7 +33,6 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 /** Main android activity.
- *
  * @author addie */
 public class MainActivity extends Activity {
   private MenuItem[] mis;
@@ -80,7 +79,7 @@ public class MainActivity extends Activity {
   }
 
   @Override public boolean onKeyDown(final int keyCode, final KeyEvent event) {
-    Log.d("Xyzzy", "onKeyDown:" + keyCode + " :" + event);
+    Log.v("Xyzzy", "onKeyDown:" + keyCode + " :" + event);
     if (event == null) { // ie. it's synthetic
       synchronized (inputSyncObject) {
         inputSyncObject.setCharacter(keyCode);
@@ -277,7 +276,7 @@ public class MainActivity extends Activity {
   static {
     okl = new View.OnKeyListener() {
       @Override public boolean onKey(final View v, final int keyCode, final KeyEvent event) {
-        Log.d("Xyzzy", "MainActivity.onKey:" + v + "," + keyCode + "," + event);
+        Log.v("Xyzzy", "MainActivity.onKey:" + v + "," + keyCode + "," + event);
         final EditText et = (EditText) v;
         if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
           synchronized (MainActivity.inputSyncObject) {

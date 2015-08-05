@@ -10,13 +10,10 @@ import uk.addie.xyzzy.zobjects.ZWindow;
 import android.util.Log;
 
 /** Main story interpreter thread.
- *
  * @author addie */
 class Xyzzy implements Runnable {
   /** Creates a new interpreter with a given story name.
-   *
-   * @param story
-   *          The path to the story to interpret. */
+   * @param story The path to the story to interpret. */
   public Xyzzy(final String story) {
     Xyzzy.story = story;
   }
@@ -47,6 +44,7 @@ class Xyzzy implements Runnable {
       window0.println();
       window0.append(e.toString());
       window0.flush();
+      Log.e("Xyzyy", e.toString(), e);
     }
   }
 

@@ -5,6 +5,7 @@ import java.util.List;
 
 import uk.addie.xyzzy.header.Header;
 import uk.addie.xyzzy.state.Memory;
+import android.util.Log;
 
 public class ZText {
   private static final char[] a0 = { ' ', '~', '~', '~', '~', '~', 'a', 'b', 'c', 'd', 'e', 'f',
@@ -19,11 +20,41 @@ public class ZText {
       '4', '5', '6', '7', '8', '9', '.', ',', '!', '?', '_', '#', '\'', '"', '/', '\\', '-', ':',
       '(', ')' };
 
+  private static final char[] unicode = { // starts at 155
+  'ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü', 'ß', '»', '«', 'ë', // 164
+      'ï', 'ÿ', 'Ë', 'Ï', 'á', 'é', 'í', 'ó', 'ú', 'ý', // 174
+      'Á', 'É', 'Í', 'Ó', 'Ú', 'Ý', 'à', 'è', 'ì', 'ò', // 184
+      'ù', 'À', 'È', 'Ì', 'Ò', 'Ù', 'â', 'ê', 'î', 'ô', // 194
+      'û', 'Â', 'Ê', 'Î', 'Ô', 'Û', 'å', 'Å', 'ø', 'Ø', // 204
+      'ã', 'ñ', 'õ', 'Ã', 'Ñ', 'Õ', 'æ', 'Æ', 'ç', 'Ç', // 214
+      'þ', 'ð', 'Þ', 'Ð', '£', 'œ', 'Œ', '¡', '¿' // 223
+  };
+
+  private static int lastAlphabet = 0;
+
   public static int bytePosition;
 
   public static String encodedAtOffset(final int offset) {
     final List<Character> cb = new ArrayList<Character>();
-    // int alphabet = Header.H_ALPHABET.value(FastMem.CURRENT.zmp); //TODO v5 alternative alphabets
+    int alphabet = Header.ALPHABET.value(Memory.current().buff()); // TODO v5 alternative alphabets
+    if (Header.VERSION.value() >= 5 && alphabet != lastAlphabet) {
+      lastAlphabet = alphabet;
+      Log.w("Xyzzy", "Alternative alphabet in use... @" + alphabet);
+      String foreignAlphabet = alphabet != 0 ? unencodedAtOffset(alphabet)
+          : "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ \n0123456789.,!?_#'\"/\\-:()\0";
+      Log.e("Xyzzy", "Foreign? " + foreignAlphabet + " (" + foreignAlphabet.length() + ")");
+      int count = 0;
+      for (int x = 6; x < a0.length; x++) {
+        a0[x] = foreignAlphabet.charAt(count++);
+      }
+      for (int x = 6; x < a1.length; x++) {
+        a1[x] = foreignAlphabet.charAt(count++);
+      }
+      for (int x = 6; x < a2.length; x++) {
+        a2[x] = foreignAlphabet.charAt(count++);
+      }
+      a2[7] = '\n';
+    }
     int b = 0;
     for (b = offset; true; b += 2) {
       final int word = Memory.current().buff().getShort(b) & 0xffff;
@@ -54,7 +85,7 @@ public class ZText {
         continue;
       } else if (zchar != 0) {
         zchar |= c;
-        sb.append((char) zchar);
+        addCharOrUnicode(sb, zchar);
         zchar = 0;
         continue;
       }
@@ -74,23 +105,24 @@ public class ZText {
         switch (set) {
         case 0:
         default:
-          sb.append(a0[c]);
+          addCharOrUnicode(sb, a0[c]);
           break;
         case 1:
-          sb.append(a1[c]);
+          addCharOrUnicode(sb, a1[c]);
           break;
         case 2:
           if (c == 6) {
             zchar = -1;
             break;
           }
-          sb.append(a2[c]);
+          addCharOrUnicode(sb, a2[c]);
           break;
         }
       }
       set = 0;
     }
     bytePosition = b;
+    // Log.v("Xyzzy", "Encoded string (alphabet " + alphabet + "):" + sb.toString());
     return sb.toString();
   }
 
@@ -190,8 +222,21 @@ public class ZText {
     return sb.toString();
   }
 
+  private static void addCharOrUnicode(final StringBuilder sb, int zchar) {
+    int extension = Header.EXTENSION_TABLE.value(Memory.current().buff());
+    /* TODO v5 alternative alphabets */
+    if (extension != 0) {
+      Log.w("Xyzzy", "Alternative extensions...");
+    }
+    if (zchar >= 155 && zchar - 155 < unicode.length) {
+      sb.append(unicode[zchar - 155]);
+    } else {
+      sb.append((char) zchar);
+    }
+  }
+
   private static void tryInArray(final int i, final byte[] chars, final byte j) {
-    if (i > chars.length) {
+    if (i >= chars.length) {
       return;
     }
     chars[i] = j;

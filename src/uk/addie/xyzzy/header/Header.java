@@ -74,8 +74,9 @@ public enum Header {
   private int value = -1;
 
   public void put(final int s) {
-    if (!dynamic)
+    if (!dynamic) {
       throw new UnsupportedOperationException();
+    }
     switch (length) {
     case 1:
       Memory.current().buff().put(offset, (byte) s);
@@ -89,14 +90,16 @@ public enum Header {
   }
 
   public int value() {
-    if (!dynamic && value != -1)
+    if (!dynamic && value != -1) {
       return value;
+    }
     return value(Memory.current().buffer);
   }
 
   public int value(final FileBuffer fb) {
-    if (!dynamic && value != -1)
+    if (!dynamic && value != -1) {
       return value;
+    }
     int rval = 0;
     for (int i = offset; i < offset + length; i++) {
       rval *= 0x100;

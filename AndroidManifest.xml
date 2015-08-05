@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.addie.xyzzy"
-    android:versionCode="4"
-    android:versionName="20th April 2015" >
+    android:versionCode="5"
+    android:versionName="5th August 2015" >
 
     <uses-sdk
         android:minSdkVersion="9"
